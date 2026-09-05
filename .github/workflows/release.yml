@@ -20,12 +20,20 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Verify tag and package version
         shell: pwsh
         run: |
-          if ((git cat-file -t $env:GITHUB_REF_NAME) -ne 'tag') {
+          $escapedTag = [regex]::Escape($env:GITHUB_REF_NAME)
+          $peeledTag = git ls-remote --tags origin | Where-Object { $_ -match "refs/tags/$escapedTag\^\{\}$" }
+          if (-not $peeledTag) {
             throw 'Releases require an annotated tag.'
+          }
+          $tagCommit = ($peeledTag -split '\s+')[0]
+          $checkedOutCommit = git rev-parse HEAD
+          if ($checkedOutCommit -ne $tagCommit) {
+            throw "Checked-out commit $checkedOutCommit does not match tag commit $tagCommit."
           }
           $manifest = cargo metadata --locked --no-deps --format-version 1 | ConvertFrom-Json
           $version = $env:GITHUB_REF_NAME.TrimStart('v')

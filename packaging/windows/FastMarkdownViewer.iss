@@ -1,6 +1,9 @@
 #ifndef AppVersion
   #error AppVersion must be provided with /DAppVersion=x.y.z
 #endif
+#ifndef VersionInfoVersion
+  #error VersionInfoVersion must be provided with /DVersionInfoVersion=x.y.z.w
+#endif
 #ifndef BuildRoot
   #error BuildRoot must be provided with /DBuildRoot=path
 #endif
@@ -41,7 +44,7 @@ WizardStyle=modern
 ChangesAssociations=yes
 CloseApplications=no
 RestartApplications=no
-VersionInfoVersion={#AppVersion}
+VersionInfoVersion={#VersionInfoVersion}
 VersionInfoDescription=FastMarkdownViewer per-user installer
 LicenseFile={#SourcePath}\..\..\LICENSE-MIT
 

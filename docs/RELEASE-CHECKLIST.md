@@ -43,9 +43,11 @@ substitute for the remaining platform and publication checks.
   unchanged defaults, no console, SmartScreen, light/dark, and 100/150/200% DPI.
 - [ ] Capture a genuine release screenshot and replace the representative CSS
   preview on the GitHub Pages site.
-- [ ] Push the repository and confirm CI and Pages pass on GitHub-hosted runners.
-- [ ] Prepare release notes that clearly say v0.1 is unsigned and describe
+- [x] Push the repository and confirm CI and Pages pass on GitHub-hosted runners.
+- [x] Prepare release notes that clearly say v0.1 is unsigned and describe
   checksum and provenance-attestation verification.
 
-Only after every item above is checked should an annotated `v0.1.0` tag be
-pushed. That tag is the sole supported way to build and publish the release.
+The known limitations above may be published under an annotated prerelease tag
+such as `v0.1.0-alpha.1`. Only after every item is checked should the final
+annotated `v0.1.0` tag be pushed. Tags are the sole supported way to build and
+publish releases.

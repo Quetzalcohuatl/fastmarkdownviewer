@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidatePattern('^\d+\.\d+\.\d+$')]
+    [ValidatePattern('^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$')]
     [string] $Version,
 
     [Parameter(Mandatory = $true)]
@@ -89,6 +89,7 @@ if (-not (Test-Path -LiteralPath $InnoCompiler)) {
 }
 $innoArguments = @(
     "/DAppVersion=$Version",
+    "/DVersionInfoVersion=$(($Version -split '-', 2)[0]).0",
     "/DBuildRoot=$(Split-Path -Parent $sourceBinary)",
     "/DOutputDir=$output",
     "/DIconFile=$icon"

@@ -27,7 +27,7 @@
         <a class="button primary" href="{{REPOSITORY_URL}}/releases/latest">Download latest release</a>
         <a class="button secondary" href="{{REPOSITORY_URL}}">View source</a>
       </div>
-      <p class="release-note">v0.1.0 will be unsigned. Windows may show a SmartScreen warning; verification instructions are below.</p>
+      <p class="release-note">v0.1.0-alpha.1 is unsigned. Windows may show a SmartScreen warning; verification instructions are below.</p>
     </section>
 
     <section class="preview" aria-labelledby="preview-title">
@@ -78,10 +78,10 @@
       </div>
       <ol>
         <li><strong>Download together</strong><span>Get the EXE or ZIP and <code>SHA256SUMS.txt</code> from the same canonical GitHub Release.</span></li>
-        <li><strong>Compare SHA-256</strong><code>Get-FileHash .\FastMarkdownViewer-0.1.0-windows-x86_64.exe -Algorithm SHA256</code></li>
-        <li><strong>Verify provenance</strong><code>gh attestation verify .\FastMarkdownViewer-0.1.0-windows-x86_64.exe --repo {{REPOSITORY_SLUG}}</code></li>
+        <li><strong>Compare SHA-256</strong><code>Get-FileHash .\FastMarkdownViewer-0.1.0-alpha.1-windows-x86_64.exe -Algorithm SHA256</code></li>
+        <li><strong>Verify provenance</strong><code>gh attestation verify .\FastMarkdownViewer-0.1.0-alpha.1-windows-x86_64.exe --repo {{REPOSITORY_SLUG}}</code></li>
       </ol>
-      <p>Checksums and attestations establish origin and unchanged bytes. They do not suppress SmartScreen; v0.1.0 is transparently unsigned.</p>
+      <p>Checksums and attestations establish origin and unchanged bytes. They do not suppress SmartScreen; v0.1.0-alpha.1 is transparently unsigned.</p>
     </section>
 
     <section class="roadmap">

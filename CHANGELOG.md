@@ -21,6 +21,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 - Clamped End-key scrolling to the measured document range to prevent invalid
   geometry
 
+## [0.1.0-alpha.1] - 2026-09-05
+
+The first public alpha of the Windows x64 viewer.
+
 ## [0.1.0] - Unreleased
 
 The first public release will be cut only after the Windows 10 and Windows 11 acceptance matrix passes.

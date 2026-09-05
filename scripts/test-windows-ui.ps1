@@ -26,7 +26,7 @@ if ($Headless) {
     if ($LASTEXITCODE -ne 0) {
         throw "FastMarkdownViewer --version failed with exit code $LASTEXITCODE."
     }
-    if ($versionOutput.Trim() -notmatch '^FastMarkdownViewer \d+\.\d+\.\d+$') {
+    if ($versionOutput.Trim() -notmatch '^FastMarkdownViewer \d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$') {
         throw "Unexpected --version output: $($versionOutput.Trim())"
     }
     Write-Output "WINDOWS_HEADLESS_SMOKE=passed version=$($versionOutput.Trim())"

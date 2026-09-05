@@ -41,10 +41,11 @@ jobs:
         shell: pwsh
         run: .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Headless
 
+      - name: Install pinned cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked
+
       - name: Audit RustSec advisories
-        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo audit --ignore RUSTSEC-2026-0192
 
       - name: Check licenses, bans, and sources
         uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2

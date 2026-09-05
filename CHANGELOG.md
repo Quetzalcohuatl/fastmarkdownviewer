@@ -21,9 +21,14 @@ All notable changes are documented here. This project follows Semantic Versionin
 - Clamped End-key scrolling to the measured document range to prevent invalid
   geometry
 
-## [0.1.0-alpha.2] - 2026-09-05
+## [0.1.0-alpha.3] - 2026-09-05
 
 The first public alpha of the Windows x64 viewer.
+
+## [0.1.0-alpha.2] - 2026-09-05
+
+Release automation reached packaging but failed before publishing because the
+runner already contained a newer Inno Setup than the pinned install command.
 
 ## [0.1.0-alpha.1] - 2026-09-05
 

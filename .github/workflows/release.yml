@@ -67,7 +67,7 @@ jobs:
 
       - name: Install pinned Inno Setup
         shell: pwsh
-        run: choco install innosetup --version=6.4.3 --no-progress -y
+        run: choco install innosetup --version=6.7.1 --no-progress -y
 
       - name: Package exact release assets
         shell: pwsh

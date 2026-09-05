@@ -13,7 +13,8 @@ substitute for the remaining platform and publication checks.
   scale factors.
 - [x] A native Windows smoke test drives the compiled window and verifies two
   independent launches.
-- [x] The exact optimized executable is tested before packaging.
+- [x] The exact optimized executable is native-window tested locally before
+  packaging and CLI-smoke-tested on GitHub's headless Windows worker.
 - [x] The installer is silently installed, exercised, and uninstalled; its
   Open-with registry entries and cleanup behavior are verified.
 - [x] The four release assets and their SHA-256 checksums are verified.

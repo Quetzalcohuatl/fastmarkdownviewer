@@ -53,9 +53,9 @@ jobs:
       - name: Build release once
         run: cargo build --locked --release --target x86_64-pc-windows-msvc
 
-      - name: Exercise release window, scrolling, and independent launches
+      - name: Smoke-test the exact release executable
         shell: pwsh
-        run: .\scripts\test-windows-ui.ps1 -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md
+        run: .\scripts\test-windows-ui.ps1 -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Headless
 
       - name: Install pinned Inno Setup
         shell: pwsh
@@ -73,7 +73,7 @@ jobs:
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME.TrimStart('v')
-          .\scripts\test-windows-installer.ps1 -Installer ".\release\FastMarkdownViewer-Setup-$version.exe" -Fixture .\tests\fixtures\feature-matrix.md
+          .\scripts\test-windows-installer.ps1 -Installer ".\release\FastMarkdownViewer-Setup-$version.exe" -Fixture .\tests\fixtures\feature-matrix.md -Headless
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2

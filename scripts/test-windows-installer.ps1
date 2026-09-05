@@ -4,7 +4,9 @@ param(
     [string]$Installer,
 
     [Parameter(Mandatory = $true)]
-    [string]$Fixture
+    [string]$Fixture,
+
+    [switch]$Headless
 )
 
 Set-StrictMode -Version Latest
@@ -103,9 +105,14 @@ try {
         throw 'Installer changed a default file association.'
     }
 
-    & (Join-Path $PSScriptRoot 'test-windows-ui.ps1') `
-        -Binary $installedBinary `
-        -Fixture $fixturePath
+    $smokeArguments = @{
+        Binary = $installedBinary
+        Fixture = $fixturePath
+    }
+    if ($Headless) {
+        $smokeArguments.Headless = $true
+    }
+    & (Join-Path $PSScriptRoot 'test-windows-ui.ps1') @smokeArguments
     if ($LASTEXITCODE -ne 0) {
         throw "Installed application smoke test failed with exit code $LASTEXITCODE."
     }

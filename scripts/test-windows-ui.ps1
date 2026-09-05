@@ -7,7 +7,9 @@ param(
     [string]$Fixture,
 
     [ValidateRange(2, 60)]
-    [int]$TimeoutSeconds = 15
+    [int]$TimeoutSeconds = 15,
+
+    [switch]$Headless
 )
 
 Set-StrictMode -Version Latest
@@ -17,6 +19,18 @@ $binaryPath = (Resolve-Path -LiteralPath $Binary).Path
 $fixturePath = (Resolve-Path -LiteralPath $Fixture).Path
 if ([System.IO.Path]::GetExtension($binaryPath) -ne '.exe') {
     throw "UI smoke target must be an .exe: $binaryPath"
+}
+
+if ($Headless) {
+    $versionOutput = & $binaryPath --version | Out-String
+    if ($LASTEXITCODE -ne 0) {
+        throw "FastMarkdownViewer --version failed with exit code $LASTEXITCODE."
+    }
+    if ($versionOutput.Trim() -notmatch '^FastMarkdownViewer \d+\.\d+\.\d+$') {
+        throw "Unexpected --version output: $($versionOutput.Trim())"
+    }
+    Write-Output "WINDOWS_HEADLESS_SMOKE=passed version=$($versionOutput.Trim())"
+    return
 }
 
 Add-Type -TypeDefinition @'

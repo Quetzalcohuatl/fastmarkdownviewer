@@ -43,13 +43,20 @@ cargo build --locked
   -Fixture .\tests\fixtures\feature-matrix.md
 ```
 
-The release workflow repeats the native smoke test against the exact optimized
-binary that is subsequently packaged. A failure prevents release publication.
+Before a release, run the native smoke test locally against the exact optimized
+binary that will be represented by the tag. GitHub-hosted Windows workers do
+not provide a usable interactive graphics desktop, so hosted CI uses
+`-Headless` to verify the exact executable starts and reports its version; the
+deterministic egui tests remain the hosted scrolling and interaction gate.
+Native window/input coverage is required on an interactive Windows machine and
+in clean-VM acceptance.
 
 `scripts/test-windows-installer.ps1` then silently installs the produced setup,
 checks both Open-with registrations without changing either default
 association, exercises the installed binary, uninstalls it, and verifies that
-the files and registry entries are removed. This also blocks publication.
+the files and registry entries are removed. Hosted CI invokes its exact-binary
+check with `-Headless`; local and clean-VM runs exercise the actual window. This
+also blocks publication.
 
 ## Manual clean-VM acceptance
 

@@ -37,9 +37,9 @@ jobs:
       - name: Build native UI smoke target
         run: cargo build --locked
 
-      - name: Exercise Windows window, scrolling, and independent launches
+      - name: Smoke-test the exact Windows executable
         shell: pwsh
-        run: .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md
+        run: .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Headless
 
       - name: Audit RustSec advisories
         uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0

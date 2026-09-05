@@ -1,0 +1,26 @@
+# Changelog
+
+All notable changes are documented here. This project follows Semantic Versioning.
+
+## [Unreleased]
+
+### Added
+
+- Windows-first read-only Markdown viewer foundation
+- CommonMark/GFM rendering, lazy RaTeX math, and bounded asynchronous images
+- Portable and per-user installer release automation
+- No-JavaScript GitHub Pages project site
+- Permanent UI regressions for scrolling, drag-and-drop, Ctrl+O, links,
+  selection/copy, theme changes, and common DPI scales
+- Native Windows executable smoke gate for scroll keys and independent windows
+
+### Fixed
+
+- Replaced the crash-prone hidden `egui_commonmark` paginated renderer with its
+  stable renderer inside an egui scroll area
+- Clamped End-key scrolling to the measured document range to prevent invalid
+  geometry
+
+## [0.1.0] - Unreleased
+
+The first public release will be cut only after the Windows 10 and Windows 11 acceptance matrix passes.

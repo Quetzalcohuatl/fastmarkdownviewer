@@ -1,0 +1,19 @@
+[package]
+name = "fast-markdown-viewer-direct2d-prototype"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+publish = false
+
+[dependencies]
+pulldown-cmark = { version = "=0.13.4", default-features = false }
+windows-canvas = "=0.100.0"
+windows-core = "=0.100.0"
+windows-window = "=0.100.0"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

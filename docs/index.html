@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="FastMarkdownViewer is a tiny, read-only Markdown viewer for Windows.">
+  <title>FastMarkdownViewer — double-click Markdown, read</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="wordmark" href="#top" aria-label="FastMarkdownViewer home"><span aria-hidden="true">FM</span> FastMarkdownViewer</a>
+    <nav aria-label="Primary navigation">
+      <a href="#privacy">Privacy</a>
+      <a href="#verify">Verify</a>
+      <a href="{{REPOSITORY_URL}}">Source</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="eyebrow">Windows 10 / 11 · open source · read-only</div>
+      <h1>Double-click Markdown.<br><em>Read it.</em></h1>
+      <p class="lede">No editor chrome. No project index. No WebView. FastMarkdownViewer opens one local file as a clean rendered document.</p>
+      <div class="actions">
+        <a class="button primary" href="{{REPOSITORY_URL}}/releases/latest">Download latest release</a>
+        <a class="button secondary" href="{{REPOSITORY_URL}}">View source</a>
+      </div>
+      <p class="release-note">v0.1.0 will be unsigned. Windows may show a SmartScreen warning; verification instructions are below.</p>
+    </section>
+
+    <section class="preview" aria-labelledby="preview-title">
+      <h2 id="preview-title" class="visually-hidden">Application preview</h2>
+      <div class="window" role="img" aria-label="FastMarkdownViewer showing a rendered Markdown document in a minimal window">
+        <div class="titlebar"><i></i><i></i><i></i><span>README.md — FastMarkdownViewer</span></div>
+        <div class="document">
+          <div class="crumb">README.MD</div>
+          <h3>A reader that gets out of the way</h3>
+          <p>CommonMark, tables, task lists, alerts, images, and math—rendered locally in a native window.</p>
+          <div class="alert"><strong>NOTE</strong><span>Raw HTML stays inert. Links open only after a click.</span></div>
+          <div class="code"><span>fn</span> first_frame() { <b>"content"</b> }</div>
+          <div class="math">E = mc²</div>
+        </div>
+      </div>
+      <p class="caption">Representative UI preview. A release screenshot will replace it after the clean-VM acceptance pass.</p>
+    </section>
+
+    <section class="principles" aria-label="Project principles">
+      <article><span>01</span><h2>One job</h2><p>Open one UTF-8 Markdown file, render it, and let you select and copy the text.</p></article>
+      <article><span>02</span><h2>Fast by design</h2><p>Plain code, virtualized off-screen work, lazy math, and images that never block the first document frame.</p></article>
+      <article><span>03</span><h2>Quiet software</h2><p>No accounts, analytics, update pings, settings writes, history database, or persistent cache.</p></article>
+    </section>
+
+    <section class="details" id="privacy">
+      <div>
+        <div class="eyebrow">Network behavior</div>
+        <h2>Your document stays yours.</h2>
+      </div>
+      <div class="copy">
+        <p>Local documents are not uploaded. FastMarkdownViewer has no telemetry or update checker and does not execute HTML.</p>
+        <p>Visible remote images load automatically in memory. That request exposes your IP to the image host, but sends no cookies, credentials, or referrer. Responses, redirects, formats, and decoded dimensions are bounded.</p>
+        <a href="{{REPOSITORY_URL}}/blob/main/PRIVACY.md">Read the complete privacy and network policy →</a>
+      </div>
+    </section>
+
+    <section class="metrics" aria-labelledby="performance-title">
+      <div class="eyebrow">Measured, not marketed</div>
+      <h2 id="performance-title">Performance numbers are pending the reproducible bake-off.</h2>
+      <p>Before release, each renderer is launched as a fresh process 30 times against 5 KiB, 100 KiB, and 2 MiB fixtures on one documented Windows 11 x64 machine with a warm filesystem cache. We publish medians, geometric means, raw/compressed size, first-idle working set, and peak working set—with the harness and raw results.</p>
+      <a href="{{REPOSITORY_URL}}/tree/main/experiments/architecture">Inspect the benchmark materials →</a>
+    </section>
+
+    <section class="verify" id="verify">
+      <div>
+        <div class="eyebrow">Verify a download</div>
+        <h2>Trust the build trail.</h2>
+      </div>
+      <ol>
+        <li><strong>Download together</strong><span>Get the EXE or ZIP and <code>SHA256SUMS.txt</code> from the same canonical GitHub Release.</span></li>
+        <li><strong>Compare SHA-256</strong><code>Get-FileHash .\FastMarkdownViewer-0.1.0-windows-x86_64.exe -Algorithm SHA256</code></li>
+        <li><strong>Verify provenance</strong><code>gh attestation verify .\FastMarkdownViewer-0.1.0-windows-x86_64.exe --repo {{REPOSITORY_SLUG}}</code></li>
+      </ol>
+      <p>Checksums and attestations establish origin and unchanged bytes. They do not suppress SmartScreen; v0.1.0 is transparently unsigned.</p>
+    </section>
+
+    <section class="roadmap">
+      <div class="eyebrow">After v0.1</div>
+      <h2>Stability first. Reach second.</h2>
+      <p>Planned follow-ons include OSS code signing, Windows ARM64, macOS and Linux builds, high-contrast design, then prepared Scoop and winget manifests. Search, editing, file watching, Mermaid, and syntax highlighting remain intentionally outside v0.1.</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>FastMarkdownViewer · MIT OR Apache-2.0</span>
+    <span>No JavaScript. No analytics.</span>
+  </footer>
+</body>
+</html>

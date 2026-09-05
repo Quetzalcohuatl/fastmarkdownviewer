@@ -1,0 +1,12 @@
+date = "YYYY-MM-DD"
+commit = "full Git commit SHA"
+windows_edition = "Windows 11"
+windows_build = "record with winver"
+cpu = "model and logical-core count"
+physical_memory_gib = 0
+gpu = "model and driver version"
+display_scale_percent = 100
+power_mode = "Best performance"
+security_software = "record state; do not disable organizational controls"
+rustc = "rustc 1.95.0"
+notes = "AC power; filesystem cache warm; no serial numbers or usernames"

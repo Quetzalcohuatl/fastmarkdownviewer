@@ -1,0 +1,8 @@
+# one formula per line; comments and blanks are ignored
+x^2 + y_1
+\frac{a}{b}
+\sqrt{x+1}
+\left(\sum_{i=1}^{n} i\right)
+\begin{matrix}a&b\\c&d\end{matrix}
+\int_0^\infty e^{-x}\,dx
+\overline{AB} + \vec{v}

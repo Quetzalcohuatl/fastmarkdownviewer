@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  windows-x86_64:
+    runs-on: windows-2022
+    steps:
+      - name: Check out annotated tag
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag and package version
+        shell: pwsh
+        run: |
+          if ((git cat-file -t $env:GITHUB_REF_NAME) -ne 'tag') {
+            throw 'Releases require an annotated tag.'
+          }
+          $manifest = cargo metadata --locked --no-deps --format-version 1 | ConvertFrom-Json
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          if ($manifest.packages[0].version -ne $version) {
+            throw "Tag $env:GITHUB_REF_NAME does not match Cargo.toml version $($manifest.packages[0].version)."
+          }
+          $repositoryUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY"
+          if ($manifest.packages[0].repository -ne $repositoryUrl) {
+            throw "Cargo.toml repository must be $repositoryUrl before release."
+          }
+
+      - name: Install pinned Rust toolchain
+        shell: pwsh
+        run: |
+          rustup set profile minimal
+          rustup toolchain install 1.95.0 --component clippy,rustfmt --target x86_64-pc-windows-msvc
+          rustup default 1.95.0
+
+      - name: Test locked source
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo test --locked --all-targets
+
+      - name: Build release once
+        run: cargo build --locked --release --target x86_64-pc-windows-msvc
+
+      - name: Exercise release window, scrolling, and independent launches
+        shell: pwsh
+        run: .\scripts\test-windows-ui.ps1 -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md
+
+      - name: Install pinned Inno Setup
+        shell: pwsh
+        run: choco install innosetup --version=6.4.3 --no-progress -y
+
+      - name: Package exact release assets
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          $repositoryUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY"
+          .\scripts\package-release.ps1 -Version $version -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -OutputDirectory .\release -RepositoryUrl $repositoryUrl
+          .\scripts\verify-release.ps1 -Version $version -Directory .\release
+
+      - name: Install, exercise, and uninstall the packaged application
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          .\scripts\test-windows-installer.ps1 -Installer ".\release\FastMarkdownViewer-Setup-$version.exe" -Fixture .\tests\fixtures\feature-matrix.md
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: release/*
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          gh release create $env:GITHUB_REF_NAME (Get-ChildItem .\release -File | ForEach-Object FullName) --verify-tag --title "$env:GITHUB_REF_NAME alpha" --generate-notes --prerelease --latest=false

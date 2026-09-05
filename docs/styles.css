@@ -1,0 +1,94 @@
+:root {
+  color-scheme: light dark;
+  --paper: #f4f1ea;
+  --ink: #161b22;
+  --muted: #626971;
+  --line: #cbc7bd;
+  --blue: #145caa;
+  --blue-dark: #0b3e79;
+  --panel: #fffdfa;
+  --code: #e7e3da;
+  --max: 1120px;
+  font-family: Inter, ui-sans-serif, "Segoe UI", system-ui, sans-serif;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.55; }
+a { color: inherit; text-underline-offset: .22em; }
+.nav, main, footer { width: min(calc(100% - 40px), var(--max)); margin-inline: auto; }
+.nav { min-height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.wordmark { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 720; letter-spacing: -.02em; }
+.wordmark span { display: grid; place-items: center; width: 34px; height: 34px; background: var(--blue); color: white; border-radius: 7px; font: 800 12px/1 ui-monospace, monospace; }
+nav { display: flex; gap: 24px; font-size: .9rem; }
+nav a { text-decoration: none; color: var(--muted); }
+nav a:hover { color: var(--blue); }
+.hero { padding: clamp(72px, 11vw, 144px) 0 72px; max-width: 890px; }
+.eyebrow { color: var(--blue); font: 700 .76rem/1.2 ui-monospace, "Cascadia Code", monospace; letter-spacing: .13em; text-transform: uppercase; }
+h1 { margin: 18px 0 24px; font-size: clamp(3.6rem, 9.5vw, 8.3rem); line-height: .88; letter-spacing: -.075em; font-weight: 760; }
+h1 em { color: var(--blue); font-style: normal; }
+.lede { max-width: 700px; margin: 0; color: var(--muted); font-size: clamp(1.12rem, 2vw, 1.42rem); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.button { padding: 12px 18px; border: 1px solid var(--ink); border-radius: 7px; text-decoration: none; font-weight: 680; }
+.button.primary { background: var(--ink); color: var(--paper); }
+.button:hover { transform: translateY(-1px); }
+.release-note, .caption { color: var(--muted); font-size: .84rem; }
+.release-note { margin-top: 18px; }
+.preview { margin: 0 0 96px; }
+.window { overflow: hidden; border: 1px solid #8d9298; border-radius: 11px; background: #fcfcfc; color: #20242a; box-shadow: 0 28px 70px rgba(23, 31, 41, .17); }
+.titlebar { height: 44px; display: flex; align-items: center; gap: 7px; padding: 0 15px; background: #e9ebee; border-bottom: 1px solid #cdd0d4; font-size: .76rem; color: #535961; }
+.titlebar i { width: 9px; height: 9px; border: 1px solid #afb3b8; border-radius: 50%; background: #f8f8f8; }
+.titlebar span { margin-left: 8px; }
+.document { padding: clamp(28px, 7vw, 76px); max-width: 880px; }
+.document .crumb { color: #727983; font: 700 .68rem ui-monospace, monospace; letter-spacing: .12em; }
+.document h3 { margin: 14px 0 12px; font-size: clamp(1.8rem, 4vw, 3.1rem); line-height: 1.08; letter-spacing: -.04em; }
+.document p { max-width: 690px; color: #59606a; }
+.alert { display: flex; gap: 16px; margin: 28px 0; padding: 14px 16px; border-left: 4px solid #2875c7; background: #edf5ff; color: #21466d; }
+.alert strong { font: 750 .7rem ui-monospace, monospace; }
+.code { overflow: hidden; white-space: nowrap; padding: 15px; border: 1px solid #d7d9dd; border-radius: 6px; background: #f1f2f4; font-family: "Cascadia Code", ui-monospace, monospace; }
+.code span { color: #7f3fbf; } .code b { color: #216e39; font-weight: 500; }
+.math { padding-top: 28px; text-align: center; font: italic 1.55rem Georgia, serif; }
+.principles { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
+.principles article { padding: 42px 30px 44px 0; }
+.principles article + article { padding-left: 30px; border-left: 1px solid var(--line); }
+.principles span { color: var(--blue); font: 700 .75rem ui-monospace, monospace; }
+.principles h2 { margin: 14px 0 8px; font-size: 1.35rem; }
+.principles p { margin: 0; color: var(--muted); }
+.details, .verify { display: grid; grid-template-columns: .8fr 1.2fr; gap: 70px; padding: 110px 0; border-bottom: 1px solid var(--line); }
+.details h2, .verify h2, .metrics h2, .roadmap h2 { margin: 14px 0 0; font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1.03; letter-spacing: -.045em; }
+.copy p, .metrics p, .roadmap p, .verify > p { color: var(--muted); }
+.copy a, .metrics a { color: var(--blue); font-weight: 650; }
+.metrics { margin: 0 calc(50% - 50vw); padding: 100px max(20px, calc((100vw - var(--max)) / 2)); background: var(--blue-dark); color: #f7f9fc; }
+.metrics .eyebrow { color: #8bc1ff; }
+.metrics p { max-width: 850px; color: #c7d9ed; }
+.metrics a { color: white; }
+.verify ol { margin: 0; padding: 0; list-style: none; counter-reset: verify; }
+.verify li { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 18px 0; border-top: 1px solid var(--line); }
+.verify li span { color: var(--muted); }
+code { padding: .15em .35em; background: var(--code); border-radius: 4px; font: .86em/1.5 "Cascadia Code", ui-monospace, monospace; overflow-wrap: anywhere; }
+.roadmap { padding: 100px 0 120px; max-width: 800px; }
+footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px 0 36px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 760px) {
+  .nav { align-items: flex-start; padding: 18px 0; gap: 20px; }
+  nav { gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+  .principles { grid-template-columns: 1fr; }
+  .principles article, .principles article + article { padding: 28px 0; border-left: 0; border-top: 1px solid var(--line); }
+  .principles article:first-child { border-top: 0; }
+  .details, .verify { grid-template-columns: 1fr; gap: 34px; padding: 76px 0; }
+  .verify li { grid-template-columns: 1fr; gap: 5px; }
+  footer { flex-direction: column; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #101419; --ink: #edf1f5; --muted: #9aa4ae; --line: #303740; --blue: #6aafff; --blue-dark: #092846; --panel: #171c22; --code: #232a32; }
+  .button.primary { background: var(--ink); color: var(--paper); }
+  .window { box-shadow: 0 28px 70px rgba(0, 0, 0, .4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .button:hover { transform: none; }
+}

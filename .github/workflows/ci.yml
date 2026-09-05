@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    runs-on: windows-2022
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install pinned Rust toolchain
+        shell: pwsh
+        run: |
+          rustup set profile minimal
+          rustup toolchain install 1.95.0 --component clippy,rustfmt --target x86_64-pc-windows-msvc
+          rustup default 1.95.0
+
+      - name: Verify formatting
+        run: cargo fmt --all -- --check
+
+      - name: Lint
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --locked --all-targets
+
+      - name: Build native UI smoke target
+        run: cargo build --locked
+
+      - name: Exercise Windows window, scrolling, and independent launches
+        shell: pwsh
+        run: .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md
+
+      - name: Audit RustSec advisories
+        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check licenses, bans, and sources
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2
+        with:
+          command: check
+
+  site:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate static site
+        shell: bash
+        run: |
+          test -f docs/index.html
+          test -f docs/styles.css
+          ! grep -RniE '<script|google-analytics|googletagmanager' docs
+          grep -q '{{REPOSITORY_URL}}' docs/index.html
+          grep -q '{{REPOSITORY_SLUG}}' docs/index.html

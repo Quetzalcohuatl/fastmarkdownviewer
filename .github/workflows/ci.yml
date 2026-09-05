@@ -41,6 +41,18 @@ jobs:
         shell: pwsh
         run: .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Headless
 
+  policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install pinned Rust toolchain
+        run: |
+          rustup set profile minimal
+          rustup toolchain install 1.95.0
+          rustup default 1.95.0
+
       - name: Install pinned cargo-audit
         run: cargo install cargo-audit --version 0.22.2 --locked
 

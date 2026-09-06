@@ -36,19 +36,7 @@ h1 em { color: var(--blue); font-style: normal; }
 .release-note, .caption { color: var(--muted); font-size: .84rem; }
 .release-note { margin-top: 18px; }
 .preview { margin: 0 0 96px; }
-.window { overflow: hidden; border: 1px solid #8d9298; border-radius: 11px; background: #fcfcfc; color: #20242a; box-shadow: 0 28px 70px rgba(23, 31, 41, .17); }
-.titlebar { height: 44px; display: flex; align-items: center; gap: 7px; padding: 0 15px; background: #e9ebee; border-bottom: 1px solid #cdd0d4; font-size: .76rem; color: #535961; }
-.titlebar i { width: 9px; height: 9px; border: 1px solid #afb3b8; border-radius: 50%; background: #f8f8f8; }
-.titlebar span { margin-left: 8px; }
-.document { padding: clamp(28px, 7vw, 76px); max-width: 880px; }
-.document .crumb { color: #727983; font: 700 .68rem ui-monospace, monospace; letter-spacing: .12em; }
-.document h3 { margin: 14px 0 12px; font-size: clamp(1.8rem, 4vw, 3.1rem); line-height: 1.08; letter-spacing: -.04em; }
-.document p { max-width: 690px; color: #59606a; }
-.alert { display: flex; gap: 16px; margin: 28px 0; padding: 14px 16px; border-left: 4px solid #2875c7; background: #edf5ff; color: #21466d; }
-.alert strong { font: 750 .7rem ui-monospace, monospace; }
-.code { overflow: hidden; white-space: nowrap; padding: 15px; border: 1px solid #d7d9dd; border-radius: 6px; background: #f1f2f4; font-family: "Cascadia Code", ui-monospace, monospace; }
-.code span { color: #7f3fbf; } .code b { color: #216e39; font-weight: 500; }
-.math { padding-top: 28px; text-align: center; font: italic 1.55rem Georgia, serif; }
+.app-screenshot { display: block; width: 100%; height: auto; border: 1px solid #8d9298; border-radius: 11px; box-shadow: 0 28px 70px rgba(23, 31, 41, .17); }
 .principles { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
 .principles article { padding: 42px 30px 44px 0; }
 .principles article + article { padding-left: 30px; border-left: 1px solid var(--line); }
@@ -85,7 +73,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px
 @media (prefers-color-scheme: dark) {
   :root { --paper: #101419; --ink: #edf1f5; --muted: #9aa4ae; --line: #303740; --blue: #6aafff; --blue-dark: #092846; --panel: #171c22; --code: #232a32; }
   .button.primary { background: var(--ink); color: var(--paper); }
-  .window { box-shadow: 0 28px 70px rgba(0, 0, 0, .4); }
+  .app-screenshot { box-shadow: 0 28px 70px rgba(0, 0, 0, .4); }
 }
 
 @media (prefers-reduced-motion: reduce) {

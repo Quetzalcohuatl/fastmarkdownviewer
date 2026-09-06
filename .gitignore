@@ -1,6 +1,7 @@
 /target/
 **/target/
 /release/
+/release-*/
 /dist/
 /.idea/
 /.vscode/

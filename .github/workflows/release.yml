@@ -93,4 +93,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: pwsh
         run: |
-          gh release create $env:GITHUB_REF_NAME (Get-ChildItem .\release -File | ForEach-Object FullName) --verify-tag --title $env:GITHUB_REF_NAME --notes-file .github/ALPHA_RELEASE_NOTES.md --generate-notes --prerelease --latest=false
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          $releaseArguments = @(
+            'release', 'create', $env:GITHUB_REF_NAME
+          ) + (Get-ChildItem .\release -File | ForEach-Object FullName) + @(
+            '--verify-tag', '--title', $env:GITHUB_REF_NAME,
+            '--notes-file', '.github/RELEASE_NOTES.md', '--generate-notes'
+          )
+          if ($version.Contains('-')) {
+            $releaseArguments += @('--prerelease', '--latest=false')
+          } else {
+            $releaseArguments += '--latest'
+          }
+          & gh @releaseArguments
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub Release creation failed with exit code $LASTEXITCODE."
+          }

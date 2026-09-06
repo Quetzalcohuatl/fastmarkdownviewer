@@ -4,6 +4,20 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.0-beta.1] - 2026-09-06
+
+### Changed
+
+- Errors can be dismissed with the visible Dismiss button or Escape.
+- Release automation now distinguishes prerelease tags from stable tags instead
+  of marking every release as a prerelease.
+- The release bar was simplified around the product's core open, render, scroll,
+  install, and safety behavior.
+
+## [0.1.0-alpha.3] - 2026-09-05
+
+The first public alpha of the Windows x64 viewer.
+
 ### Added
 
 - Windows-first read-only Markdown viewer foundation
@@ -21,10 +35,6 @@ All notable changes are documented here. This project follows Semantic Versionin
 - Clamped End-key scrolling to the measured document range to prevent invalid
   geometry
 
-## [0.1.0-alpha.3] - 2026-09-05
-
-The first public alpha of the Windows x64 viewer.
-
 ## [0.1.0-alpha.2] - 2026-09-05
 
 Release automation reached packaging but failed before publishing because the
@@ -33,7 +43,3 @@ runner already contained a newer Inno Setup than the pinned install command.
 ## [0.1.0-alpha.1] - 2026-09-05
 
 Release automation preflight failed before building or publishing binaries.
-
-## [0.1.0] - Unreleased
-
-The first public release will be cut only after the Windows 10 and Windows 11 acceptance matrix passes.

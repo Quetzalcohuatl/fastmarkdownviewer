@@ -265,6 +265,12 @@ impl ViewerApp {
         if context.input_mut(|input| input.consume_key(egui::Modifiers::COMMAND, egui::Key::O)) {
             self.open_dialog();
         }
+        if self.error.is_some()
+            && context
+                .input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Escape))
+        {
+            self.error = None;
+        }
 
         if let Some(document) = &self.document {
             context.send_viewport_cmd(egui::ViewportCommand::Title(format!(
@@ -276,14 +282,26 @@ impl ViewerApp {
         egui::Frame::central_panel(ui.style())
             .inner_margin(egui::Margin::symmetric(18, 12))
             .show(ui, |ui| {
-                if let Some(error) = &self.error {
+                if let Some(error) = self.error.clone() {
+                    let mut dismiss = false;
                     egui::Frame::new()
                         .fill(ui.visuals().error_fg_color.gamma_multiply(0.08))
                         .corner_radius(5)
                         .inner_margin(8)
                         .show(ui, |ui| {
-                            ui.colored_label(ui.visuals().error_fg_color, error);
+                            ui.horizontal(|ui| {
+                                ui.colored_label(ui.visuals().error_fg_color, error);
+                                ui.with_layout(
+                                    egui::Layout::right_to_left(egui::Align::Center),
+                                    |ui| {
+                                        dismiss = ui.small_button("Dismiss").clicked();
+                                    },
+                                );
+                            });
                         });
+                    if dismiss {
+                        self.error = None;
+                    }
                     ui.add_space(6.0);
                 }
                 if self.document.is_some() {

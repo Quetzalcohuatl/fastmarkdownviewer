@@ -286,6 +286,13 @@ fn invalid_drop_is_a_visible_error_instead_of_a_crash() {
         app.error_message()
             .is_some_and(|error| error.contains("Cannot open"))
     );
+
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::Escape, egui::Modifiers::NONE)]),
+    );
+    assert!(app.error_message().is_none());
 }
 
 #[test]

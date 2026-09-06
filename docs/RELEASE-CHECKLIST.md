@@ -21,7 +21,7 @@ benchmarking do not block v0.1.
 - [x] The product name and repository metadata are fixed for v0.1.
 - [x] The website, privacy behavior, unsigned status, and verification steps are
   clear.
-- [ ] Publish `v0.1.0-beta.1` and confirm its hosted CI, installer, assets, and
+- [x] Publish `v0.1.0-beta.1` and confirm its hosted CI, installer, assets, and
   Pages deployment.
 - [ ] Resolve any reproducible crash, unsafe network behavior, or broken core
   interaction reported against the beta.

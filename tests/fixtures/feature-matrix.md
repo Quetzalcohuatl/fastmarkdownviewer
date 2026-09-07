@@ -1,6 +1,6 @@
 # Feature matrix
 
-Unicode: naïve café · Ελληνικά · العربية · עברית · 中文 · 日本語 · 😀
+Unicode: naïve café · Ελληνικά · العربية · עברית · 中文 · 日本語 · 😀 🎉 ✅ ❤️
 
 ## Lists and tasks
 

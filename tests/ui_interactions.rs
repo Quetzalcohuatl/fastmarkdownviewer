@@ -6,7 +6,10 @@ use std::{
 };
 
 use eframe::egui;
-use fast_markdown_viewer::app::{AppServices, InitialState, ViewerApp};
+use fast_markdown_viewer::{
+    app::{AppServices, InitialState, ViewerApp},
+    fonts,
+};
 use url::Url;
 
 const VIEWPORT_WIDTH: f32 = 720.0;
@@ -141,6 +144,97 @@ fn accesskit_action(
         target_node,
         data,
     })
+}
+
+#[test]
+fn empty_window_paints_the_whole_viewport_and_exposes_main_menus() {
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Empty);
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    let viewport = egui::Rect::from_min_size(
+        egui::Pos2::ZERO,
+        egui::vec2(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
+    );
+
+    assert!(output.shapes.iter().any(|clipped| {
+        matches!(
+            &clipped.shape,
+            egui::epaint::Shape::Rect(rect)
+                if rect.fill != egui::Color32::TRANSPARENT
+                    && rect.rect.contains(viewport.min)
+                    && rect.rect.contains(viewport.max - egui::vec2(0.1, 0.1))
+        )
+    }));
+
+    let update = accesskit_update(&output);
+    for expected in ["File", "Settings", "Open Markdown file"] {
+        assert!(
+            update.nodes.iter().any(|(_, node)| {
+                node.label()
+                    .or_else(|| node.value())
+                    .is_some_and(|text| text.contains(expected))
+            }),
+            "accessibility tree did not contain {expected:?}"
+        );
+    }
+}
+
+#[test]
+fn control_wheel_zooms_in_and_out() {
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(fixture()));
+    run_frame(&context, &mut app, input(Vec::new()));
+    let initial_zoom = context.zoom_factor();
+    let modifiers = egui::Modifiers::CTRL | egui::Modifiers::COMMAND;
+
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![egui::Event::MouseWheel {
+            unit: egui::MouseWheelUnit::Point,
+            delta: egui::vec2(0.0, 120.0),
+            modifiers,
+            phase: egui::TouchPhase::Move,
+        }]),
+    );
+    assert!(app.document_scroll_offset().abs() < f32::EPSILON);
+    run_frame(&context, &mut app, input(Vec::new()));
+    let zoomed_in = context.zoom_factor();
+    assert!(zoomed_in > initial_zoom);
+
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![egui::Event::MouseWheel {
+            unit: egui::MouseWheelUnit::Point,
+            delta: egui::vec2(0.0, -120.0),
+            modifiers,
+            phase: egui::TouchPhase::Move,
+        }]),
+    );
+    run_frame(&context, &mut app, input(Vec::new()));
+    assert!(context.zoom_factor() < zoomed_in);
+}
+
+#[test]
+fn default_fonts_cover_common_unicode_emoji() {
+    let context = egui::Context::default();
+    fonts::install(&context);
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Path(fixture()));
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    let rendered_text = accesskit_update(&output)
+        .nodes
+        .iter()
+        .filter_map(|(_, node)| node.value().or_else(|| node.label()))
+        .collect::<String>();
+    assert!(rendered_text.contains("😀 🎉 ✅ ❤️"));
+
+    let font = egui::FontId::proportional(16.0);
+    for character in ['😀', '🎉', '✅', '❤'] {
+        assert!(context.fonts_mut(|fonts| fonts.glyph_width(&font, character) > 0.0));
+    }
 }
 
 #[test]

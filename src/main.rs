@@ -4,7 +4,7 @@ use eframe::egui;
 use fast_markdown_viewer::{
     app::{InitialState, ViewerApp},
     cli::{self, Command},
-    network,
+    fonts, network,
 };
 
 fn main() -> eframe::Result {
@@ -45,6 +45,7 @@ fn main() -> eframe::Result {
         native_options,
         Box::new(move |creation_context| {
             network::install(&creation_context.egui_ctx);
+            fonts::install(&creation_context.egui_ctx);
             creation_context
                 .egui_ctx
                 .set_theme(egui::ThemePreference::System);

@@ -54,6 +54,7 @@ Source: "{#SourcePath}\..\..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\..\..\LICENSE-MIT"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\..\..\LICENSE-APACHE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\..\..\THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\..\..\assets\fonts\OFL-NotoEmoji.txt"; DestDir: "{app}"; DestName: "LICENSE-NOTO-EMOJI.txt"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\FastMarkdownViewer"; Filename: "{app}\FastMarkdownViewer.exe"; WorkingDir: "{userdocs}"

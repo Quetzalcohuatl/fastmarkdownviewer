@@ -2,15 +2,16 @@
 
 FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
-> **Beta:** v0.1.0-beta.1 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
+> **Beta:** v0.1.0-beta.2 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
 
 ## What v0.1 includes
 
 - CommonMark and GitHub-style tables, task lists, strikethrough, autolinks, footnotes, definition lists, and alerts
 - Inline, display, and fenced math rendered with RaTeX
 - Selectable plain code blocks without startup syntax highlighting
+- Standard Unicode emoji rendered with a bundled monochrome fallback font
 - Local and remote PNG, JPEG, WebP, first-frame GIF, and SVG images
-- System light/dark preference, high-DPI rendering, keyboard scrolling, Ctrl+O, and drag-and-drop
+- A small File/Settings menu, per-window theme switching, Ctrl+mouse-wheel zoom, keyboard scrolling, Ctrl+O, and drag-and-drop
 - A portable executable and a per-user installer for Windows 10 22H2 and Windows 11 x64
 
 There is no editor, file watcher, search index, history database, updater, telemetry, or settings file.

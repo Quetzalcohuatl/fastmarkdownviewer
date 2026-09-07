@@ -4,6 +4,20 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.0-beta.2] - 2026-09-07
+
+### Added
+
+- A compact File menu with Open and Exit actions.
+- A Settings menu with per-window system, light, and dark themes plus text zoom.
+- Ctrl+mouse-wheel zoom with a 50% to 300% range.
+- A bundled monochrome Noto Emoji fallback font.
+
+### Fixed
+
+- The empty landing view now paints the complete window instead of leaving a
+  black lower region.
+
 ## [0.1.0-beta.1] - 2026-09-06
 
 ### Changed

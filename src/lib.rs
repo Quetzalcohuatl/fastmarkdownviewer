@@ -1,6 +1,7 @@
 pub mod app;
 pub mod cli;
 pub mod document;
+pub mod fonts;
 pub mod links;
 pub mod math;
 pub mod network;

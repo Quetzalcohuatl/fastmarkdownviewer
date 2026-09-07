@@ -17,6 +17,25 @@ use crate::{
 
 const LINE_SCROLL_POINTS: f32 = 48.0;
 const PAGE_SCROLL_FRACTION: f32 = 0.9;
+const MIN_ZOOM_FACTOR: f32 = 0.5;
+const MAX_ZOOM_FACTOR: f32 = 3.0;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ThemeChoice {
+    System,
+    Light,
+    Dark,
+}
+
+impl ThemeChoice {
+    const fn preference(self) -> egui::ThemePreference {
+        match self {
+            Self::System => egui::ThemePreference::System,
+            Self::Light => egui::ThemePreference::Light,
+            Self::Dark => egui::ThemePreference::Dark,
+        }
+    }
+}
 
 #[derive(Debug)]
 pub enum InitialState {
@@ -66,6 +85,7 @@ pub struct ViewerApp {
     markdown_cache: CommonMarkCache,
     math: MathRenderer,
     services: Arc<dyn AppServices>,
+    theme: ThemeChoice,
     document_scroll_offset: f32,
     document_max_scroll_offset: f32,
 }
@@ -84,6 +104,7 @@ impl ViewerApp {
             markdown_cache: CommonMarkCache::default(),
             math: MathRenderer::default(),
             services,
+            theme: ThemeChoice::System,
             document_scroll_offset: 0.0,
             document_max_scroll_offset: 0.0,
         };
@@ -259,8 +280,70 @@ impl ViewerApp {
         });
     }
 
+    fn menu_bar(&mut self, ui: &mut egui::Ui) {
+        egui::MenuBar::new().ui(ui, |ui| {
+            ui.menu_button("File", |ui| {
+                if ui.button("Open…").clicked() {
+                    self.open_dialog();
+                    ui.close();
+                }
+                ui.separator();
+                if ui.button("Exit").clicked() {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+                }
+            });
+            ui.menu_button("Settings", |ui| {
+                ui.label("Theme");
+                let previous = self.theme;
+                ui.radio_value(&mut self.theme, ThemeChoice::System, "Use Windows setting");
+                ui.radio_value(&mut self.theme, ThemeChoice::Light, "Light");
+                ui.radio_value(&mut self.theme, ThemeChoice::Dark, "Dark");
+                if self.theme != previous {
+                    ui.ctx().set_theme(self.theme.preference());
+                }
+
+                ui.separator();
+                ui.label(format!("Text size: {:.0}%", ui.ctx().zoom_factor() * 100.0));
+                egui::gui_zoom::zoom_menu_buttons(ui);
+                ui.weak("Settings apply to this window only.");
+            });
+        });
+        ui.separator();
+    }
+
+    fn apply_zoom_input(context: &egui::Context) {
+        let wheel_points = context.input_mut(|input| {
+            let mut wheel_points = 0.0;
+            input.events.retain(|event| {
+                let points = match event {
+                    egui::Event::MouseWheel {
+                        unit,
+                        delta,
+                        modifiers,
+                        ..
+                    } if modifiers.ctrl || modifiers.command => match unit {
+                        egui::MouseWheelUnit::Point => delta.y,
+                        egui::MouseWheelUnit::Line => delta.y * 24.0,
+                        egui::MouseWheelUnit::Page => delta.y * 120.0,
+                    },
+                    _ => return true,
+                };
+                wheel_points += points;
+                false
+            });
+            wheel_points
+        });
+        if wheel_points.abs() > f32::EPSILON {
+            let zoom_delta = (wheel_points * 0.0015).exp();
+            context.set_zoom_factor(
+                (context.zoom_factor() * zoom_delta).clamp(MIN_ZOOM_FACTOR, MAX_ZOOM_FACTOR),
+            );
+        }
+    }
+
     pub fn show(&mut self, ui: &mut egui::Ui) {
         let context = ui.ctx().clone();
+        Self::apply_zoom_input(&context);
         self.handle_drops(&context);
         if context.input_mut(|input| input.consume_key(egui::Modifiers::COMMAND, egui::Key::O)) {
             self.open_dialog();
@@ -279,9 +362,12 @@ impl ViewerApp {
             )));
         }
 
+        ui.painter()
+            .rect_filled(ui.max_rect(), 0.0, ui.visuals().panel_fill);
         egui::Frame::central_panel(ui.style())
             .inner_margin(egui::Margin::symmetric(18, 12))
             .show(ui, |ui| {
+                self.menu_bar(ui);
                 if let Some(error) = self.error.clone() {
                     let mut dismiss = false;
                     egui::Frame::new()

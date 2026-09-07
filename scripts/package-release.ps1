@@ -47,6 +47,7 @@ Copy-Item -LiteralPath $sourceBinary -Destination (Join-Path $staging 'FastMarkd
 foreach ($name in @('README.md', 'LICENSE-MIT', 'LICENSE-APACHE', 'THIRD_PARTY_NOTICES.md')) {
     Copy-Item -LiteralPath (Join-Path $repositoryRoot $name) -Destination $staging
 }
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'assets\fonts\OFL-NotoEmoji.txt') -Destination (Join-Path $staging 'LICENSE-NOTO-EMOJI.txt')
 
 $zip = Join-Path $output "FastMarkdownViewer-$Version-windows-x86_64.zip"
 Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zip -CompressionLevel Optimal

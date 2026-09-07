@@ -13,6 +13,10 @@ Major direct components include:
 - ureq — MIT OR Apache-2.0
 - rfd — MIT
 - open — MIT
+- Noto Emoji 3.002 — SIL Open Font License 1.1. The bundled monochrome variable
+  font is from Google Fonts commit
+  `b979dba422e445492b0eb9951ac52ee0b4d648c3`; its license is preserved at
+  `assets/fonts/OFL-NotoEmoji.txt`.
 
 The transitive graph also includes components under the Boost Software License
 1.0 and root-certificate data under CDLA-Permissive-2.0. egui's embedded default

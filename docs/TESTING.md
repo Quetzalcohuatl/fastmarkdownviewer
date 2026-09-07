@@ -9,14 +9,17 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
 `tests/ui_interactions.rs` feeds real egui input events through the production
 `ViewerApp` surface. It currently verifies:
 
+- the empty landing view paints the full viewport and exposes File and Settings;
 - mouse-wheel scrolling of the nested-list feature fixture without a panic;
+- Ctrl+mouse-wheel zoom in and out;
 - Page Up, Page Down, Up, Down, Home, End, and Space scrolling behavior;
 - one-file drag-and-drop, multiple-drop rejection, and invalid-file errors;
 - Ctrl+O file selection through an injected platform service;
 - safe HTTP(S) and relative-Markdown link activation, including AccessKit
   interaction, while unsafe schemes remain inert;
 - selectable rendered text and copy output;
-- system light/dark changes; and
+- system light/dark changes;
+- bundled emoji fallback rendering; and
 - rendering at 100%, 150%, and 200% scale factors.
 
 `tests/render_smoke.rs` separately renders the complete feature matrix. It is

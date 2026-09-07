@@ -32,7 +32,14 @@ New-Item -ItemType Directory -Path $extract | Out-Null
 try {
     Expand-Archive -LiteralPath (Join-Path $directoryPath "FastMarkdownViewer-$Version-windows-x86_64.zip") -DestinationPath $extract
     $zipNames = Get-ChildItem -LiteralPath $extract -File | Select-Object -ExpandProperty Name | Sort-Object
-    $expectedZip = @('FastMarkdownViewer.exe', 'README.md', 'LICENSE-MIT', 'LICENSE-APACHE', 'THIRD_PARTY_NOTICES.md') | Sort-Object
+    $expectedZip = @(
+        'FastMarkdownViewer.exe',
+        'README.md',
+        'LICENSE-MIT',
+        'LICENSE-APACHE',
+        'LICENSE-NOTO-EMOJI.txt',
+        'THIRD_PARTY_NOTICES.md'
+    ) | Sort-Object
     if (Compare-Object $expectedZip $zipNames) { throw "Unexpected ZIP contents: $($zipNames -join ', ')" }
     $directHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $directoryPath "FastMarkdownViewer-$Version-windows-x86_64.exe")).Hash
     $zipExeHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $extract 'FastMarkdownViewer.exe')).Hash

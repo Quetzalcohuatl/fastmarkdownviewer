@@ -13,13 +13,18 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
 - mouse-wheel scrolling of the nested-list feature fixture without a panic;
 - Ctrl+mouse-wheel zoom in and out;
 - Page Up, Page Down, Up, Down, Home, End, and Space scrolling behavior;
-- one-file drag-and-drop, multiple-drop rejection, and invalid-file errors;
+- multiple-file drag-and-drop, duplicate-tab activation, and invalid-file errors that preserve documents;
 - Ctrl+O file selection through an injected platform service;
 - safe HTTP(S) and relative-Markdown link activation, including AccessKit
   interaction, while unsafe schemes remain inert;
 - selectable rendered text and copy output;
 - system light/dark changes;
-- bundled emoji fallback rendering; and
+- actual fallback font glyph coverage for English, Japanese, Chinese, Korean, Arabic, Hebrew, and emoji;
+- Ctrl+F across formatted text and code, next/previous results, Escape, and horizontal match reveal;
+- tab switching/closing and per-tab scroll preservation;
+- duplicate and Setext outline navigation, Ctrl+H toggling, and empty-window shortcut help;
+- repeated Ctrl+F toggling and keyboard scrolling after Find closes;
+- tab tear-out with preserved state, cancellation, negative monitor origins, repeated child tear-out, and original/last-window close behavior; and
 - rendering at 100%, 150%, and 200% scale factors.
 
 `tests/render_smoke.rs` separately renders the complete feature matrix. It is
@@ -67,3 +72,16 @@ Automation does not replace the final Windows 10 22H2 and Windows 11 clean-VM
 matrix. Before the public v0.1 tag, record the portable, installer, association,
 uninstaller, SmartScreen, theme, and DPI observations described in the project
 acceptance plan. Keep those results with the release notes.
+
+
+## Reading-tool visual checks
+
+`tests/render_smoke.rs` also verifies that off-screen code does not start a highlight worker, visible Rust code gains multiple syntax colors, and theme changes refresh the result.
+
+Use the framebuffer capture example when desktop capture cannot read an OpenGL surface:
+
+```powershell
+cargo run --locked --example visual_check -- tests/fixtures/navigation.md target/reading-tools.png greeting
+```
+
+The example opens the production UI, optionally searches for the final argument, captures egui's actual framebuffer, and closes itself. Inspect the generated PNG for heading layout, script glyphs, syntax colors, and match placement. This is a visual regression aid, not a startup benchmark. Full mixed-direction text layout still requires a separate renderer improvement; glyph coverage tests do not claim bidi conformance.

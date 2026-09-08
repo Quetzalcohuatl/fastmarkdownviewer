@@ -92,7 +92,17 @@ pub fn code_block<'t>(
     max_width: f32,
     text: &str,
     layouter: &'t mut dyn FnMut(&Ui, &dyn TextBuffer, f32) -> std::sync::Arc<egui::Galley>,
-) {
+) -> egui::text_edit::TextEditOutput {
+    code_block_with_navigation(ui, max_width, text, layouter, None)
+}
+
+pub fn code_block_with_navigation<'t>(
+    ui: &mut Ui,
+    max_width: f32,
+    text: &str,
+    layouter: &'t mut dyn FnMut(&Ui, &dyn TextBuffer, f32) -> std::sync::Arc<egui::Galley>,
+    navigation: Option<&mut crate::navigation::Navigation>,
+) -> egui::text_edit::TextEditOutput {
     let mut text = text.strip_suffix('\n').unwrap_or(text);
 
     // To manually add background color to the code block, we imitate what
@@ -106,12 +116,17 @@ pub fn code_block<'t>(
         .id_salt(ui.next_auto_id())
         .auto_shrink([false, true])
         .show(ui, |ui| {
-            egui::TextEdit::multiline(&mut text)
+            let output = egui::TextEdit::multiline(&mut text)
                 .layouter(layouter)
                 .desired_width(max_width)
                 // prevent trailing lines
                 .desired_rows(1)
-                .show(ui)
+                .show(ui);
+            if let Some(navigation) = navigation {
+                navigation.record(output.galley_pos, output.galley.clone(), ui.clip_rect());
+                navigation.scroll_recorded(ui);
+            }
+            output
         })
         .inner;
 
@@ -182,6 +197,7 @@ pub fn code_block<'t>(
         };
         ui.copy_text(copy_text);
     }
+    output
 }
 
 // Stripped down version of egui's Checkbox. The only difference is that this

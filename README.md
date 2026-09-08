@@ -2,16 +2,20 @@
 
 FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
-> **Beta:** v0.1.0-beta.2 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
+> **Beta:** v0.1.0-beta.3 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
 
 ## What v0.1 includes
 
 - CommonMark and GitHub-style tables, task lists, strikethrough, autolinks, footnotes, definition lists, and alerts
 - Inline, display, and fenced math rendered with RaTeX
-- Selectable plain code blocks without startup syntax highlighting
-- Standard Unicode emoji rendered with a bundled monochrome fallback font
+- Selectable code blocks with lazy, background syntect highlighting
+- Bundled monochrome emoji plus Windows font fallbacks for Japanese, Chinese, Korean, Arabic, and Hebrew
 - Local and remote PNG, JPEG, WebP, first-frame GIF, and SVG images
-- A small File/Settings menu, per-window theme switching, Ctrl+mouse-wheel zoom, keyboard scrolling, Ctrl+O, and drag-and-drop
+- Ctrl+F search with highlights, match counts, next/previous navigation, and optional case matching
+- A resizable outline sidebar with a Settings toggle
+- Multiple document tabs, per-tab scroll/search state, Ctrl+O, and multi-file drag-and-drop
+- Drag tabs outside a window to move them into independent native windows
+- File/Settings menus, session-wide themes, Ctrl+mouse-wheel zoom, and keyboard scrolling
 - A portable executable and a per-user installer for Windows 10 22H2 and Windows 11 x64
 
 There is no editor, file watcher, search index, history database, updater, telemetry, or settings file.
@@ -25,6 +29,28 @@ FastMarkdownViewer.exe --version
 ```
 
 The installer registers `.md` and `.markdown` under **Open with**. It does not and cannot silently replace your chosen Windows default application.
+
+### Reading shortcuts
+
+| Shortcut | Action |
+|:--|:--|
+| Ctrl+O | Open a file in a tab; an already-open file activates its tab |
+| Ctrl+W / middle-click tab | Close a tab |
+| Ctrl+Tab / Ctrl+Shift+Tab | Next / previous tab |
+| Ctrl+F | Show and focus Find / hide Find |
+| Enter / Shift+Enter, F3 / Shift+F3 | Next / previous match (wraps around) |
+| Escape | Close Find, or dismiss an error |
+| Ctrl+H (also Ctrl+Shift+O) | Show / hide the outline sidebar |
+
+Search operates on rendered text, including code and link captions, and can span inline formatting. Image contents and rendered math are not searchable. The outline supports ATX and Setext headings, including duplicate titles. A failed open leaves existing tabs intact. The empty-window page lists reading shortcuts.
+
+Drag a tab outside the window and release to move it into a new native window, keeping its document, scroll position, search, and caches. Escape cancels a drag. The tab's right-click menu also offers **Move to new window**. Closing the original window keeps detached windows alive; closing the last window exits. Theme and text size are shared within a process; each window has its own outline toggle. Moving tabs into an existing window and tab reordering are not supported yet. Separate command-line launches and Markdown links still start separate processes.
+
+The current eframe backend does not initialize native accessibility for dynamically created child windows. For screen-reader access, open the file through a separate application launch instead of detaching its tab.
+
+Syntax definitions initialize on a worker only when a language-tagged code block becomes visible. Results are cached by content, language, theme, and font size. Unknown languages remain plain text; blocks over 256 KiB skip highlighting. Highlight caches are bounded to 128 entries and approximately 8 MiB per tab.
+
+Large East Asian system fonts load on demand. Glyph coverage depends on installed Windows fonts; no system fonts are redistributed. The sample in `tests/fixtures/navigation.md` is covered by the tested Windows installation. Full Unicode bidirectional paragraph layout remains limited by egui, so mixed Arabic/Hebrew and left-to-right text needs further renderer work. Emoji are monochrome.
 
 ## Build from source
 

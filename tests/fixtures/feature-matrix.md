@@ -1,6 +1,6 @@
 # Feature matrix
 
-Unicode: naïve café · Ελληνικά · العربية · עברית · 中文 · 日本語 · 😀 🎉 ✅ ❤️
+Unicode: naïve café · Ελληνικά · العربية · עברית · 中文 · 日本語 · 한국어 · 😀 🎉 ✅ ❤️
 
 ## Lists and tasks
 
@@ -17,7 +17,7 @@ Unicode: naïve café · Ελληνικά · العربية · עברית · 中
 | Feature | State |
 |:--|--:|
 | Tables | ready |
-| Plain code | ready |
+| Highlighted code | ready |
 
 > [!NOTE]
 > Alerts remain readable.
@@ -42,7 +42,7 @@ $$
 ```
 
 ```rust
-fn deliberately_plain() -> &'static str { "This line stays unhighlighted and scrolls horizontally when it is wider than the viewport." }
+fn highlighted_example() -> &'static str { "This line is highlighted and scrolls horizontally when it is wider than the viewport." }
 ```
 
 Raw HTML is inert: <script>alert("never")</script>

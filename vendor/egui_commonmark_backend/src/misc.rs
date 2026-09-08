@@ -224,19 +224,21 @@ impl Link {
                 egui::Align::LEFT,
             );
         }
-        if cache.link_hooks().contains_key(&destination) {
-            let ui_link = ui.link(layout_job);
-            if ui_link.clicked() || ui_link.middle_clicked() {
+        for section in &mut layout_job.sections {
+            section.format.color = ui.visuals().hyperlink_color;
+            section.format.underline = egui::Stroke::new(1.0, ui.visuals().hyperlink_color);
+        }
+        let response = crate::navigation::label(ui, layout_job.into(), &mut cache.navigation, true)
+            .on_hover_cursor(egui::CursorIcon::PointingHand)
+            .on_hover_text(&destination);
+        if response.clicked() || response.middle_clicked() {
+            if cache.link_hooks().contains_key(&destination) {
                 cache.link_hooks_mut().insert(destination, true);
+            } else if options.enable_scroll_to_heading && destination.starts_with('#') {
+                scroll_to_heading.replace(destination[1..].to_owned());
+            } else {
+                ui.ctx().open_url(egui::OpenUrl::new_tab(destination));
             }
-        } else if options.enable_scroll_to_heading
-            && let Some(stripped) = destination.strip_prefix("#")
-        {
-            if ui.link(layout_job).clicked() {
-                scroll_to_heading.replace(stripped.to_string());
-            };
-        } else {
-            ui.hyperlink_to(layout_job, destination);
         }
     }
 }
@@ -296,15 +298,15 @@ impl CodeBlock {
         &self,
         ui: &mut Ui,
         cache: &mut CommonMarkCache,
-        options: &CommonMarkOptions,
+        _options: &CommonMarkOptions,
         max_width: f32,
     ) {
         ui.scope(|ui| {
-            Self::pre_syntax_highlighting(cache, options, ui);
-
+            let position = ui.next_widget_position();
+            let highlighting = &mut cache.highlighting;
             let mut layout = |ui: &Ui, string: &dyn TextBuffer, _wrap_width: f32| {
                 let mut job = if let Some(lang) = &self.lang {
-                    self.syntax_highlighting(cache, options, lang, ui, string.as_str())
+                    highlighting.layout(ui, position, lang, string.as_str())
                 } else {
                     plain_highlighting(ui, string.as_str())
                 };
@@ -315,12 +317,20 @@ impl CodeBlock {
                 ui.fonts_mut(|f| f.layout_job(job))
             };
 
-            crate::elements::code_block(ui, max_width, &self.content, &mut layout);
+            crate::elements::code_block_with_navigation(
+                ui,
+                max_width,
+                &self.content,
+                &mut layout,
+                Some(&mut cache.navigation),
+            );
+            cache.navigation.separator("\n");
         });
     }
 }
 
 #[cfg(not(feature = "better_syntax_highlighting"))]
+#[allow(dead_code)]
 impl CodeBlock {
     fn pre_syntax_highlighting(
         _cache: &mut CommonMarkCache,
@@ -343,6 +353,7 @@ impl CodeBlock {
 }
 
 #[cfg(feature = "better_syntax_highlighting")]
+#[allow(dead_code)]
 impl CodeBlock {
     fn pre_syntax_highlighting(
         cache: &mut CommonMarkCache,
@@ -437,6 +448,8 @@ fn default_theme(ui: &Ui) -> &str {
 /// A cache used for storing content such as images.
 #[derive(Debug)]
 pub struct CommonMarkCache {
+    pub navigation: crate::navigation::Navigation,
+    pub(crate) highlighting: crate::highlighting::HighlightCache,
     // Everything stored in `CommonMarkCache` must take into account that
     // the cache is for multiple `CommonMarkviewer`s with different source_ids.
     #[cfg(feature = "better_syntax_highlighting")]
@@ -461,6 +474,8 @@ impl Default for CommonMarkCache {
             ps: SyntaxSet::load_defaults_newlines(),
             #[cfg(feature = "better_syntax_highlighting")]
             ts: ThemeSet::load_defaults(),
+            navigation: Default::default(),
+            highlighting: Default::default(),
             link_hooks: HashMap::new(),
             scroll: Default::default(),
             scroll_to_id_target: None,

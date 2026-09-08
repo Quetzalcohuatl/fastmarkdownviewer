@@ -19,3 +19,60 @@ fn feature_matrix_renders_without_panicking() {
     });
     output.textures_delta.clear();
 }
+
+#[test]
+fn syntax_highlighting_is_lazy_and_theme_aware() {
+    let context = egui::Context::default();
+    let mut cache = CommonMarkCache::default();
+    context.set_theme(egui::ThemePreference::Light);
+    let source = "```rust\nfn main() { let answer = 42; println!(\"hello\"); }\n```";
+    let render = |cache: &mut CommonMarkCache, visible: bool| {
+        let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+            if !visible {
+                ui.set_clip_rect(egui::Rect::NOTHING);
+            }
+            cache.navigation.clear();
+            CommonMarkViewer::new().show(ui, cache, source);
+        });
+        output.textures_delta.clear();
+        cache
+            .navigation
+            .regions
+            .iter()
+            .find(|region| region.galley.text().starts_with("fn main"))
+            .unwrap()
+            .galley
+            .job
+            .sections
+            .iter()
+            .map(|section| section.format.color)
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(render(&mut cache, false).len(), 1);
+    assert!(format!("{cache:?}").contains("worker_started: false"));
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    let light_colors = loop {
+        let colors = render(&mut cache, true);
+        if colors.iter().any(|color| *color != colors[0]) {
+            break colors;
+        }
+        assert!(
+            std::time::Instant::now() < deadline,
+            "highlight worker did not finish"
+        );
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    };
+    context.set_theme(egui::ThemePreference::Dark);
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    loop {
+        let colors = render(&mut cache, true);
+        if colors.len() > 1 && colors != light_colors {
+            break;
+        }
+        assert!(
+            std::time::Instant::now() < deadline,
+            "theme change did not rehighlight"
+        );
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+}

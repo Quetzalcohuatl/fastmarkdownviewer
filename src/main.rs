@@ -4,7 +4,7 @@ use eframe::egui;
 use fast_markdown_viewer::{
     app::{InitialState, ViewerApp},
     cli::{self, Command},
-    fonts, network,
+    fonts, network, platform,
 };
 
 fn main() -> eframe::Result {
@@ -33,7 +33,7 @@ fn main() -> eframe::Result {
             .with_app_id("FastMarkdownViewer")
             .with_inner_size([900.0, 700.0])
             .with_min_inner_size([420.0, 280.0])
-            .with_icon(app_icon()),
+            .with_icon(platform::app_icon()),
         renderer: selected_renderer(),
         persist_window: false,
         persistence_path: None,
@@ -72,32 +72,4 @@ const fn selected_renderer() -> eframe::Renderer {
 #[cfg(all(feature = "renderer-wgpu", not(feature = "renderer-glow")))]
 const fn selected_renderer() -> eframe::Renderer {
     eframe::Renderer::Wgpu
-}
-
-fn app_icon() -> egui::IconData {
-    const SIZE: usize = 32;
-    const SIZE_U32: u32 = 32;
-    let mut rgba = Vec::with_capacity(SIZE * SIZE * 4);
-    for y in 0..SIZE {
-        for x in 0..SIZE {
-            let page = (5..27).contains(&x) && (3..29).contains(&y);
-            let fold = x >= 21 && y < 9 && x - 21 >= 8 - y;
-            let line = (9..24).contains(&x) && matches!(y, 12 | 17 | 22) && (!fold || y >= 12);
-            let color = if line {
-                [31, 41, 55, 255]
-            } else if page && !fold {
-                [243, 244, 246, 255]
-            } else if page {
-                [145, 164, 188, 255]
-            } else {
-                [30, 111, 214, 255]
-            };
-            rgba.extend_from_slice(&color);
-        }
-    }
-    egui::IconData {
-        rgba,
-        width: SIZE_U32,
-        height: SIZE_U32,
-    }
 }

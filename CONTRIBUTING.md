@@ -4,7 +4,7 @@ Thanks for helping keep FastMarkdownViewer small, predictable, and fast.
 
 ## Before opening a change
 
-Please open an issue before adding user-facing scope. v0.1 intentionally excludes editing, export, annotations, search, file watching, history, updates, Mermaid, and syntax highlighting. Fixes, accessibility improvements, compatibility work, tests, and measured performance improvements are welcome.
+Please open an issue before adding user-facing scope. The current scope includes read-only tabs, find, an outline, and lazy syntax highlighting. Editing, export, annotations, file watching, history, updates, and Mermaid remain outside this scope. Fixes, accessibility improvements, compatibility work, tests, and measured performance improvements are welcome.
 
 ## Local checks
 

@@ -1,6 +1,6 @@
 [package]
 name = "fast-markdown-viewer"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 edition = "2024"
 rust-version = "1.95"
 description = "A fast, read-only Markdown viewer"
@@ -25,6 +25,8 @@ egui_extras = { version = "0.36.0", default-features = false, features = ["file"
 egui_commonmark = { version = "0.25.0", default-features = false, features = ["load-images", "pulldown_cmark", "svg"] }
 image = { version = "0.25.10", default-features = false, features = ["gif", "jpeg", "png", "webp"] }
 open = "5.3.2"
+regex = "1.12"
+egui_commonmark_backend = { version = "0.25.0", default-features = false }
 ratex-layout = "0.1.14"
 ratex-parser = "0.1.14"
 ratex-svg = { version = "0.1.14", features = ["embed-fonts"] }
@@ -38,6 +40,7 @@ url = "2.5.7"
 winresource = "0.1.23"
 
 [dev-dependencies]
+ttf-parser = "0.25.1"
 tempfile = "3.23.0"
 
 [profile.release]
@@ -48,6 +51,7 @@ panic = "abort"
 strip = "symbols"
 
 [patch.crates-io]
+egui_commonmark = { path = "vendor/egui_commonmark" }
 egui_commonmark_backend = { path = "vendor/egui_commonmark_backend" }
 
 [lints.rust]

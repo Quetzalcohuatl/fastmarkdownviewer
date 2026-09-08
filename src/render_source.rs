@@ -1,7 +1,4 @@
-/// Normalize fenced blocks for the intentionally plain v0.1 renderer.
-///
-/// Fenced `math` becomes display math; other language identifiers are removed
-/// so no syntax definition is requested.
+/// Convert fenced math to display math while preserving code language hints.
 #[must_use]
 pub fn normalize_for_rendering(source: &str) -> String {
     let mut result = String::with_capacity(source.len());
@@ -44,7 +41,7 @@ pub fn normalize_for_rendering(source: &str) -> String {
             if is_math {
                 result.push_str("$$");
             } else {
-                result.extend(std::iter::repeat_n(fence_char, fence_len));
+                result.push_str(trimmed);
             }
             result.push_str(ending);
             active = Some((fence_char, fence_len, is_math));
@@ -83,10 +80,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn strips_code_language_without_touching_content() {
+    fn preserves_code_language_and_content() {
         assert_eq!(
             normalize_for_rendering("```rust\nfn main() {}\n```\n"),
-            "```\nfn main() {}\n```\n"
+            "```rust\nfn main() {}\n```\n"
         );
     }
 

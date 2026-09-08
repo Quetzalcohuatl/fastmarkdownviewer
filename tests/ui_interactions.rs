@@ -218,6 +218,62 @@ fn control_wheel_zooms_in_and_out() {
 }
 
 #[test]
+fn find_and_heading_shortcuts_toggle_and_release_keyboard_focus() {
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(fixture()));
+    run_frame(&context, &mut app, input(Vec::new()));
+    for expected in [true, false, true, false] {
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![key(egui::Key::F, egui::Modifiers::COMMAND)]),
+        );
+        assert_eq!(app.search_status().is_some(), expected);
+    }
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::PageDown, egui::Modifiers::NONE)]),
+    );
+    assert!(app.document_scroll_offset() > 0.0);
+    for expected in [false, true] {
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![key(egui::Key::H, egui::Modifiers::COMMAND)]),
+        );
+        assert_eq!(app.outline_visible(), expected);
+    }
+}
+
+#[test]
+fn empty_window_explains_find_and_heading_shortcuts() {
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Empty);
+    let mut raw = input(Vec::new());
+    raw.screen_rect = Some(egui::Rect::from_min_size(
+        egui::Pos2::ZERO,
+        egui::vec2(900.0, 700.0),
+    ));
+    let output = run_frame(&context, &mut app, raw);
+    let text = accesskit_update(&output)
+        .nodes
+        .iter()
+        .filter_map(|(_, node)| node.label().or_else(|| node.value()))
+        .collect::<String>();
+    for expected in [
+        "Ctrl+F",
+        "Ctrl+H",
+        "Show / hide Find",
+        "Show / hide headings",
+        "Drag a tab outside",
+    ] {
+        assert!(text.contains(expected), "missing shortcut help: {expected}");
+    }
+}
+
+#[test]
 fn default_fonts_cover_common_unicode_emoji() {
     let context = egui::Context::default();
     fonts::install(&context);
@@ -233,7 +289,7 @@ fn default_fonts_cover_common_unicode_emoji() {
 
     let font = egui::FontId::proportional(16.0);
     for character in ['😀', '🎉', '✅', '❤'] {
-        assert!(context.fonts_mut(|fonts| fonts.glyph_width(&font, character) > 0.0));
+        assert!(has_actual_glyph(&context, &font, character));
     }
 }
 
@@ -321,7 +377,7 @@ fn page_space_home_end_and_arrow_keys_scroll_the_document() {
 }
 
 #[test]
-fn dropping_one_file_loads_it_and_multiple_files_show_an_error() {
+fn dropping_files_opens_tabs_and_deduplicates_paths() {
     let context = egui::Context::default();
     let mut app = ViewerApp::new(InitialState::Empty);
     let path = fixture();
@@ -338,10 +394,8 @@ fn dropping_one_file_loads_it_and_multiple_files_show_an_error() {
     let mut multiple_input = input(Vec::new());
     multiple_input.dropped_files = vec![Arc::new(TestDrop(path.clone())), Arc::new(TestDrop(path))];
     run_frame(&context, &mut app, multiple_input);
-    assert_eq!(
-        app.error_message(),
-        Some("Drop one Markdown file at a time")
-    );
+    assert!(app.error_message().is_none());
+    assert_eq!(app.tab_count(), 1);
 }
 
 #[test]
@@ -549,4 +603,232 @@ fn system_theme_and_common_windows_scale_factors_render_without_panicking() {
         run_frame(&context, &mut app, raw_input);
         assert_eq!(context.theme(), theme);
     }
+}
+
+#[test]
+fn find_searches_rendered_text_and_code_without_stealing_typing_keys() {
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    write!(
+        file,
+        "# Search fixture\n\nHello **world**\n\n{}\n\n```rust\n// hello world\n```\n",
+        "Filler paragraph.\n\n".repeat(70)
+    )
+    .unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
+    run_frame(&context, &mut app, input(Vec::new()));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::F, egui::Modifiers::COMMAND)]),
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![egui::Event::Text("hello world".into())]),
+    );
+    assert_eq!(app.search_status(), Some((1, 2)));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::Enter, egui::Modifiers::NONE)]),
+    );
+    for _ in 0..20 {
+        run_frame(&context, &mut app, input(Vec::new()));
+    }
+    assert_eq!(app.search_status(), Some((2, 2)));
+    assert!(app.document_scroll_offset() > 500.0);
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::Enter, egui::Modifiers::SHIFT)]),
+    );
+    assert_eq!(app.search_status(), Some((1, 2)));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::Escape, egui::Modifiers::NONE)]),
+    );
+    assert_eq!(app.search_status(), None);
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::Home, egui::Modifiers::NONE)]),
+    );
+    assert!(app.document_scroll_offset() < 1.0);
+}
+
+#[test]
+fn tabs_preserve_scroll_and_bad_opens_preserve_documents() {
+    let directory = tempfile::tempdir().unwrap();
+    let first = directory.path().join("first.md");
+    let second = directory.path().join("second.md");
+    std::fs::write(&first, "Paragraph.\n\n".repeat(100)).unwrap();
+    std::fs::write(&second, "# Second").unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(first.clone()));
+    run_frame(&context, &mut app, input(Vec::new()));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::PageDown, egui::Modifiers::NONE)]),
+    );
+    let scroll = app.document_scroll_offset();
+    let mut dropped = input(Vec::new());
+    dropped.dropped_files = vec![
+        Arc::new(TestDrop(second.clone())),
+        Arc::new(TestDrop(directory.path().join("missing.md"))),
+    ];
+    run_frame(&context, &mut app, dropped);
+    assert_eq!(app.tab_count(), 2);
+    assert_eq!(
+        app.document_path(),
+        Some(second.canonicalize().unwrap().as_path())
+    );
+    assert!(app.error_message().is_some());
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::Tab, egui::Modifiers::CTRL)]),
+    );
+    assert_eq!(
+        app.document_path(),
+        Some(first.canonicalize().unwrap().as_path())
+    );
+    assert!((app.document_scroll_offset() - scroll).abs() < 1.0);
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::W, egui::Modifiers::COMMAND)]),
+    );
+    assert_eq!(app.tab_count(), 1);
+    assert_eq!(
+        app.document_path(),
+        Some(second.canonicalize().unwrap().as_path())
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::W, egui::Modifiers::COMMAND)]),
+    );
+    assert_eq!(app.tab_count(), 0);
+    assert!(app.document_path().is_none());
+}
+
+#[test]
+fn outline_navigates_duplicate_and_setext_headings_and_can_be_hidden() {
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    write!(
+        file,
+        "# Duplicate\n\n{}\n\nDuplicate\n=========\n",
+        "Paragraph.\n\n".repeat(80)
+    )
+    .unwrap();
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
+    run_frame(&context, &mut app, input(Vec::new()));
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    let mut headings: Vec<_> = accesskit_update(&output)
+        .nodes
+        .iter()
+        .filter(|(_, node)| {
+            node.role() == egui::accesskit::Role::Button && node.label() == Some("Duplicate")
+        })
+        .map(|(id, node)| (*id, node.bounds().unwrap().y0))
+        .collect();
+    headings.sort_by(|a, b| a.1.total_cmp(&b.1));
+    assert_eq!(headings.len(), 2);
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            headings[1].0,
+            None,
+        )]),
+    );
+    for _ in 0..20 {
+        run_frame(&context, &mut app, input(Vec::new()));
+    }
+    assert!(app.document_scroll_offset() > 500.0);
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(
+            egui::Key::O,
+            egui::Modifiers::COMMAND | egui::Modifiers::SHIFT,
+        )]),
+    );
+    assert!(!app.outline_visible());
+}
+
+#[test]
+#[cfg(target_os = "windows")]
+fn windows_fallbacks_contain_actual_multilingual_glyphs_in_text_and_code() {
+    const SAMPLE: &str = "English 日本語 中文 한국어 العربية עברית 🙂";
+    let context = egui::Context::default();
+    fonts::install(&context);
+    fonts::ensure_for_text(&context, SAMPLE);
+    let mut output = context.run_ui(input(Vec::new()), |ui| {
+        ui.label(SAMPLE);
+    });
+    output.textures_delta.clear();
+    for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+        let font = egui::FontId::new(16.0, family);
+        for character in SAMPLE
+            .chars()
+            .filter(|character| !character.is_whitespace())
+        {
+            assert!(
+                has_actual_glyph(&context, &font, character),
+                "Missing glyph: {character}"
+            );
+        }
+    }
+}
+
+fn has_actual_glyph(context: &egui::Context, font: &egui::FontId, character: char) -> bool {
+    // egui 0.36's has_glyph compares face identity with the replacement face,
+    // giving false negatives for valid characters in that same fallback face.
+    context.fonts_mut(|fonts| {
+        let definitions = fonts.definitions();
+        definitions.families[&font.family].iter().any(|name| {
+            let data = &definitions.font_data[name];
+            ttf_parser::Face::parse(&data.font, data.index)
+                .is_ok_and(|face| face.glyph_index(character).is_some())
+        })
+    })
+}
+
+#[test]
+fn find_reveals_matches_beyond_a_code_blocks_horizontal_viewport() {
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    write!(
+        file,
+        "```text\n{}far_away_match\n```",
+        "padding ".repeat(60)
+    )
+    .unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
+    run_frame(&context, &mut app, input(Vec::new()));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::F, egui::Modifiers::COMMAND)]),
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![egui::Event::Text("far_away_match".into())]),
+    );
+    for _ in 0..30 {
+        run_frame(&context, &mut app, input(Vec::new()));
+    }
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    let highlight = egui::Color32::from_rgba_unmultiplied(255, 140, 0, 100);
+    assert!(output.shapes.iter().any(|shape| {
+        matches!(&shape.shape, egui::Shape::Rect(rect) if rect.fill == highlight && shape.clip_rect.contains_rect(rect.rect))
+    }), "active code match was not revealed inside the horizontal clip");
 }

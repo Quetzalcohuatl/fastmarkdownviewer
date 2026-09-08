@@ -7,3 +7,4 @@ pub mod math;
 pub mod network;
 pub mod platform;
 pub mod render_source;
+mod search;

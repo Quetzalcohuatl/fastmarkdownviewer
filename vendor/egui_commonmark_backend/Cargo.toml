@@ -39,7 +39,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/lampsitter/egui_commonmark"
 
 [features]
-better_syntax_highlighting = ["dep:syntect"]
+better_syntax_highlighting = ["syntect/default-fancy"]
 embedded_image = ["dep:data-url"]
 
 [lib]
@@ -63,7 +63,6 @@ version = "0.13"
 default-features = false
 
 [dependencies.syntect]
-version = "5.0.0"
-features = ["default-fancy"]
-optional = true
+version = "5.3"
+features = ["default-syntaxes", "default-themes", "regex-fancy"]
 default-features = false

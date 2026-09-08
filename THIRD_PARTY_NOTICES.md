@@ -5,8 +5,10 @@ FastMarkdownViewer is built from open-source Rust crates. Exact package names, v
 Major direct components include:
 
 - eframe, egui, and egui_extras — MIT OR Apache-2.0
-- egui_commonmark and egui_commonmark_backend — MIT OR Apache-2.0. The backend 0.25.0 is vendored with the two changes recorded in `vendor/egui_commonmark_backend/FASTMARKDOWNVIEWER-PATCHES.md`; original license files are preserved.
+- egui_commonmark and egui_commonmark_backend — MIT OR Apache-2.0. Both 0.25.0 crates are vendored; patch records are in their `FASTMARKDOWNVIEWER-PATCHES.md` files and original licenses are preserved.
 - pulldown-cmark — MIT
+- syntect — MIT (embedded syntax definitions and themes retain their upstream notices)
+- regex — MIT OR Apache-2.0
 - RaTeX crates — MIT
 - image — MIT OR Apache-2.0
 - url — MIT OR Apache-2.0
@@ -32,3 +34,11 @@ RaTeX stack is updated.
 The packaged notices include the complete project MIT and Apache-2.0 license texts. `cargo deny check licenses` is the release-time source of truth for the complete transitive dependency set.
 
 No Tinta source code is included or adapted. Tinta informed product-positioning research only.
+
+Windows fallback fonts are read from the local operating system and are not redistributed.
+
+Syntect 5.3 uses bincode 1.3.3 for its bundled syntax/theme dumps. RustSec
+RUSTSEC-2025-0141 marks bincode as unmaintained, with no safe upgrade and no
+vulnerability listed. The application only deserializes syntect's embedded
+trusted dumps, not document-supplied binary data. This maintenance exception is
+tracked explicitly in `deny.toml` and must be revisited when syntect changes.

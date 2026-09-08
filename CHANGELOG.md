@@ -4,6 +4,30 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.0-beta.3] - 2026-09-08
+
+### Added
+
+- Ctrl+F find with Unicode-aware case matching, highlighted results, and wrapping next/previous navigation, including horizontal code scrolling.
+- Lazy background syntect code highlighting with bounded per-tab caches.
+- A resizable, toggleable heading outline supporting duplicate and Setext headings.
+- Document tabs with independent scroll/search state, close/cycle shortcuts, and multiple-file drops.
+- Drag tabs outside a window to create a new native window, preserving document state; a tab context-menu action provides the same operation.
+- Ctrl+F toggles Find, Ctrl+H toggles headings, and the empty-window page lists shortcuts.
+- On-demand Windows font fallbacks for East Asian scripts and Arabic/Hebrew glyphs.
+- Automated reading-tool regressions and a real-framebuffer visual-check example.
+
+### Changed
+
+- Opening an invalid file preserves existing documents.
+- Fenced code language hints are preserved; fenced math still renders as math.
+
+### Limitations
+
+- Moving tabs into existing windows and reordering tabs are not yet supported.
+- Native accessibility in detached child windows is limited by the current eframe backend; separate application launches retain accessibility.
+- Complete bidirectional paragraph layout still depends on future renderer support.
+
 ## [0.1.0-beta.2] - 2026-09-07
 
 ### Added

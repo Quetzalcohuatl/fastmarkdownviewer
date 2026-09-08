@@ -22,6 +22,9 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
 - actual fallback font glyph coverage for English, Japanese, Chinese, Korean, Arabic, Hebrew, and emoji;
 - Ctrl+F across formatted text and code, next/previous results, Escape, and horizontal match reveal;
 - tab switching/closing and per-tab scroll preservation;
+- tab reordering while preserving the active document and existing tear-out behavior;
+- F5 / Ctrl+R reload, preserved reading state, and failure recovery;
+- default-on remote images, blocking without a request, individual loading, cached-image blocking, and texture release on tab close;
 - duplicate and Setext outline navigation, Ctrl+H toggling, and empty-window shortcut help;
 - repeated Ctrl+F toggling and keyboard scrolling after Find closes;
 - tab tear-out with preserved state, cancellation, negative monitor origins, repeated child tear-out, and original/last-window close behavior; and
@@ -30,6 +33,8 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
 `tests/render_smoke.rs` separately renders the complete feature matrix. It is
 the focused regression for the v0.1 nested-list crash in
 `egui_commonmark::show_scrollable`.
+
+Image resource unit tests cover LRU payload budgets, worker concurrency permits, and stale worker completions after invalidation. Exploratory performance evidence and its limitations are recorded in [reader-results.md](../experiments/architecture/reader-results.md).
 
 ## Native Windows process smoke test
 

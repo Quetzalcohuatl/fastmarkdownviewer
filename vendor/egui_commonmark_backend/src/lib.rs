@@ -33,6 +33,8 @@ pub use syntect;
 pub type RenderMathFn = dyn Fn(&mut egui::Ui, &str, bool);
 /// Takes [`egui::Ui`] and the html text to be rendered/used
 pub type RenderHtmlFn = dyn Fn(&mut egui::Ui, &str);
+/// Return true when the image was handled (for example, by a blocked-image placeholder).
+pub type ImageGateFn = dyn Fn(&mut egui::Ui, &str, &str) -> bool;
 
 mod highlighting;
 /// Rendered text geometry used by the viewer for find and outline navigation.

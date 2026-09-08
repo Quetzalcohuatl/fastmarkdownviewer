@@ -218,6 +218,12 @@ impl<'f> CommonMarkViewer<'f> {
         self
     }
 
+    /// Intercept images before any texture or network lookup.
+    pub fn image_gate(mut self, gate: Option<&'f egui_commonmark_backend::ImageGateFn>) -> Self {
+        self.options.image_gate = gate;
+        self
+    }
+
     /// Allows custom handling of html. Enabling this will disable plain text rendering
     /// of html blocks. Nodes are included in the provided text
     pub fn render_html_fn(mut self, func: Option<&'f RenderHtmlFn>) -> Self {

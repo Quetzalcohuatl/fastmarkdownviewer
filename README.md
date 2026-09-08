@@ -2,7 +2,7 @@
 
 FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
-> **Stable:** v0.1.0 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
+> **Stable:** v0.1.1 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
 
 ## What v0.1 includes
 
@@ -35,6 +35,7 @@ The installer registers `.md` and `.markdown` under **Open with**. It does not a
 | Shortcut | Action |
 |:--|:--|
 | Ctrl+O | Open a file in a tab; an already-open file activates its tab |
+| F5 / Ctrl+R | Reload the current file, keeping the tab and reading position |
 | Ctrl+W / middle-click tab | Close a tab |
 | Ctrl+Tab / Ctrl+Shift+Tab | Next / previous tab |
 | Ctrl+F | Show and focus Find / hide Find |
@@ -44,7 +45,11 @@ The installer registers `.md` and `.markdown` under **Open with**. It does not a
 
 Search operates on rendered text, including code and link captions, and can span inline formatting. `*` matches zero or more characters on the same line (for example, `hello*world`); `\*` finds a literal asterisk. Other punctuation is literal. Wildcards match as much of the line as possible. Image contents and rendered math are not searchable. The outline supports ATX and Setext headings, including duplicate titles. A failed open leaves existing tabs intact. The empty-window page lists reading shortcuts.
 
-Drag a tab outside the window and release to move it into a new native window, keeping its document, scroll position, search, and caches. Escape cancels a drag. The tab's right-click menu also offers **Move to new window**. Closing the original window keeps detached windows alive; closing the last window exits. Theme and text size are shared within a process; each window has its own outline toggle. Moving tabs into an existing window and tab reordering are not supported yet. Separate command-line launches and Markdown links still start separate processes.
+Drag a tab onto another tab to reorder it, or outside the window to move it into a new native window, keeping its document, scroll position, search, and caches. Escape cancels a drag. The tab's right-click menu also offers **Move to new window**. Closing the original window keeps detached windows alive; closing the last window exits. Theme and text size are shared within a process; each window has its own outline toggle. Moving tabs into an existing window is not supported yet. Separate command-line launches and Markdown links still start separate processes.
+
+Reload reads the file again and refreshes its image and rendering caches. If the file has become unreadable, the current document stays open with an error message.
+
+**Settings → Automatically load remote images** defaults to on. Turn it off to hide remote images and show individual **Load image** buttons. This setting applies to every window in the current session and resets on the next launch. Requests already running may finish. Ordinary links still open only when clicked.
 
 The current eframe backend does not initialize native accessibility for dynamically created child windows. For screen-reader access, open the file through a separate application launch instead of detaching its tab.
 
@@ -65,7 +70,7 @@ Release artifacts are built by GitHub Actions from annotated `vX.Y.Z` tags. See 
 
 ## Privacy and security
 
-Local Markdown is rendered without a browser engine; raw HTML is inert text. Remote images referenced by a document are fetched automatically and asynchronously, with scheme, redirect, response-size, and decoded-size limits. No cookies, credentials, referrer, persistent cache, analytics, or update request is used. Details are in [PRIVACY.md](PRIVACY.md) and security reports belong under [SECURITY.md](SECURITY.md).
+Local Markdown is rendered without a browser engine; raw HTML is inert text. Remote images referenced by a document load asynchronously when enabled, with scheme, redirect, response-size, and decoded-size limits. Image workers and memory caches are bounded and start only when needed. No cookies, credentials, referrer, persistent cache, analytics, or update request is used. Details are in [PRIVACY.md](PRIVACY.md) and security reports belong under [SECURITY.md](SECURITY.md).
 
 ## License
 

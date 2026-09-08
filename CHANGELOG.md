@@ -4,6 +4,15 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-08
+
+- Added a session-wide automatic remote-image setting, enabled by default, with individual Load image buttons when disabled.
+- Bounded image caches and concurrent loading/decoding; release redundant image copies after texture upload and invalidate images when tabs close or reload.
+- Added F5 / Ctrl+R reload, preserving tab identity and reading position; failed reloads preserve the open document.
+- Added tab reordering by dragging onto another tab, retaining native window tear-out.
+- Limit local image inputs to 10 MiB and validate SVG raster dimensions before allocation.
+- Added reproducible exploratory comparisons against v0.1.0, including native process memory and CPU layout measurements.
+
 ## [0.1.0] - 2026-09-08
 
 First stable Windows x64 release, including the beta.3 reading tools and documented limitations.

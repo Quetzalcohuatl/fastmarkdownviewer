@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::HashSet,
     io::{Cursor, Read as _},
     net::{IpAddr, ToSocketAddrs as _},
     sync::{Arc, Mutex, MutexGuard},
@@ -18,6 +18,80 @@ use eframe::egui::{
 use image::{GenericImageView as _, ImageFormat, ImageReader, Limits};
 use url::{Host, Url};
 
+mod resources;
+use resources::{Cache, Cost, Permit, Textures};
+
+#[derive(Clone)]
+struct ImagePolicy {
+    automatic: bool,
+    approvals: HashSet<String>,
+}
+impl Default for ImagePolicy {
+    fn default() -> Self {
+        Self {
+            automatic: true,
+            approvals: HashSet::new(),
+        }
+    }
+}
+fn remote(uri: &str) -> bool {
+    uri.get(..7)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case("http://"))
+        || uri
+            .get(..8)
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case("https://"))
+}
+fn allowed(context: &egui::Context, uri: &str) -> bool {
+    if !remote(uri) {
+        return true;
+    }
+    context.data_mut(|data| {
+        let policy =
+            data.get_temp_mut_or_default::<ImagePolicy>(egui::Id::new("remote image policy"));
+        policy.automatic || policy.approvals.contains(uri)
+    })
+}
+#[must_use]
+pub fn automatic_images(context: &egui::Context) -> bool {
+    context.data_mut(|data| {
+        data.get_temp_mut_or_default::<ImagePolicy>(egui::Id::new("remote image policy"))
+            .automatic
+    })
+}
+pub fn set_automatic_images(context: &egui::Context, automatic: bool) {
+    context.data_mut(|data| {
+        let policy =
+            data.get_temp_mut_or_default::<ImagePolicy>(egui::Id::new("remote image policy"));
+        policy.automatic = automatic;
+        policy.approvals.clear();
+    });
+    let viewports = context.input(|input| input.raw.viewports.keys().copied().collect::<Vec<_>>());
+    for id in viewports {
+        context.request_repaint_of(id);
+    }
+}
+pub fn image_placeholder(ui: &mut egui::Ui, uri: &str, alt: &str) -> bool {
+    if allowed(ui.ctx(), uri) {
+        return false;
+    }
+    ui.push_id(uri, |ui| {
+        ui.horizontal_wrapped(|ui| {
+            ui.weak(if alt.is_empty() { "Remote image" } else { alt });
+            if ui.button("Load image").on_hover_text(uri).clicked() {
+                ui.ctx().data_mut(|data| {
+                    data.get_temp_mut_or_default::<ImagePolicy>(egui::Id::new(
+                        "remote image policy",
+                    ))
+                    .approvals
+                    .insert(uri.to_owned());
+                });
+                ui.ctx().request_repaint();
+            }
+        });
+    });
+    true
+}
+
 pub const MAX_REMOTE_BYTES: usize = 10 * 1024 * 1024;
 pub const MAX_DECODED_PIXELS: u64 = 40_000_000;
 const MAX_REDIRECTS: usize = 5;
@@ -29,10 +103,23 @@ struct RemoteFile {
 }
 
 type RemoteEntry = Poll<Result<RemoteFile, String>>;
+impl Cost for RemoteEntry {
+    const LIMIT: usize = 32 * 1024 * 1024;
+    fn bytes(&self) -> usize {
+        match self {
+            Poll::Ready(Ok(file)) => file.bytes.len(),
+            Poll::Ready(Err(error)) => error.len(),
+            Poll::Pending => 0,
+        }
+    }
+    fn pending(&self) -> bool {
+        self.is_pending()
+    }
+}
 
 #[derive(Default)]
 pub struct LocalBytesLoader {
-    cache: Arc<Mutex<HashMap<String, RemoteEntry>>>,
+    cache: Arc<Mutex<Cache<String, RemoteEntry>>>,
 }
 
 impl LocalBytesLoader {
@@ -56,23 +143,32 @@ impl BytesLoader for LocalBytesLoader {
             return remote_poll(entry);
         }
 
-        lock(&self.cache).insert(uri.to_owned(), Poll::Pending);
+        let Some(permit) = Permit::acquire(false) else {
+            context.request_repaint_after(Duration::from_millis(50));
+            return Ok(BytesPoll::Pending { size: None });
+        };
+        let ticket = lock(&self.cache).insert(uri.to_owned(), Poll::Pending);
         let cache = Arc::clone(&self.cache);
+        let viewport = context.viewport_id();
         let context = context.clone();
         let key = uri.to_owned();
         thread::Builder::new()
             .name("FastMarkdownViewer local image".to_owned())
             .spawn(move || {
-                let result = std::fs::read(&path)
+                let _permit = permit;
+                let result = read_local_image(&path)
                     .map(|bytes| RemoteFile {
                         bytes: bytes.into(),
                         mime: mime_from_path(&path),
                     })
                     .map_err(|error| format!("could not read local image: {error}"));
-                lock(&cache).insert(key, Poll::Ready(result));
-                context.request_repaint();
+                lock(&cache).complete(key, ticket, Poll::Ready(result));
+                context.request_repaint_of(viewport);
             })
-            .map_err(|error| LoadError::Loading(error.to_string()))?;
+            .map_err(|error| {
+                lock(&self.cache).remove(uri);
+                LoadError::Loading(error.to_string())
+            })?;
         Ok(BytesPoll::Pending { size: None })
     }
 
@@ -115,9 +211,20 @@ fn mime_from_path(path: &std::path::Path) -> Option<String> {
     )
 }
 
+fn read_local_image(path: &std::path::Path) -> std::io::Result<Vec<u8>> {
+    let mut bytes = Vec::new();
+    std::fs::File::open(path)?
+        .take((MAX_REMOTE_BYTES + 1) as u64)
+        .read_to_end(&mut bytes)?;
+    if bytes.len() > MAX_REMOTE_BYTES {
+        return Err(std::io::Error::other("local image is larger than 10 MiB"));
+    }
+    Ok(bytes)
+}
+
 #[derive(Default)]
 pub struct SafeBytesLoader {
-    cache: Arc<Mutex<HashMap<String, RemoteEntry>>>,
+    cache: Arc<Mutex<Cache<String, RemoteEntry>>>,
 }
 
 impl SafeBytesLoader {
@@ -138,22 +245,34 @@ impl BytesLoader for SafeBytesLoader {
             Err(error) => return Err(LoadError::Loading(error)),
         };
 
+        if !allowed(context, uri) {
+            return Err(LoadError::Loading("Remote image loading is off".into()));
+        }
         if let Some(entry) = lock(&self.cache).get(uri).cloned() {
             return remote_poll(entry);
         }
 
-        lock(&self.cache).insert(uri.to_owned(), Poll::Pending);
+        let Some(permit) = Permit::acquire(false) else {
+            context.request_repaint_after(Duration::from_millis(50));
+            return Ok(BytesPoll::Pending { size: None });
+        };
+        let ticket = lock(&self.cache).insert(uri.to_owned(), Poll::Pending);
         let cache = Arc::clone(&self.cache);
+        let viewport = context.viewport_id();
         let context = context.clone();
         let key = uri.to_owned();
         thread::Builder::new()
             .name("FastMarkdownViewer image download".to_owned())
             .spawn(move || {
+                let _permit = permit;
                 let result = fetch_remote(url);
-                lock(&cache).insert(key, Poll::Ready(result));
-                context.request_repaint();
+                lock(&cache).complete(key, ticket, Poll::Ready(result));
+                context.request_repaint_of(viewport);
             })
-            .map_err(|error| LoadError::Loading(error.to_string()))?;
+            .map_err(|error| {
+                lock(&self.cache).remove(uri);
+                LoadError::Loading(error.to_string())
+            })?;
         Ok(BytesPoll::Pending { size: None })
     }
 
@@ -342,10 +461,23 @@ enum DecodedEntry {
     Ready(Arc<ColorImage>),
     Failed(String),
 }
+impl Cost for DecodedEntry {
+    const LIMIT: usize = 192 * 1024 * 1024;
+    fn bytes(&self) -> usize {
+        match self {
+            Self::Ready(image) => image.pixels.len() * 4,
+            Self::Failed(error) => error.len(),
+            Self::Pending => 0,
+        }
+    }
+    fn pending(&self) -> bool {
+        matches!(self, Self::Pending)
+    }
+}
 
 #[derive(Default)]
 pub struct SafeImageLoader {
-    cache: Arc<Mutex<HashMap<(String, SizeHint), DecodedEntry>>>,
+    cache: Arc<Mutex<Cache<(String, SizeHint), DecodedEntry>>>,
 }
 
 impl SafeImageLoader {
@@ -367,20 +499,30 @@ impl ImageLoader for SafeImageLoader {
         match context.try_load_bytes(uri) {
             Ok(BytesPoll::Pending { size }) => Ok(ImagePoll::Pending { size }),
             Ok(BytesPoll::Ready { bytes, mime, .. }) => {
-                lock(&self.cache).insert(key.clone(), DecodedEntry::Pending);
+                let Some(permit) = Permit::acquire(true) else {
+                    context.request_repaint_after(Duration::from_millis(50));
+                    return Ok(ImagePoll::Pending { size: None });
+                };
+                let ticket = lock(&self.cache).insert(key.clone(), DecodedEntry::Pending);
+                let pending_key = key.clone();
                 let cache = Arc::clone(&self.cache);
+                let viewport = context.viewport_id();
                 let context = context.clone();
                 thread::Builder::new()
                     .name("FastMarkdownViewer image decode".to_owned())
                     .spawn(move || {
+                        let _permit = permit;
                         let result = decode_image(&key.0, &bytes, mime.as_deref(), key.1)
                             .map_or_else(DecodedEntry::Failed, |image| {
                                 DecodedEntry::Ready(Arc::new(image))
                             });
-                        lock(&cache).insert(key, result);
-                        context.request_repaint();
+                        lock(&cache).complete(key, ticket, result);
+                        context.request_repaint_of(viewport);
                     })
-                    .map_err(|error| LoadError::Loading(error.to_string()))?;
+                    .map_err(|error| {
+                        lock(&self.cache).remove(&pending_key);
+                        LoadError::Loading(error.to_string())
+                    })?;
                 Ok(ImagePoll::Pending { size: None })
             }
             Err(error) => Err(error),
@@ -428,13 +570,7 @@ fn decode_image(
     size_hint: SizeHint,
 ) -> Result<ColorImage, String> {
     if is_svg(uri, mime, bytes) {
-        let svg_options = resvg::usvg::Options::default();
-        let image = egui_extras::image::load_svg_bytes_with_size(bytes, size_hint, &svg_options)?;
-        enforce_pixel_limit(
-            u64::try_from(image.size[0]).map_err(|error| error.to_string())?,
-            u64::try_from(image.size[1]).map_err(|error| error.to_string())?,
-        )?;
-        return Ok(image);
+        return decode_svg(bytes, size_hint);
     }
 
     let format = image::guess_format(bytes).map_err(|error| error.to_string())?;
@@ -466,6 +602,50 @@ fn decode_image(
         ],
         rgba.as_raw(),
     ))
+}
+
+// Check SVG dimensions before allocating its raster buffer. Match egui_extras' sizing.
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss
+)]
+fn decode_svg(bytes: &[u8], hint: SizeHint) -> Result<ColorImage, String> {
+    let tree = resvg::usvg::Tree::from_data(bytes, &resvg::usvg::Options::default())
+        .map_err(|error| error.to_string())?;
+    let source = egui::vec2(tree.size().width(), tree.size().height());
+    let size = match hint {
+        SizeHint::Size {
+            width,
+            height,
+            maintain_aspect_ratio: true,
+        } => source * (width as f32 / source.x).min(height as f32 / source.y),
+        SizeHint::Size {
+            width,
+            height,
+            maintain_aspect_ratio: false,
+        } => egui::vec2(width as f32, height as f32),
+        SizeHint::Width(width) => source * (width as f32 / source.x),
+        SizeHint::Height(height) => source * (height as f32 / source.y),
+        SizeHint::Scale(scale) => source * scale.into_inner(),
+    }
+    .round();
+    if !size.is_finite() || size.x < 1.0 || size.y < 1.0 {
+        return Err("invalid SVG dimensions".into());
+    }
+    enforce_pixel_limit(size.x as u64, size.y as u64)?;
+    let (width, height) = (size.x as u32, size.y as u32);
+    let mut pixels = resvg::tiny_skia::Pixmap::new(width, height)
+        .ok_or_else(|| "could not allocate SVG pixels".to_owned())?;
+    resvg::render(
+        &tree,
+        resvg::usvg::Transform::from_scale(size.x / source.x, size.y / source.y),
+        &mut pixels.as_mut(),
+    );
+    Ok(
+        ColorImage::from_rgba_premultiplied([width as usize, height as usize], pixels.data())
+            .with_source_size(source),
+    )
 }
 
 fn is_svg(uri: &str, mime: Option<&str>, bytes: &[u8]) -> bool {
@@ -517,6 +697,9 @@ pub fn install(context: &egui::Context) {
     if !context.is_loader_installed(LocalBytesLoader::ID) {
         context.add_bytes_loader(Arc::new(LocalBytesLoader::default()));
     }
+    if !context.is_loader_installed("FastMarkdownViewer bounded textures") {
+        context.add_texture_loader(Arc::new(Textures::default()));
+    }
 }
 
 #[cfg(test)]
@@ -548,5 +731,19 @@ mod tests {
     fn enforces_decoded_pixel_limit() {
         assert!(enforce_pixel_limit(8_000, 5_000).is_ok());
         assert!(enforce_pixel_limit(8_001, 5_000).is_err());
+    }
+
+    #[test]
+    fn svg_checks_raster_size_and_preserves_source_dimensions() {
+        let svg = br#"<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><rect width="80" height="40" fill="red"/></svg>"#;
+        let image = decode_svg(svg, SizeHint::Width(160)).unwrap();
+        assert_eq!(image.size, [160, 80]);
+        assert_eq!(image.source_size, egui::vec2(80.0, 40.0));
+        assert_eq!(image.pixels[0], egui::Color32::RED);
+        assert!(
+            decode_svg(svg, SizeHint::Width(100_000))
+                .unwrap_err()
+                .contains("40 megapixels")
+        );
     }
 }

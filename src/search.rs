@@ -3,6 +3,7 @@ use egui_commonmark_backend::navigation::Navigation;
 use std::ops::Range;
 
 #[derive(Default)]
+#[allow(clippy::struct_excessive_bools)] // Independent UI preferences and navigation flags.
 pub struct Search {
     pub open: bool,
     pub query: String,
@@ -11,9 +12,16 @@ pub struct Search {
     pub selected: usize,
     pub jump: bool,
     previous: Option<(String, bool)>,
+    preserve_position: bool,
 }
 
 impl Search {
+    pub fn invalidate(&mut self) {
+        self.previous = None;
+        self.matches.clear();
+        self.selected = 0;
+        self.preserve_position = true;
+    }
     pub fn current(&self) -> usize {
         if self.matches.is_empty() {
             0
@@ -38,7 +46,7 @@ impl Search {
         if self.previous.as_ref() != Some(&signature) {
             self.matches = find(&navigation.text, &self.query, self.case_sensitive);
             self.selected = 0;
-            self.jump = true;
+            self.jump = !std::mem::take(&mut self.preserve_position);
             self.previous = Some(signature);
             ui.ctx().request_repaint();
         }

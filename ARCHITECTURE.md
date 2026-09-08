@@ -9,7 +9,7 @@ FastMarkdownViewer separates document policy from its UI so the same core can se
 3. `render_source` turns fenced `math` into display math and preserves other code language hints.
 4. `egui_commonmark` owns the pulldown-cmark render parse. The stable renderer stays inside an egui scroll area to preserve nested parser state. The vendored parser records headings and, while Find is open, text geometry.
 5. `math` starts one background RaTeX worker only when visible math is requested and caches theme/DPI-specific SVG in memory.
-6. `network` provides memory-only local/remote byte and image loaders with redirect, private-network, byte, format, and pixel limits.
+6. `network` provides memory-only local/remote byte, decoded-image, and texture loaders with redirect, private-network, byte, format, and pixel limits. LRU caches bound retained payloads, and lazy worker permits cap I/O at four jobs and decoding at two. Per-entry tickets prevent stale completions from restoring invalidated images. A shared context policy and renderer image gate implement optional automatic remote loading, including placeholders for cached images.
 7. The backend starts a bounded syntect worker lazily for visible fenced code, with shared immutable syntax/theme definitions and per-tab layout caches.
 8. `links` classifies every click before `platform` opens a browser or starts another viewer process.
 

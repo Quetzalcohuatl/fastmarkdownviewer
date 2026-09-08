@@ -1,26 +1,13 @@
-FastMarkdownViewer is a small Windows x64 Markdown reader focused on the core
-double-click, open, render, and scroll experience.
+FastMarkdownViewer v0.1.1 adds remote-image controls and reading conveniences without adding dependencies.
 
-The first stable release includes document tabs with drag-out native windows, Ctrl+F search with
-highlighted matches and `*` wildcards, lazy syntect code highlighting, a Ctrl+H heading sidebar,
-and on-demand Windows font fallbacks for multilingual documents. Ctrl+F toggles
-Find open and closed, and the empty-window page lists keyboard shortcuts.
-Detached tabs retain their reading position and search state. Theme and text size
-are shared by windows within a process.
+- **Settings → Automatically load remote images** defaults to on. Turn it off for individual **Load image** buttons. The setting applies to all windows in the session; requests already running may finish. Ordinary links remain click-only.
+- Image caches and concurrent loading/decoding are bounded. Redundant image copies are released after texture upload; closing or reloading a tab invalidates its images.
+- **F5 / Ctrl+R** reloads the current file while preserving the tab and reading position. A failed reload keeps the current document open.
+- Drag a tab onto another tab to reorder it. Dragging outside the window still creates an independent native window.
+- Local image inputs now have a 10 MiB limit, and SVG raster dimensions are checked before allocation.
 
-In Find, `*` matches zero or more characters on the same line; use `\*` for a
-literal asterisk. Other punctuation remains literal.
+All 52 tests pass. The repository includes exploratory comparisons against v0.1.0 with raw samples: startup proxies are similar and the local-image fixture uses less memory. These are small same-machine comparisons, not first-content timing or broad performance claims. Idle CPU and large-document layout remain performance follow-ups.
 
-Moving tabs into existing windows and reordering tabs are not supported yet.
-The current backend does not initialize native accessibility in detached child
-windows; use a separate application launch for screen-reader access.
-Emoji are monochrome; full bidirectional paragraph layout remains limited by the
-renderer, and glyph coverage depends on installed Windows fonts.
+Download the portable EXE, portable ZIP, or per-user installer below. The executable and installer remain unsigned. Verify downloads with `SHA256SUMS.txt` and GitHub build-provenance attestations.
 
-The executable and installer are currently unsigned, so Windows SmartScreen may
-warn. Verify downloads with `SHA256SUMS.txt` and the GitHub build-provenance
-attestation.
-
-Remote images make asynchronous HTTP(S) requests under the policy documented in
-`PRIVACY.md`. There is no updater, file watcher, editor, telemetry, or persistent
-settings database.
+Existing limitations: tabs cannot move into an existing window; detached child windows have limited native accessibility (use a separate launch for screen-reader access). Emoji are monochrome, full bidirectional layout remains limited, and glyph coverage depends on installed fonts. There is no editor, watcher, updater, telemetry, or persistent settings database. See `PRIVACY.md` for network behavior.

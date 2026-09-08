@@ -33,6 +33,7 @@ pub struct CommonMarkOptions<'f> {
     pub mutable: bool,
     pub math_fn: Option<&'f crate::RenderMathFn>,
     pub html_fn: Option<&'f crate::RenderHtmlFn>,
+    pub image_gate: Option<&'f crate::ImageGateFn>,
     /// Whether to enable scrolling to headings by their ID.
     /// To give a heading an ID, use the syntax `# Heading {#myheadingid}`. Then links to `#myheadingid` e.g. `[click me!](#myheadingid)` will scroll to that heading.
     pub enable_scroll_to_heading: bool,
@@ -79,6 +80,7 @@ impl Default for CommonMarkOptions<'_> {
             mutable: false,
             math_fn: None,
             html_fn: None,
+            image_gate: None,
             enable_scroll_to_heading: false,
         }
     }
@@ -271,6 +273,9 @@ impl Image {
             .iter()
             .map(egui::RichText::text)
             .collect::<String>();
+        if options.image_gate.is_some_and(|gate| gate(ui, &self.uri, &accessible_alt_text)) {
+            return;
+        }
         let response = ui.add(
             egui::Image::from_uri(&self.uri)
                 .fit_to_original_size(1.0)

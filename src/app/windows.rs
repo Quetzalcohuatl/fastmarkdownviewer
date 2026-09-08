@@ -156,6 +156,11 @@ impl ViewerApp {
                 // egui's root must exist until the process exits. Hide it while independent
                 // document windows remain, and release its documents immediately.
                 self.root_closed = true;
+                for tab in &self.root.tabs {
+                    for uri in tab.image_uris.lock().expect("image references lock").iter() {
+                        context.forget_image(uri);
+                    }
+                }
                 self.root.tabs.clear();
                 context.send_viewport_cmd(egui::ViewportCommand::CancelClose);
                 context.send_viewport_cmd(egui::ViewportCommand::Visible(false));
@@ -194,6 +199,11 @@ impl ViewerApp {
                     window.show(ui);
                 }
                 if native_close || window.close_requested {
+                    for tab in &window.tabs {
+                        for uri in tab.image_uris.lock().expect("image references lock").iter() {
+                            ui.ctx().forget_image(uri);
+                        }
+                    }
                     window.close_requested = true;
                     pending
                         .lock()

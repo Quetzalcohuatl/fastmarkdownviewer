@@ -1,4 +1,5 @@
 use std::{
+    collections::HashSet,
     io,
     path::{Path, PathBuf},
     sync::{
@@ -96,6 +97,7 @@ struct DocumentTab {
     search: crate::search::Search,
     heading_target: Option<usize>,
     fonts_checked: bool,
+    image_uris: Arc<Mutex<HashSet<String>>>,
 }
 
 #[derive(Clone, Copy)]
@@ -213,6 +215,7 @@ impl ViewerWindow {
                     search: crate::search::Search::default(),
                     heading_target: None,
                     fonts_checked: false,
+                    image_uris: Arc::default(),
                 });
                 self.active = self.tabs.len() - 1;
                 self.error = None;
@@ -221,8 +224,38 @@ impl ViewerWindow {
         }
     }
 
-    fn close_tab(&mut self, index: usize) {
-        self.remove_tab(index);
+    fn close_tab(&mut self, index: usize, context: &egui::Context) {
+        let tab = self.remove_tab(index);
+        for uri in tab.image_uris.lock().expect("image references lock").iter() {
+            context.forget_image(uri);
+        }
+    }
+
+    fn reload(&mut self, context: &egui::Context) {
+        let Some(tab) = self.tabs.get_mut(self.active) else {
+            return;
+        };
+        match Document::load(&tab.document.path) {
+            Ok(document) => {
+                for uri in tab
+                    .image_uris
+                    .lock()
+                    .expect("image references lock")
+                    .drain()
+                {
+                    context.forget_image(&uri);
+                }
+                tab.document = document;
+                tab.markdown_cache = CommonMarkCache::default();
+                tab.math = MathRenderer::default();
+                tab.heading_target = None;
+                tab.fonts_checked = false;
+                tab.search.invalidate();
+                self.error = None;
+                context.request_repaint();
+            }
+            Err(error) => self.error = Some(format!("Could not reload: {error}")),
+        }
     }
 
     fn remove_tab(&mut self, index: usize) -> DocumentTab {
@@ -313,6 +346,7 @@ impl ViewerWindow {
                     ("Enter / Shift+Enter", "Next / previous match"),
                     ("Ctrl+Tab / Ctrl+Shift+Tab", "Next / previous tab"),
                     ("Ctrl+W", "Close tab"),
+                    ("F5 / Ctrl+R", "Reload file"),
                     ("Ctrl+mouse wheel", "Zoom text"),
                 ] {
                     ui.label(format!("{shortcut}   —   {action}"));
@@ -337,10 +371,14 @@ impl ViewerWindow {
                     )
                     .clicked()
                 {
-                    self.close_tab(self.active);
+                    self.close_tab(self.active, ui.ctx());
                     ui.close();
                 }
                 ui.separator();
+                if ui.add_enabled(!self.tabs.is_empty(), egui::Button::new("Reload    F5 / Ctrl+R")).clicked() {
+                    self.reload(ui.ctx());
+                    ui.close();
+                }
                 if ui.button("Close window").clicked() {
                     self.close_requested = true;
                 }
@@ -354,6 +392,10 @@ impl ViewerWindow {
             }
             ui.menu_button("Settings", |ui| {
                 ui.checkbox(&mut self.show_outline, "Outline sidebar    Ctrl+H");
+                let mut automatic = crate::network::automatic_images(ui.ctx());
+                if ui.checkbox(&mut automatic, "Automatically load remote images").on_hover_text("Shared by this session's windows. Turning off hides remote images and stops new automatic requests; requests already running may finish.").changed() {
+                    crate::network::set_automatic_images(ui.ctx(), automatic);
+                }
                 ui.separator();
                 ui.label("Theme");
                 let mut theme = *self.theme.lock().expect("appearance lock");
@@ -400,7 +442,13 @@ impl ViewerWindow {
         if context.input_mut(|input| input.consume_key(egui::Modifiers::COMMAND, egui::Key::W))
             && !self.tabs.is_empty()
         {
-            self.close_tab(self.active);
+            self.close_tab(self.active, context);
+        }
+        if context.input_mut(|input| {
+            input.consume_key(egui::Modifiers::NONE, egui::Key::F5)
+                || input.consume_key(egui::Modifiers::COMMAND, egui::Key::R)
+        }) {
+            self.reload(context);
         }
         if context.input_mut(|input| {
             input.consume_key(egui::Modifiers::COMMAND, egui::Key::H)
@@ -467,6 +515,7 @@ impl ViewerWindow {
         }
         let mut close = None;
         let mut detach = None;
+        let mut tab_rects = Vec::new();
         egui::ScrollArea::horizontal()
             .id_salt("tabs")
             .show(ui, |ui| {
@@ -477,7 +526,8 @@ impl ViewerWindow {
                                 .add(egui::Button::selectable(index == self.active, &tab.document.title)
                                     .sense(egui::Sense::click_and_drag()))
                                 .on_hover_cursor(egui::CursorIcon::Grab)
-                                .on_hover_text(format!("{}\nDrag outside this window to move the tab into a new window.", tab.document.path.display()));
+                                .on_hover_text(format!("{}\nDrag onto another tab to reorder, or outside this window to create a new window.", tab.document.path.display()));
+                            tab_rects.push((tab.id, response.rect));
                             if response.is_pointer_button_down_on()
                                 && ui.input(|input| input.pointer.primary_down())
                                 && self.tab_drag.is_none()
@@ -518,17 +568,17 @@ impl ViewerWindow {
                 });
             });
         if let Some(index) = close {
-            self.close_tab(index);
+            self.close_tab(index, ui.ctx());
             self.tab_drag = None;
         }
         if let Some(tab_id) = detach {
             self.request_detach(ui.ctx(), tab_id, None);
         }
-        self.finish_tab_drag(ui.ctx());
+        self.finish_tab_drag(ui.ctx(), &tab_rects);
         ui.separator();
     }
 
-    fn finish_tab_drag(&mut self, context: &egui::Context) {
+    fn finish_tab_drag(&mut self, context: &egui::Context, tab_rects: &[(u64, egui::Rect)]) {
         if self.drag_cancelled {
             if !context.input(|input| input.pointer.primary_down()) {
                 self.drag_cancelled = false;
@@ -567,6 +617,22 @@ impl ViewerWindow {
                 && !bounds.expand(8.0).contains(drag.latest)
             {
                 self.request_detach(context, drag.tab_id, Some(drag.latest));
+            } else if drag.latest.distance(drag.origin) >= 12.0
+                && let Some((target, _)) = tab_rects
+                    .iter()
+                    .find(|(_, rect)| rect.contains(drag.latest))
+                && let Some(from) = self.tabs.iter().position(|tab| tab.id == drag.tab_id)
+                && let Some(to) = self.tabs.iter().position(|tab| tab.id == *target)
+            {
+                let active_id = self.tabs[self.active].id;
+                let tab = self.tabs.remove(from);
+                self.tabs.insert(to, tab);
+                self.active = self
+                    .tabs
+                    .iter()
+                    .position(|tab| tab.id == active_id)
+                    .unwrap();
+                context.request_repaint();
             }
         } else if !down {
             self.tab_drag = None;
@@ -852,6 +918,14 @@ impl DocumentTab {
         let render_math = move |ui: &mut egui::Ui, formula: &str, inline: bool| {
             math.show(ui, formula, inline);
         };
+        let references = self.image_uris.clone();
+        let image_gate = move |ui: &mut egui::Ui, uri: &str, alt: &str| {
+            references
+                .lock()
+                .expect("image references lock")
+                .insert(uri.to_owned());
+            crate::network::image_placeholder(ui, uri, alt)
+        };
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let max_image_width = ui.available_width().max(1.0) as usize;
         CommonMarkViewer::new()
@@ -860,6 +934,7 @@ impl DocumentTab {
             .show_alt_text_on_hover(true)
             .enable_scroll_to_heading(true)
             .render_math_fn(Some(&render_math))
+            .image_gate(Some(&image_gate))
             .show(ui, &mut self.markdown_cache, &document.source);
         let navigation = &mut self.markdown_cache.navigation;
         navigation.scroll_target = None;

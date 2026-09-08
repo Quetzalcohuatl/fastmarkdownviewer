@@ -247,3 +247,73 @@ fn detached_windows_can_tear_out_again_with_unique_ids() {
     let second = app.detached.keys().find(|id| **id != first).unwrap();
     assert_eq!(app.detached[second].state.lock().unwrap().tab_count(), 1);
 }
+
+#[test]
+fn dragging_tabs_reorders_without_changing_active_document_or_tear_out() {
+    let (directory, context, mut app, _) = fixture();
+    let second = directory.path().join("second.md");
+    std::fs::write(&second, "# Second").unwrap();
+    app.root.load(&second);
+    let output = frame(&context, &mut app, input(Vec::new()));
+    let first = tab_center(&output, "tear-out.md");
+    let second_center = tab_center(&output, "second.md");
+    let active_id = app.root.tabs[app.root.active].id;
+    drag(&context, &mut app, first, second_center);
+    assert_eq!(app.root.tabs[0].document.title, "second.md");
+    assert_eq!(app.root.tabs[1].document.title, "tear-out.md");
+    assert_eq!(app.root.tabs[app.root.active].id, active_id);
+    assert_eq!(app.detached_window_count(), 0);
+    let output = frame(&context, &mut app, input(Vec::new()));
+    let moved = tab_center(&output, "tear-out.md");
+    drag(&context, &mut app, moved, egui::pos2(920.0, 150.0));
+    assert_eq!(app.detached_window_count(), 1);
+    assert_eq!(app.root.tabs[0].document.title, "second.md");
+}
+
+#[test]
+fn reload_keeps_tab_and_reading_state_and_failed_reload_keeps_document() {
+    let (directory, context, mut app, _) = fixture();
+    let path = directory.path().join("tear-out.md");
+    frame(
+        &context,
+        &mut app,
+        input(vec![egui::Event::Key {
+            key: egui::Key::PageDown,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::NONE,
+        }]),
+    );
+    let scroll = app.document_scroll_offset();
+    let id = app.root.tabs[0].id;
+    std::fs::write(
+        &path,
+        format!("# Updated\n\n{}", "New paragraph.\n\n".repeat(120)),
+    )
+    .unwrap();
+    for (key, modifiers) in [
+        (egui::Key::F5, egui::Modifiers::NONE),
+        (egui::Key::R, egui::Modifiers::COMMAND),
+    ] {
+        frame(
+            &context,
+            &mut app,
+            input(vec![egui::Event::Key {
+                key,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers,
+            }]),
+        );
+        assert!(app.root.tabs[0].document.source.contains("Updated"));
+        assert_eq!(app.tab_count(), 1);
+        assert_eq!(app.root.tabs[0].id, id);
+        assert!((app.document_scroll_offset() - scroll).abs() < 2.0);
+    }
+    std::fs::write(&path, [0xff]).unwrap();
+    app.root.reload(&context);
+    assert!(app.error_message().unwrap().contains("Could not reload"));
+    assert!(app.root.tabs[0].document.source.contains("Updated"));
+}

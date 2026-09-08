@@ -4,7 +4,11 @@ Startup claims are based on fresh-process launches, never an in-process loop or 
 
 ## Fixed inputs
 
-Run `experiments/architecture/fixtures/generate.ps1` to generate deterministic documents of approximately 5 KiB, 100 KiB, and 2 MiB. The medium fixture includes GFM, math, local images, and remote-image placeholders. The large fixture stresses layout and virtualization.
+Run `experiments/architecture/fixtures/generate.ps1` to generate deterministic documents of approximately 5 KiB, 100 KiB, and 2 MiB. These repeat GFM, math, code, and multilingual text; despite its historical filename, the medium fixture contains no images. A separate `images.md` fixture references 24 generated local SVGs. The large fixture stresses full-document layout.
+
+## Exploratory reader comparisons
+
+[The v0.1.0 comparison](../experiments/architecture/reader-results.md) records five native launches and three CPU-layout/lifecycle runs per variant and fixture, with raw CSVs. Use `experiments/architecture/compare-reader.ps1` with optimized viewer binaries and matching `reading_benchmark` examples. This small same-machine comparison helps catch regressions; it does not replace the formal backend selection protocol below. Native window discovery is a startup proxy, and headless layout excludes GPU work and presentation.
 
 ## Machine record
 

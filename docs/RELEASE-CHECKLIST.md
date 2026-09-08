@@ -47,6 +47,21 @@ benchmarking do not block v0.1.
 - Release publication, installer verification, checksums, and provenance are
   additionally gated by the annotated-tag GitHub workflow.
 
+## v0.1.1 candidate validation — 2026-09-08
+
+- Version 0.1.1 passes formatting, Clippy, and all 52 locked tests. Dependency
+  policy checks passed for this feature set; only the application version changed
+  in the lockfile for release.
+- The optimized portable binary passes the native Windows open/scroll/two-window
+  smoke test. Local packaging and checksums pass, followed by a fresh per-user
+  install, native smoke test, Open-with registration checks, and uninstall.
+- Local installer validation used Inno Setup 6.7.3; the GitHub release workflow
+  uses pinned 6.7.1 and independently verifies its exact published installer.
+- Remote image controls, cache lifetime, reload, and tab reordering are covered
+  by production-UI and resource tests. Exploratory performance evidence is in
+  `experiments/architecture/reader-results.md`.
+- Publication and build provenance are gated by the annotated `v0.1.1` tag workflow.
+
 Startup benchmarking, Windows ARM64, macOS/Linux packages, code signing,
 package-manager listings, high-contrast design, and safe viewport
 virtualization are valuable follow-ups. They are not required for the small,

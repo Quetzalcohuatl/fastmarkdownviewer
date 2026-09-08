@@ -832,3 +832,104 @@ fn find_reveals_matches_beyond_a_code_blocks_horizontal_viewport() {
         matches!(&shape.shape, egui::Shape::Rect(rect) if rect.fill == highlight && shape.clip_rect.contains_rect(rect.rect))
     }), "active code match was not revealed inside the horizontal clip");
 }
+
+#[test]
+fn remote_images_default_on_can_be_blocked_and_loaded_individually() {
+    use fast_markdown_viewer::network;
+    #[derive(Default)]
+    struct TestImages(std::sync::atomic::AtomicUsize);
+    impl egui::load::BytesLoader for TestImages {
+        fn id(&self) -> &'static str {
+            "test remote image bytes"
+        }
+        fn load(&self, _: &egui::Context, uri: &str) -> egui::load::BytesLoadResult {
+            if !uri.starts_with("https://") {
+                return Err(egui::load::LoadError::NotSupported);
+            }
+            self.0.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            Ok(egui::load::BytesPoll::Ready { size: None, bytes: egui::load::Bytes::Static(br#"<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="red"/></svg>"#), mime: Some("image/svg+xml".into()) })
+        }
+        fn forget(&self, _: &str) {}
+        fn forget_all(&self) {}
+        fn byte_size(&self) -> usize {
+            0
+        }
+    }
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    writeln!(
+        file,
+        "![One](https://example.com/one.svg)\n\n![Two](https://example.com/two.svg)"
+    )
+    .unwrap();
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    network::install(&context);
+    let images = Arc::new(TestImages::default());
+    context.add_bytes_loader(images.clone());
+    let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
+    assert!(network::automatic_images(&context));
+    network::set_automatic_images(&context, false);
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    assert_eq!(images.0.load(std::sync::atomic::Ordering::Relaxed), 0);
+    let button = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::Button,
+        "Load image",
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            button,
+            None,
+        )]),
+    );
+    for _ in 0..20 {
+        run_frame(&context, &mut app, input(Vec::new()));
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    assert_eq!(images.0.load(std::sync::atomic::Ordering::Relaxed), 1);
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    assert_eq!(
+        accesskit_update(&output)
+            .nodes
+            .iter()
+            .filter(|(_, node)| node.role() == egui::accesskit::Role::Button
+                && node.label() == Some("Load image"))
+            .count(),
+        1
+    );
+    network::set_automatic_images(&context, true);
+    for _ in 0..20 {
+        run_frame(&context, &mut app, input(Vec::new()));
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    assert_eq!(images.0.load(std::sync::atomic::Ordering::Relaxed), 2);
+    network::set_automatic_images(&context, false);
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    assert_eq!(
+        accesskit_update(&output)
+            .nodes
+            .iter()
+            .filter(|(_, node)| node.role() == egui::accesskit::Role::Button
+                && node.label() == Some("Load image"))
+            .count(),
+        2
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::W, egui::Modifiers::COMMAND)]),
+    );
+    assert_eq!(
+        context
+            .loaders()
+            .texture
+            .lock()
+            .iter()
+            .map(|loader| loader.byte_size())
+            .sum::<usize>(),
+        0
+    );
+}

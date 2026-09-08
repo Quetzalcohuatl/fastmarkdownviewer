@@ -1,12 +1,15 @@
 FastMarkdownViewer is a small Windows x64 Markdown reader focused on the core
 double-click, open, render, and scroll experience.
 
-This beta adds document tabs with drag-out native windows, Ctrl+F search with
-highlighted matches, lazy syntect code highlighting, a Ctrl+H heading sidebar,
+The first stable release includes document tabs with drag-out native windows, Ctrl+F search with
+highlighted matches and `*` wildcards, lazy syntect code highlighting, a Ctrl+H heading sidebar,
 and on-demand Windows font fallbacks for multilingual documents. Ctrl+F toggles
 Find open and closed, and the empty-window page lists keyboard shortcuts.
 Detached tabs retain their reading position and search state. Theme and text size
 are shared by windows within a process.
+
+In Find, `*` matches zero or more characters on the same line; use `\*` for a
+literal asterisk. Other punctuation remains literal.
 
 Moving tabs into existing windows and reordering tabs are not supported yet.
 The current backend does not initialize native accessibility in detached child

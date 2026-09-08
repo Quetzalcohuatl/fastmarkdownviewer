@@ -625,7 +625,7 @@ fn find_searches_rendered_text_and_code_without_stealing_typing_keys() {
     run_frame(
         &context,
         &mut app,
-        input(vec![egui::Event::Text("hello world".into())]),
+        input(vec![egui::Event::Text("hello*world".into())]),
     );
     assert_eq!(app.search_status(), Some((1, 2)));
     run_frame(

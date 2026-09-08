@@ -22,12 +22,12 @@
     <section class="hero">
       <div class="eyebrow">Windows 10 / 11 · open source · read-only</div>
       <h1>Double-click Markdown.<br><em>Read it.</em></h1>
-      <p class="lede">No editor chrome. No project index. No WebView. FastMarkdownViewer opens one local file as a clean rendered document.</p>
+      <p class="lede">No editor chrome. No project index. No WebView. FastMarkdownViewer opens Markdown files as clean rendered documents.</p>
       <div class="actions">
-        <a class="button primary" href="{{REPOSITORY_URL}}/releases/tag/v0.1.0-beta.2">Download beta</a>
+        <a class="button primary" href="{{REPOSITORY_URL}}/releases/tag/v0.1.0">Download v0.1.0</a>
         <a class="button secondary" href="{{REPOSITORY_URL}}">View source</a>
       </div>
-      <p class="release-note">v0.1.0-beta.2 is unsigned. Windows may show a SmartScreen warning; verification instructions are below.</p>
+      <p class="release-note">v0.1.0 is unsigned. Windows may show a SmartScreen warning; verification instructions are below.</p>
     </section>
 
     <section class="preview" aria-labelledby="preview-title">
@@ -37,8 +37,8 @@
     </section>
 
     <section class="principles" aria-label="Project principles">
-      <article><span>01</span><h2>One job</h2><p>Open one UTF-8 Markdown file, render it, and let you select and copy the text.</p></article>
-      <article><span>02</span><h2>Fast by design</h2><p>Plain code and asynchronous math and image work keep expensive extras away from the first document frame.</p></article>
+      <article><span>01</span><h2>One job</h2><p>Open Markdown files, render them, and let you read, search, select, and copy the text.</p></article>
+      <article><span>02</span><h2>Fast by design</h2><p>Lazy code highlighting and asynchronous math and image work keep expensive extras away from the first document frame.</p></article>
       <article><span>03</span><h2>Quiet software</h2><p>No accounts, analytics, update pings, settings writes, history database, or persistent cache.</p></article>
     </section>
 
@@ -68,16 +68,16 @@
       </div>
       <ol>
         <li><strong>Download together</strong><span>Get the EXE or ZIP and <code>SHA256SUMS.txt</code> from the same canonical GitHub Release.</span></li>
-        <li><strong>Compare SHA-256</strong><code>Get-FileHash .\FastMarkdownViewer-0.1.0-beta.2-windows-x86_64.exe -Algorithm SHA256</code></li>
-        <li><strong>Verify provenance</strong><code>gh attestation verify .\FastMarkdownViewer-0.1.0-beta.2-windows-x86_64.exe --repo {{REPOSITORY_SLUG}}</code></li>
+        <li><strong>Compare SHA-256</strong><code>Get-FileHash .\FastMarkdownViewer-0.1.0-windows-x86_64.exe -Algorithm SHA256</code></li>
+        <li><strong>Verify provenance</strong><code>gh attestation verify .\FastMarkdownViewer-0.1.0-windows-x86_64.exe --repo {{REPOSITORY_SLUG}}</code></li>
       </ol>
-      <p>Checksums and attestations establish origin and unchanged bytes. They do not suppress SmartScreen; v0.1.0-beta.2 is transparently unsigned.</p>
+      <p>Checksums and attestations establish origin and unchanged bytes. They do not suppress SmartScreen; v0.1.0 is transparently unsigned.</p>
     </section>
 
     <section class="roadmap">
       <div class="eyebrow">After v0.1</div>
       <h2>Stability first. Reach second.</h2>
-      <p>Planned follow-ons include OSS code signing, Windows ARM64, macOS and Linux builds, high-contrast design, then prepared Scoop and winget manifests. Search, editing, file watching, Mermaid, and syntax highlighting remain intentionally outside v0.1.</p>
+      <p>Planned follow-ons include OSS code signing, Windows ARM64, macOS and Linux builds, high-contrast design, then prepared Scoop and winget manifests. Tabs, wildcard search, a heading outline, and lazy syntax highlighting are included. Editing, file watching, and Mermaid remain outside this release.</p>
     </section>
   </main>
 

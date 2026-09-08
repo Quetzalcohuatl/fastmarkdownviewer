@@ -34,7 +34,7 @@ def greet(name):
 
 ## Search across formatting
 
-Hello **world** appears across styled text. Search is literal: `.*` is just text.
+Hello **world** appears across styled text. Search for `Hello*world` with a wildcard, or use `\*` to find a literal asterisk.
 
 ## Repeated heading
 

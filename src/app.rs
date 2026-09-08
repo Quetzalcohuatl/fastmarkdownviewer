@@ -611,12 +611,16 @@ impl ViewerWindow {
         }
         ui.horizontal_wrapped(|ui| {
             ui.label("Find:");
-            let response = ui.add(
-                egui::TextEdit::singleline(&mut tab.search.query)
-                    .id_salt(("find", tab.id))
-                    .hint_text("Find in document…")
-                    .desired_width(180.0),
-            );
+            let response = ui
+                .add(
+                    egui::TextEdit::singleline(&mut tab.search.query)
+                        .id_salt(("find", tab.id))
+                        .hint_text("Find (* wildcard)…")
+                        .desired_width(180.0),
+                )
+                .on_hover_text(
+                    r"* matches any text on the same line. Use \* for a literal asterisk.",
+                );
             if self.focus_search {
                 response.request_focus();
                 self.focus_search = false;

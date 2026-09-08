@@ -23,12 +23,29 @@ benchmarking do not block v0.1.
   clear.
 - [x] Publish `v0.1.0-beta.1` and confirm its hosted CI, installer, assets, and
   Pages deployment.
-- [ ] Resolve any reproducible crash, unsafe network behavior, or broken core
+- [x] Resolve any reproducible crash, unsafe network behavior, or broken core
   interaction reported against the beta.
-- [ ] Do one clean Windows 10 or 11 install/open/scroll/uninstall pass against
+- [x] Do one clean Windows 10 or 11 install/open/scroll/uninstall pass against
   the exact stable candidate.
-- [ ] Update the version, changelog, site, and release notes, then publish the
-  annotated `v0.1.0` tag through the same workflow.
+- [x] Prepare version 0.1.0, changelog, site, and release notes for the
+  annotated `v0.1.0` tag. Publication is verified by the Release workflow.
+
+## Stable candidate validation — 2026-09-08
+
+- Version 0.1.0 passes formatting, Clippy, all 46 tests, cargo-audit, and cargo-deny.
+  The two documented unmaintained-dependency exceptions remain unchanged.
+- The optimized portable binary passes the native Windows 11 Pro (build 26200)
+  open/scroll/two-window smoke test.
+- A fresh per-user installation (no existing application or ProgID) passes the
+  same native smoke test. Both Open-with registrations are verified, defaults
+  remain unchanged, and uninstall removes the application and registrations.
+- Find wildcards, outline toggling, tab transfer/lifetime behavior, font glyphs,
+  and DPI cases pass the production-UI regression suite.
+- This is a clean application installation on the existing Windows host, not a
+  pristine OS VM or an exhaustive Windows compatibility matrix. Native tab
+  dragging and SmartScreen prompts are not asserted by the scripted smoke test.
+- Release publication, installer verification, checksums, and provenance are
+  additionally gated by the annotated-tag GitHub workflow.
 
 Startup benchmarking, Windows ARM64, macOS/Linux packages, code signing,
 package-manager listings, high-contrast design, and safe viewport

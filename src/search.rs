@@ -77,12 +77,35 @@ fn find(text: &str, query: &str, case_sensitive: bool) -> Vec<Range<usize>> {
     if query.is_empty() {
         return Vec::new();
     }
-    regex::RegexBuilder::new(&regex::escape(query))
+    let mut pattern = String::new();
+    let mut characters = query.chars().peekable();
+    while let Some(character) = characters.next() {
+        if character == '*' {
+            pattern.push_str(".*");
+            while characters.peek() == Some(&'*') {
+                characters.next();
+            }
+        } else {
+            let literal = if character == '\\' && matches!(characters.peek(), Some('*' | '\\')) {
+                characters.next().unwrap()
+            } else {
+                character
+            };
+            pattern.push_str(&regex::escape(&literal.to_string()));
+        }
+    }
+    regex::RegexBuilder::new(&pattern)
         .case_insensitive(!case_sensitive)
         .build()
         .map_or_else(
             |_| Vec::new(),
-            |pattern| pattern.find_iter(text).map(|found| found.range()).collect(),
+            |pattern| {
+                pattern
+                    .find_iter(text)
+                    .filter(|found| !found.is_empty())
+                    .map(|found| found.range())
+                    .collect()
+            },
         )
 }
 
@@ -97,7 +120,7 @@ mod tests {
         );
         assert_eq!(find("Hello HELLO", "hello", false), vec![0..5, 6..11]);
         assert!(find("Hello", "hello", true).is_empty());
-        assert_eq!(find("a.*b", ".*", false), vec![1..3]);
+        assert_eq!(find("a.*b", r".\*", false), vec![1..3]);
         let mut search = Search {
             matches: vec![0..1, 2..3],
             ..Default::default()
@@ -106,5 +129,22 @@ mod tests {
         assert_eq!(search.current(), 2);
         search.advance(false);
         assert_eq!(search.current(), 1);
+    }
+
+    #[test]
+    fn wildcard_matches_with_literal_escaping_and_unicode() {
+        assert_eq!(
+            find("hello world\nhello beautiful world", "hello*world", false),
+            vec![0..11, 12..33]
+        );
+        assert_eq!(find("ab aXYZb", "a**b", false), vec![0..8]);
+        assert_eq!(find("日本語🙂中文", "日本*中文", false), vec![0..19]);
+        assert_eq!(find("HELLO world", "hello*world", false), vec![0..11]);
+        assert!(find("HELLO world", "hello*world", true).is_empty());
+        assert!(find("hello\nworld", "hello*world", false).is_empty());
+        assert_eq!(find("a.*b [x]", r".\*", false), vec![1..3]);
+        assert_eq!(find("a.*b [x]", "[x]", false), vec![5..8]);
+        assert_eq!(find("one\n\ntwo", "*", false), vec![0..3, 5..8]);
+        assert!(find("", "*", false).is_empty());
     }
 }

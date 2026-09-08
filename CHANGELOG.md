@@ -4,6 +4,13 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-08
+
+First stable Windows x64 release, including the beta.3 reading tools and documented limitations.
+
+- Find supports `*` for zero or more characters on the same line, with `\*` for a literal asterisk.
+- Updated the website, download links, and release documentation for stable v0.1.0.
+
 ## [0.1.0-beta.3] - 2026-09-08
 
 ### Added

@@ -68,10 +68,12 @@ also blocks publication.
 
 ## Manual clean-VM acceptance
 
-Automation does not replace the final Windows 10 22H2 and Windows 11 clean-VM
-matrix. Before the public v0.1 tag, record the portable, installer, association,
-uninstaller, SmartScreen, theme, and DPI observations described in the project
-acceptance plan. Keep those results with the release notes.
+Before the public v0.1 tag, do one clean Windows 10 or Windows 11 pass against
+the exact candidate, as required by `RELEASE-CHECKLIST.md`: install, open through
+Open with, read/scroll, try Find (including `*`), toggle headings, detach a tab,
+close the windows, and uninstall. Spot-check the multilingual fixture and normal
+display scaling. Record the result and any unsigned-app prompt. Fix reproducible
+core failures; an exhaustive OS/DPI matrix is not required for this release.
 
 
 ## Reading-tool visual checks

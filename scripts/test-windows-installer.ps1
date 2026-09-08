@@ -50,7 +50,7 @@ function Invoke-Uninstaller {
         '/VERYSILENT',
         '/SUPPRESSMSGBOXES',
         '/NORESTART'
-    ) -PassThru -Wait
+    ) -WindowStyle Hidden -PassThru -Wait
     if ($process.ExitCode -ne 0) {
         throw "Uninstaller failed with exit code $($process.ExitCode)."
     }
@@ -79,7 +79,7 @@ try {
         '/SUPPRESSMSGBOXES',
         '/NORESTART',
         '/SP-'
-    ) -PassThru -Wait
+    ) -WindowStyle Hidden -PassThru -Wait
     if ($install.ExitCode -ne 0) {
         throw "Installer failed with exit code $($install.ExitCode)."
     }

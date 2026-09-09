@@ -60,6 +60,18 @@ fn load_system(state: &mut FontState, name: &'static str) -> bool {
     true
 }
 
+fn load_system_family(state: &mut FontState, names: &[&'static str]) -> bool {
+    for name in names {
+        if state.definitions.font_data.contains_key(*name) {
+            return false;
+        }
+        if load_system(state, name) {
+            return true;
+        }
+    }
+    false
+}
+
 /// Extend both proportional and code fonts for scripts present in the document.
 pub fn ensure_for_text(context: &egui::Context, text: &str) {
     let Some(mut state) = context.data_mut(|data| data.remove_temp::<FontState>(state_id())) else {
@@ -95,10 +107,10 @@ pub fn ensure_for_text(context: &egui::Context, text: &str) {
         changed |= load_system(&mut state, "malgun.ttf");
     }
     if indic {
-        changed |= load_system(&mut state, "Nirmala.ttc");
+        changed |= load_system_family(&mut state, &["Nirmala.ttc", "Nirmala.ttf", "mangal.ttf"]);
     }
     if thai_lao {
-        changed |= load_system(&mut state, "LeelawUI.ttf");
+        changed |= load_system_family(&mut state, &["LeelawUI.ttf", "leelawad.ttf"]);
     }
     if changed {
         context.set_fonts(state.definitions.clone());

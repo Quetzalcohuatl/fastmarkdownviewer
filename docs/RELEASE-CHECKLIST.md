@@ -62,6 +62,20 @@ benchmarking do not block v0.1.
   `experiments/architecture/reader-results.md`.
 - Publication and build provenance are gated by the annotated `v0.1.1` tag workflow.
 
+## v0.1.2 candidate validation — 2026-09-09
+
+- Formatting, Clippy, all 59 locked tests, and the optimized native Windows
+  open/scroll/two-window smoke test pass.
+- Local packaging, checksums, fresh per-user installation, native installed-app
+  smoke test, Open-with registration checks, and uninstall pass (Inno Setup 6.7.3).
+- The GitHub workflow independently builds and tests the exact public assets
+  using pinned Inno Setup 6.7.1 and generates provenance before publication.
+- The lockfile changes only the application version. No Mermaid or other viewer
+  dependency was added; the feature commit's GitHub policy checks passed.
+- New link/anchor navigation and tab file actions have targeted UI/filesystem
+  coverage. Rename's hard-link filesystem requirement is documented in the README
+  and release notes.
+
 Startup benchmarking, Windows ARM64, macOS/Linux packages, code signing,
 package-manager listings, high-contrast design, and safe viewport
 virtualization are valuable follow-ups. They are not required for the small,

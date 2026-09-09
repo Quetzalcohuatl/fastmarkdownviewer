@@ -4,6 +4,8 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-09
+
 - Local Markdown links open or activate tabs in the current window, including relative paths and heading fragments.
 - Heading anchors use outline geometry, practical lowercase slugs, explicit IDs, and consistent duplicate suffixes.
 - Added tab context-menu Rename file and Show in Explorer actions. Rename changes the filename on disk, rejects collisions/non-Markdown extensions, and preserves tab state.

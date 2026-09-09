@@ -1,12 +1,12 @@
-FastMarkdownViewer v0.1.2 adds navigation between local documents and tab file actions, with no new viewer dependencies.
+FastMarkdownViewer v0.1.3 improves Markdown layout and adds optional word wrapping, with no new viewer dependencies.
 
-- Local `.md` and `.markdown` links open or activate a tab in the current window. Canonical paths reuse existing tabs; browser links still open in the browser.
-- Heading links support `#section` and `other.md#section`, including practical Unicode lowercase slugs, duplicate suffixes, and explicit heading IDs. Missing files or headings show a nonfatal error.
-- Right-click a tab for **Rename file…** or **Show in Explorer**. Rename changes the actual filename in the current folder, preserves Markdown extensions and tab state, rejects collisions, and reloads document paths/resource metadata.
-- The native Mermaid feasibility spike and corpus are documented in `docs/MERMAID_EVALUATION.md`. Rendering remains deferred because of SVG text compatibility and size costs; Mermaid fences remain readable code.
+- **Settings → Word wrap** is enabled by default for prose, table cells, and code. Disable it to keep long lines intact and scroll horizontally. The preference is shared across windows for the current session.
+- Tables keep cells aligned beneath their headers and size rows for wrapped content. Code backgrounds surround the full block.
+- Document tabs, tables, and code blocks have visible, space-reserving scrollbars when content overflows. Long unbroken words wrap without clipping ordinary prose.
+- Nested blockquotes, definition lists, and nested inline formatting preserve their structure and spacing.
+- Failed images show readable alt-text placeholders, error details on hover, and Retry.
+- Hindi/Devanagari and Thai font fallbacks load on demand from Windows. Glyph coverage depends on installed fonts; full mixed-direction paragraph layout remains limited.
 
-Rename requires hard-link support (such as NTFS) for overwrite-safe operation. Unsupported filesystems and case-only collisions are rejected. Rename does not rewrite other documents' links; interruption between creating the new name and removing the old one can leave both names.
+All 70 tests pass, including real UI input, wrapping toggles, table geometry, full-height code backgrounds, and navigation. Exploratory CPU-layout comparisons remain comparable to v0.1.2; raw measurements and limitations are in the repository. The app remains a lightweight, read-only Markdown viewer.
 
-All 59 tests pass. The viewer remains read-only for document contents, with no editor, file watcher, updater, telemetry, or persistent settings database.
-
-Download the portable EXE, portable ZIP, or per-user installer below. Builds remain unsigned; verify with `SHA256SUMS.txt` and GitHub provenance attestations. Existing limitations include incomplete bidirectional text layout, monochrome emoji, and limited native accessibility in detached child windows (use a separate launch for screen-reader access). Automatic remote images remain enabled by default and can be disabled in Settings; see `PRIVACY.md`.
+Download the portable EXE, portable ZIP, or per-user installer below. Builds remain unsigned; verify with SHA256SUMS.txt and GitHub provenance attestations. Settings are session-only. Automatic remote images remain enabled by default and can be disabled in Settings; see PRIVACY.md.

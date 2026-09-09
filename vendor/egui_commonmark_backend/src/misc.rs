@@ -18,6 +18,7 @@ const DEFAULT_THEME_LIGHT: &str = "base16-ocean.light";
 const DEFAULT_THEME_DARK: &str = "base16-ocean.dark";
 
 pub struct CommonMarkOptions<'f> {
+    pub wrap: bool,
     pub indentation_spaces: usize,
     pub max_image_width: Option<usize>,
     pub show_alt_text_on_hover: bool,
@@ -66,6 +67,7 @@ impl std::fmt::Debug for CommonMarkOptions<'_> {
 impl Default for CommonMarkOptions<'_> {
     fn default() -> Self {
         Self {
+            wrap: true,
             indentation_spaces: 4,
             max_image_width: None,
             show_alt_text_on_hover: true,
@@ -97,10 +99,10 @@ impl CommonMarkOptions<'_> {
     }
 
     pub fn max_width(&self, ui: &Ui) -> f32 {
-        let max_image_width = self.max_image_width.unwrap_or(0) as f32;
         let available_width = ui.available_width();
-
-        let max_width = max_image_width.max(available_width);
+        let max_width = self
+            .max_image_width
+            .map_or(available_width, |width| available_width.min(width as f32));
         if let Some(default_width) = self.default_width {
             if default_width as f32 > max_width {
                 default_width as f32
@@ -271,15 +273,36 @@ impl Image {
             .iter()
             .map(egui::RichText::text)
             .collect::<String>();
-        if options.image_gate.is_some_and(|gate| gate(ui, &self.uri, &accessible_alt_text)) {
+        if options
+            .image_gate
+            .is_some_and(|gate| gate(ui, &self.uri, &accessible_alt_text))
+        {
             return;
         }
-        let response = ui.add(
-            egui::Image::from_uri(&self.uri)
-                .fit_to_original_size(1.0)
-                .max_width(options.max_width(ui))
-                .alt_text(accessible_alt_text),
-        );
+        let image = egui::Image::from_uri(&self.uri)
+            .fit_to_original_size(1.0)
+            .max_width(options.max_width(ui))
+            .alt_text(&accessible_alt_text);
+        if let Err(error) = image.load_for_size(ui.ctx(), ui.available_size()) {
+            egui::Frame::group(ui.style()).show(ui, |ui| {
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing.x = 6.0;
+                    let message = if accessible_alt_text.is_empty() {
+                        "Image unavailable".to_owned()
+                    } else {
+                        format!("Image unavailable: {accessible_alt_text}")
+                    };
+                    ui.label(message)
+                        .on_hover_text(format!("{}\n{error}", self.uri));
+                    if ui.small_button("Retry").clicked() {
+                        ui.ctx().forget_image(&self.uri);
+                        ui.ctx().request_repaint();
+                    }
+                });
+            });
+            return;
+        }
+        let response = ui.add(image);
 
         if !self.alt_text.is_empty() && options.show_alt_text_on_hover {
             response.on_hover_ui_at_pointer(|ui| {
@@ -301,7 +324,7 @@ impl CodeBlock {
         &self,
         ui: &mut Ui,
         cache: &mut CommonMarkCache,
-        _options: &CommonMarkOptions,
+        options: &CommonMarkOptions,
         max_width: f32,
     ) {
         ui.scope(|ui| {
@@ -314,9 +337,12 @@ impl CodeBlock {
                     plain_highlighting(ui, string.as_str())
                 };
 
-                // FastMarkdownViewer v0.1 keeps code lines intact. The nested
-                // horizontal ScrollArea in `elements::code_block` handles overflow.
-                job.wrap.max_width = f32::INFINITY;
+                // Keep source text intact; only its layout changes with wrapping.
+                job.wrap.max_width = if options.wrap {
+                    (max_width - 16.0).max(1.0)
+                } else {
+                    f32::INFINITY
+                };
                 ui.fonts_mut(|f| f.layout_job(job))
             };
 

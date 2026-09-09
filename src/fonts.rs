@@ -69,8 +69,12 @@ pub fn ensure_for_text(context: &egui::Context, text: &str) {
     let mut japanese = false;
     let mut chinese = false;
     let mut korean = false;
+    let mut indic = false;
+    let mut thai_lao = false;
     for character in text.chars() {
         match character {
+            '\u{0900}'..='\u{0dff}' | '\u{a8e0}'..='\u{a8ff}' => indic = true,
+            '\u{0e00}'..='\u{0eff}' => thai_lao = true,
             '\u{3040}'..='\u{30ff}' | '\u{31f0}'..='\u{31ff}' => japanese = true,
             '\u{3400}'..='\u{9fff}' | '\u{f900}'..='\u{faff}' | '\u{20000}'..='\u{323af}' => {
                 chinese = true;
@@ -89,6 +93,12 @@ pub fn ensure_for_text(context: &egui::Context, text: &str) {
     }
     if korean {
         changed |= load_system(&mut state, "malgun.ttf");
+    }
+    if indic {
+        changed |= load_system(&mut state, "Nirmala.ttc");
+    }
+    if thai_lao {
+        changed |= load_system(&mut state, "LeelawUI.ttf");
     }
     if changed {
         context.set_fonts(state.definitions.clone());

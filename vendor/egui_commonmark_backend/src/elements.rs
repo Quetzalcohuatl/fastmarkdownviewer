@@ -16,7 +16,8 @@ pub fn soft_break(ui: &mut Ui) {
 
 #[inline]
 pub fn newline(ui: &mut Ui) {
-    ui.label("\n");
+    // Block boundaries must advance the wrapping layout even when text wrapping is off.
+    ui.add(egui::Label::new("\n").wrap());
 }
 
 pub fn bullet_point(ui: &mut Ui) {
@@ -112,7 +113,7 @@ pub fn code_block_with_navigation<'t>(
     // We use a `TextEdit` to make the text selectable.
     // Note that we take a `&mut` to a non-`mut` `&str`, which is
     // the how to tell `egui` that the text is not editable.
-    let output = egui::ScrollArea::horizontal()
+    let scroll = egui::ScrollArea::horizontal()
         .id_salt(ui.next_auto_id())
         .auto_shrink([false, true])
         .show(ui, |ui| {
@@ -127,11 +128,14 @@ pub fn code_block_with_navigation<'t>(
                 navigation.scroll_recorded(ui);
             }
             output
-        })
-        .inner;
+        });
+    let frame_rect = egui::Rect::from_min_size(
+        scroll.inner_rect.min,
+        egui::vec2(scroll.inner_rect.width(), scroll.content_size.y),
+    );
+    let output = scroll.inner;
 
     // Background color + frame (This is lost when TextEdit it not editable)
-    let frame_rect = output.response.rect;
     ui.painter().set(
         where_to_put_background,
         epaint::RectShape::new(

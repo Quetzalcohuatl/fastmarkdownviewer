@@ -2,14 +2,14 @@
 
 FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
-> **Stable:** v0.1.2 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
+> **Stable:** v0.1.3 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
 
 ## What v0.1 includes
 
 - CommonMark and GitHub-style tables, task lists, strikethrough, autolinks, footnotes, definition lists, and alerts
 - Inline, display, and fenced math rendered with RaTeX
 - Selectable code blocks with lazy, background syntect highlighting
-- Bundled monochrome emoji plus Windows font fallbacks for Japanese, Chinese, Korean, Arabic, and Hebrew
+- Bundled monochrome emoji plus Windows font fallbacks for Japanese, Chinese, Korean, Arabic, Hebrew, Hindi/Devanagari, and Thai
 - Local and remote PNG, JPEG, WebP, first-frame GIF, and SVG images
 - Ctrl+F search with highlights, match counts, next/previous navigation, and optional case matching
 - A resizable outline sidebar with a Settings toggle
@@ -63,7 +63,11 @@ The current eframe backend does not initialize native accessibility for dynamica
 
 Syntax definitions initialize on a worker only when a language-tagged code block becomes visible. Results are cached by content, language, theme, and font size. Unknown languages remain plain text; blocks over 256 KiB skip highlighting. Highlight caches are bounded to 128 entries and approximately 8 MiB per tab.
 
-Large East Asian system fonts load on demand. Glyph coverage depends on installed Windows fonts; no system fonts are redistributed. The sample in `tests/fixtures/navigation.md` is covered by the tested Windows installation. Full Unicode bidirectional paragraph layout remains limited by egui, so mixed Arabic/Hebrew and left-to-right text needs further renderer work. Emoji are monochrome.
+East Asian, Indic (Nirmala UI), and Thai/Lao (Leelawadee UI) system fonts load on demand. Glyph coverage depends on installed Windows fonts; no system fonts are redistributed or downloaded. Hindi/Devanagari and Thai samples are covered on the tested Windows installation. The renderer already uses HarfRust shaping, but full Unicode bidirectional paragraph layout remains limited, so mixed Arabic/Hebrew and left-to-right text needs further renderer work. Coverage is not a guarantee of correct layout for every language. Myanmar, Khmer, Tibetan, Ethiopic, and historic scripts have no dedicated fallback configured and remain unverified. Emoji are monochrome.
+
+Ordinary prose, including long unbroken words, wraps within a reading column capped at 960 logical pixels. Tables give longer columns more room, wrap text and long tokens, and scroll horizontally when their minimum widths exceed the available space. **Settings → Word wrap** is enabled by default for prose, table cells, and code, and is shared across windows in the current session. Disable it to retain long lines and scroll horizontally. Code blocks retain their own horizontal scroll area when needed. Scrollbars stay visible while content overflows and reserve space beside it. The document also has a horizontal scrollbar as a fallback for objects that cannot fit. Nested blockquotes and inline styles preserve their surrounding structure and formatting.
+
+Definition lists are an extension, not part of core CommonMark. Write a term on one line followed by `: Definition` on the next; multiple definitions and indented continuation paragraphs are supported. Failed images display an **Image unavailable** placeholder with alt text, error details on hover, and a **Retry** button.
 
 ## Build from source
 

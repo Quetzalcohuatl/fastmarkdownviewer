@@ -1,5 +1,5 @@
 //! Capture the real renderer framebuffer for manual visual regression checks.
-//! `cargo run --example visual_check -- input.md output.png [search text]`
+//! `cargo run --example visual_check -- input.md output.png [search text] [--no-wrap]`
 //! Use `-` as the input path to capture the empty-window shortcut page.
 use eframe::egui;
 use fast_markdown_viewer::{
@@ -88,6 +88,7 @@ fn main() -> eframe::Result {
     let query = arguments
         .next()
         .map(|value| value.to_string_lossy().into_owned());
+    let no_wrap = arguments.next().is_some_and(|value| value == "--no-wrap");
     eframe::run_native(
         "Viewer visual check",
         eframe::NativeOptions {
@@ -98,6 +99,11 @@ fn main() -> eframe::Result {
         Box::new(move |creation| {
             fonts::install(&creation.egui_ctx);
             network::install(&creation.egui_ctx);
+            if no_wrap {
+                creation
+                    .egui_ctx
+                    .data_mut(|data| data.insert_temp(egui::Id::new("word_wrap"), false));
+            }
             Ok(Box::new(Capture {
                 viewer: ViewerApp::new(if document.as_os_str() == "-" {
                     InitialState::Empty

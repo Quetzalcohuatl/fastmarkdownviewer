@@ -6,6 +6,10 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
 
 ## Deterministic UI interactions
 
+The wrap-setting regressions toggle the actual Settings checkbox, test wrapped/unwrapped prose, tables, and code, check matching column origins and non-overlapping row heights, and ensure code backgrounds surround every line. Visual checks use the supplied torture-test document without modifying it.
+
+Overflow checks include 1,000-character unbroken words in prose/table cells, horizontal document scrolling with oversized indentation, and search reveal within horizontally scrolled code. A wide table and code fence together provide a visual check of the reserved scrollbar tracks.
+
 `tests/ui_interactions.rs` feeds real egui input events through the production
 `ViewerApp` surface. It currently verifies:
 
@@ -19,7 +23,7 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
   interaction, while unsafe schemes remain inert;
 - selectable rendered text and copy output;
 - system light/dark changes;
-- actual fallback font glyph coverage for English, Japanese, Chinese, Korean, Arabic, Hebrew, and emoji;
+- actual fallback font glyph coverage for English, Japanese, Chinese, Korean, Arabic, Hebrew, Hindi/Devanagari, Thai, and emoji;
 - Ctrl+F across formatted text and code, next/previous results, Escape, and horizontal match reveal;
 - tab switching/closing and per-tab scroll preservation;
 - tab reordering while preserving the active document and existing tear-out behavior;
@@ -35,6 +39,8 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
 `tests/render_smoke.rs` separately renders the complete feature matrix. It is
 the focused regression for the v0.1 nested-list crash in
 `egui_commonmark::show_scrollable`.
+
+`tests/layout_regressions.rs` checks three-level blockquote geometry, definition indentation, nested style restoration, spaces between inline spans, readable missing-image errors, and horizontal table scrolling without widening following prose. `tests/fixtures/layout-regressions.md` includes the uneven-width table, unbroken tokens, nested formatting, missing images, long prose, and Hindi/Thai samples for framebuffer inspection via `examples/visual_check.rs`.
 
 Image resource unit tests cover LRU payload budgets, worker concurrency permits, and stale worker completions after invalidation. Exploratory performance evidence and its limitations are recorded in [reader-results.md](../experiments/architecture/reader-results.md).
 

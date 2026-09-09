@@ -12,6 +12,8 @@ Run `experiments/architecture/fixtures/generate.ps1` to generate deterministic d
 
 ## Machine record
 
+The [September 9 rendering-fix comparison](../experiments/architecture/layout-fixes-2026-09-09.md) records a focused v0.1.2 before/after CPU-layout and executable-size check, with raw samples and limitations.
+
 Copy `experiments/architecture/hardware.example.toml` to `hardware.toml` and record Windows build, CPU, physical memory, GPU/driver, display scale, power mode, security software state, Rust version, commit, and exact build commands. Do not publish a device serial number or username.
 
 ## Protocol

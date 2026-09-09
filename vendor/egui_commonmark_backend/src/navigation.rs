@@ -163,7 +163,32 @@ pub fn label(
     navigation: &mut Navigation,
     link: bool,
 ) -> egui::Response {
-    let mut label = egui::Label::new(text);
+    // Inline spans are separate widgets: reserve trailing spaces for the next span.
+    let mut job = Arc::unwrap_or_clone(text.into_layout_job(
+        ui.style(),
+        egui::FontSelection::Default,
+        ui.text_valign(),
+    ));
+    job.keep_trailing_whitespace = true;
+    // Epaint removes leading whitespace when aligning a row. Between inline
+    // widgets it is a word separator, so reserve it before laying out the span.
+    if ui.layout().is_horizontal()
+        && ui.cursor().left() > ui.max_rect().left()
+        && !job.text.trim().is_empty()
+        && let Some(section) = job.sections.first()
+    {
+        let leading_width: f32 = ui.fonts_mut(|fonts| {
+            job.text
+                .chars()
+                .take_while(|c| c.is_whitespace())
+                .map(|c| fonts.glyph_width(&section.format.font_id, c))
+                .sum()
+        });
+        if leading_width > 0.0 {
+            ui.add_space(leading_width);
+        }
+    }
+    let mut label = egui::Label::new(job).wrap_mode(ui.wrap_mode());
     if link {
         label = label.sense(egui::Sense::click());
     }

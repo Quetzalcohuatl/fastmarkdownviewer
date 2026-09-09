@@ -758,7 +758,7 @@ fn outline_navigates_duplicate_and_setext_headings_and_can_be_hidden() {
 #[test]
 #[cfg(target_os = "windows")]
 fn windows_fallbacks_contain_actual_multilingual_glyphs_in_text_and_code() {
-    const SAMPLE: &str = "English 日本語 中文 한국어 العربية עברית 🙂";
+    const SAMPLE: &str = "English 日本語 中文 한국어 العربية עברית 🙂 हिन्दी देवनागरी ภาษาไทย";
     let context = egui::Context::default();
     fonts::install(&context);
     fonts::ensure_for_text(&context, SAMPLE);
@@ -803,6 +803,7 @@ fn find_reveals_matches_beyond_a_code_blocks_horizontal_viewport() {
     )
     .unwrap();
     let context = egui::Context::default();
+    context.data_mut(|data| data.insert_temp(egui::Id::new("word_wrap"), false));
     let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
     run_frame(&context, &mut app, input(Vec::new()));
     run_frame(
@@ -1107,4 +1108,99 @@ fn tab_menu_reveals_and_renames_the_real_file() {
         )
     );
     assert_eq!(app.tab_count(), 1);
+}
+
+#[test]
+fn document_overflow_can_scroll_horizontally() {
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    // Deep indentation is an object that cannot fit even when its text wraps.
+    write!(file, "Document marker\n\n{}Overflow\n", "> ".repeat(60)).unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
+    let marker_x = |output: &egui::FullOutput| {
+        output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text) if text.galley.text() == "Document marker" => {
+                    Some(text.pos.x)
+                }
+                _ => None,
+            })
+            .expect("document marker should remain partially visible")
+    };
+    for _ in 0..8 {
+        run_frame(&context, &mut app, input(vec![]));
+    }
+    let before = marker_x(&run_frame(&context, &mut app, input(vec![])));
+    for _ in 0..12 {
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![
+                egui::Event::PointerMoved(egui::pos2(500.0, 150.0)),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(-3.0, 0.0),
+                    modifiers: egui::Modifiers::NONE,
+                    phase: egui::TouchPhase::Move,
+                },
+            ]),
+        );
+    }
+    let after = marker_x(&run_frame(&context, &mut app, input(vec![])));
+    assert!(
+        after < before - 10.0,
+        "document did not scroll: {before} -> {after}"
+    );
+}
+
+#[test]
+fn settings_word_wrap_is_enabled_by_default_and_toggles() {
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Empty);
+    let output = run_frame(&context, &mut app, input(vec![]));
+    let settings = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::Button,
+        "Settings",
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            settings,
+            None,
+        )]),
+    );
+    let output = run_frame(&context, &mut app, input(vec![]));
+    let wrap = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::CheckBox,
+        "Word wrap",
+    );
+    let id = egui::Id::new("word_wrap");
+    assert!(context.data(|data| data.get_temp::<bool>(id).unwrap_or(true)));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            wrap,
+            None,
+        )]),
+    );
+    assert_eq!(context.data(|data| data.get_temp::<bool>(id)), Some(false));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            wrap,
+            None,
+        )]),
+    );
+    assert_eq!(context.data(|data| data.get_temp::<bool>(id)), Some(true));
 }

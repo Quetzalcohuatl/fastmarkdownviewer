@@ -80,3 +80,10 @@ Startup benchmarking, Windows ARM64, macOS/Linux packages, code signing,
 package-manager listings, high-contrast design, and safe viewport
 virtualization are valuable follow-ups. They are not required for the small,
 honestly described Windows x64 v0.1 release.
+
+## v0.1.3 candidate validation — 2026-09-09
+
+- Formatting, Clippy, and all 70 locked tests pass after the version bump. Dependency audit/license/source checks pass with the existing exceptions; no dependencies were added.
+- The supplied torture-test document was checked in real framebuffer captures with wrapping enabled and disabled. Code backgrounds, table alignment/row heights, scrollbars, and font fallbacks have targeted regression coverage.
+- Repeated exploratory CPU-layout comparisons and raw measurements are recorded in experiments/architecture/layout-fixes-2026-09-09.md.
+- The annotated tag triggers GitHub Actions to build the exact versioned Windows executable, smoke-test/package/verify assets, exercise installer installation and removal, attest provenance, and publish the release. Publication is confirmed from the workflow result.

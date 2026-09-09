@@ -104,6 +104,12 @@ impl<'f> CommonMarkViewer<'f> {
         Self::default()
     }
 
+    /// Wrap prose, table cells, and code to the available width.
+    pub fn wrap(mut self, wrap: bool) -> Self {
+        self.options.wrap = wrap;
+        self
+    }
+
     /// The amount of spaces a bullet point is indented. By default this is 4
     /// spaces.
     pub fn indentation_spaces(mut self, spaces: usize) -> Self {

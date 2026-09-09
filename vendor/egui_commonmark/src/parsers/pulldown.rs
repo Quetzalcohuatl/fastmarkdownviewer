@@ -70,6 +70,7 @@ struct DefinitionList {
 pub struct CommonMarkViewerInternal {
     curr_table: usize,
     text_style: Style,
+    inline_styles: Vec<Style>,
     list: List,
     link: Option<Link>,
     image: Option<Image>,
@@ -96,6 +97,7 @@ impl CommonMarkViewerInternal {
         Self {
             curr_table: 0,
             text_style: Style::default(),
+            inline_styles: Vec::new(),
             list: List::default(),
             link: None,
             image: None,
@@ -141,6 +143,11 @@ impl CommonMarkViewerInternal {
         let layout = egui::Layout::left_to_right(egui::Align::BOTTOM).with_main_wrap(true);
 
         let re = ui.allocate_ui_with_layout(egui::vec2(max_width, 0.0), layout, |ui| {
+            ui.style_mut().wrap_mode = Some(if options.wrap {
+                egui::TextWrapMode::Wrap
+            } else {
+                egui::TextWrapMode::Extend
+            });
             ui.spacing_mut().item_spacing.x = 0.0;
             let height = ui.text_style_height(&TextStyle::Body);
             ui.set_row_height(height);
@@ -316,67 +323,48 @@ impl CommonMarkViewerInternal {
         self.blockquote(events, max_width, cache, options, ui);
     }
 
+    fn render_nested<'e>(
+        &mut self,
+        ui: &mut Ui,
+        contents: Vec<(pulldown_cmark::Event<'e>, Range<usize>)>,
+        cache: &mut CommonMarkCache,
+        options: &CommonMarkOptions,
+    ) {
+        let previous_line = std::mem::take(&mut self.line);
+        let mut events = contents.into_iter().enumerate().peekable();
+        let width = ui.available_width();
+        while let Some((_, (event, span))) = events.next() {
+            self.process_event(ui, &mut events, event, span, cache, options, width);
+            self.line.should_not_start_newline_forced = false;
+        }
+        self.line = previous_line;
+    }
+
     fn def_list_def_wrapping<'e>(
         &mut self,
         events: &mut Peekable<impl Iterator<Item = EventIteratorItem<'e>>>,
-        max_width: f32,
+        _max_width: f32,
         cache: &mut CommonMarkCache,
         options: &CommonMarkOptions,
         ui: &mut Ui,
     ) {
         if self.def_list.is_def_list_def {
             self.def_list.is_def_list_def = false;
-
-            let item_events = delayed_events(events, |tag| {
+            let contents = delayed_events(events, |tag| {
                 matches!(tag, pulldown_cmark::TagEnd::DefinitionListDefinition)
             });
-
-            let mut events_iter = item_events.into_iter().enumerate().peekable();
-
             self.line.try_insert_start(ui);
-
-            // Proccess a single event separately so that we do not insert spaces where we do not
-            // want them
-            self.line.should_start_newline = false;
-            if let Some((_, (e, src_span))) = events_iter.next() {
-                self.process_event(ui, &mut events_iter, e, src_span, cache, options, max_width);
-            }
-
-            ui.label(" ".repeat(options.indentation_spaces));
-            self.line.should_start_newline = true;
-            self.line.should_end_newline = false;
-            // Required to ensure that the content is aligned with the identation
-            ui.horizontal_wrapped(|ui| {
-                while let Some((_, (e, src_span))) = events_iter.next() {
-                    self.process_event(
-                        ui,
-                        &mut events_iter,
-                        e,
-                        src_span,
-                        cache,
-                        options,
-                        max_width,
-                    );
-                }
-            });
-            self.line.should_end_newline = true;
-
-            // Only end the definition items line if it is not the last element in the list
-            if !matches!(
-                events.peek(),
-                Some((
-                    _,
-                    (
-                        pulldown_cmark::Event::End(pulldown_cmark::TagEnd::DefinitionList),
-                        _
-                    )
-                ))
-            ) {
-                self.line.try_insert_end(ui);
-            }
+            egui::Frame::new()
+                .inner_margin(egui::Margin {
+                    left: 20,
+                    ..Default::default()
+                })
+                .show(ui, |ui| {
+                    ui.horizontal_wrapped(|ui| self.render_nested(ui, contents, cache, options));
+                });
+            self.line.try_insert_end(ui);
         }
     }
-
     fn item_list_wrapping<'e>(
         &mut self,
         events: &mut impl Iterator<Item = EventIteratorItem<'e>>,
@@ -412,111 +400,181 @@ impl CommonMarkViewerInternal {
     fn blockquote<'e>(
         &mut self,
         events: &mut Peekable<impl Iterator<Item = EventIteratorItem<'e>>>,
-        max_width: f32,
+        _max_width: f32,
         cache: &mut CommonMarkCache,
         options: &CommonMarkOptions,
         ui: &mut Ui,
     ) {
         if self.is_blockquote {
-            let mut collected_events = delayed_events(events, |tag| {
+            self.is_blockquote = false;
+            let mut contents = delayed_events(events, |tag| {
                 matches!(tag, pulldown_cmark::TagEnd::BlockQuote(_))
             });
             self.line.try_insert_start(ui);
-
-            // Currently the blockquotes are made in such a way that they need a newline at the end
-            // and the start so when this is the first element in the markdown the newline must be
-            // manually enabled
-            self.line.should_not_start_newline_forced = false;
-            if let Some(alert) = parse_alerts(&options.alerts, &mut collected_events) {
+            let previous_quote = self.text_style.quote;
+            if let Some(alert) = parse_alerts(&options.alerts, &mut contents) {
                 egui_commonmark_backend::alert_ui(alert, ui, |ui| {
-                    for (event, src_span) in collected_events {
-                        self.event(ui, event, src_span, cache, options, max_width);
-                    }
-                })
+                    self.render_nested(ui, contents, cache, options)
+                });
             } else {
+                self.text_style.quote = true;
                 blockquote(ui, ui.visuals().weak_text_color(), |ui| {
-                    self.text_style.quote = true;
-                    for (event, src_span) in collected_events {
-                        self.event(ui, event, src_span, cache, options, max_width);
-                    }
-                    self.text_style.quote = false;
+                    self.render_nested(ui, contents, cache, options)
                 });
             }
-
-            if events.peek().is_none() {
-                self.line.should_end_newline_forced = false;
-            }
-
+            self.text_style.quote = previous_quote;
             self.line.try_insert_end(ui);
-            self.is_blockquote = false;
         }
     }
-
     fn table<'e>(
         &mut self,
         events: &mut Peekable<impl Iterator<Item = EventIteratorItem<'e>>>,
         cache: &mut CommonMarkCache,
         options: &CommonMarkOptions,
         ui: &mut Ui,
-        max_width: f32,
+        _max_width: f32,
     ) {
-        if self.is_table {
-            self.line.try_insert_start(ui);
-
-            let id = ui.id().with("_table").with(self.curr_table);
-            self.curr_table += 1;
-
-            egui::Frame::group(ui.style()).show(ui, |ui| {
-                let Table { header, rows } = parse_table(events);
-
-                egui::Grid::new(id).striped(true).show(ui, |ui| {
-                    for col in header {
-                        ui.horizontal(|ui| {
-                            for (e, src_span) in col {
-                                let tmp_start =
-                                    std::mem::replace(&mut self.line.should_start_newline, false);
-                                let tmp_end =
-                                    std::mem::replace(&mut self.line.should_end_newline, false);
-                                self.event(ui, e, src_span, cache, options, max_width);
-                                self.line.should_start_newline = tmp_start;
-                                self.line.should_end_newline = tmp_end;
-                            }
-                        });
-                    }
-
-                    ui.end_row();
-
-                    for row in rows {
-                        for col in row {
-                            ui.horizontal(|ui| {
-                                for (e, src_span) in col {
-                                    let tmp_start = std::mem::replace(
+        if !self.is_table {
+            return;
+        }
+        self.is_table = false;
+        self.line.try_insert_start(ui);
+        let id = ui.id().with("_table").with(self.curr_table);
+        self.curr_table += 1;
+        let Table { header, rows } = parse_table(events);
+        let columns = header.len();
+        if columns == 0 {
+            return;
+        }
+        let unit = ui.text_style_height(&TextStyle::Body) * 0.55;
+        let mut natural = vec![32.0_f32; columns];
+        for row in std::iter::once(&header).chain(rows.iter()) {
+            for (index, cell) in row.iter().enumerate().take(columns) {
+                let length: usize =
+                    cell.iter()
+                        .map(|(event, _)| match event {
+                            pulldown_cmark::Event::Text(text)
+                            | pulldown_cmark::Event::Code(text) => text.chars().count(),
+                            _ => 0,
+                        })
+                        .sum();
+                natural[index] = natural[index].max((length as f32 * unit + 12.0).min(360.0));
+                if !options.wrap {
+                    let text: String = cell
+                        .iter()
+                        .filter_map(|(event, _)| match event {
+                            pulldown_cmark::Event::Text(text)
+                            | pulldown_cmark::Event::Code(text) => Some(text.as_ref()),
+                            _ => None,
+                        })
+                        .collect();
+                    let body = TextStyle::Body.resolve(ui.style());
+                    let mono = TextStyle::Monospace.resolve(ui.style());
+                    let measured = ui.fonts_mut(|fonts| {
+                        fonts
+                            .layout_no_wrap(text.clone(), body, egui::Color32::WHITE)
+                            .size()
+                            .x
+                            .max(
+                                fonts
+                                    .layout_no_wrap(text, mono, egui::Color32::WHITE)
+                                    .size()
+                                    .x,
+                            )
+                    });
+                    natural[index] = natural[index].max(measured + 12.0);
+                }
+            }
+        }
+        let minimum: Vec<f32> = natural.iter().map(|width| width.min(96.0)).collect();
+        let min_sum: f32 = minimum.iter().sum();
+        let natural_sum: f32 = natural.iter().sum();
+        let budget =
+            (ui.available_width() - 16.0 - 12.0 * columns.saturating_sub(1) as f32).max(min_sum);
+        let fraction = if options.wrap {
+            ((budget - min_sum) / (natural_sum - min_sum).max(1.0)).clamp(0.0, 1.0)
+        } else {
+            1.0
+        };
+        let widths: Vec<f32> = natural
+            .iter()
+            .zip(&minimum)
+            .map(|(natural, min)| min + (natural - min) * fraction)
+            .collect();
+        egui::ScrollArea::horizontal()
+            .id_salt(id)
+            .max_width(ui.available_width())
+            .auto_shrink([true, true])
+            .show(ui, |ui| {
+                egui::Frame::group(ui.style()).show(ui, |ui| {
+                    ui.vertical(|ui| {
+                        let total_width =
+                            widths.iter().sum::<f32>() + 12.0 * columns.saturating_sub(1) as f32;
+                        for (row_index, row) in std::iter::once(header).chain(rows).enumerate() {
+                            let origin = ui.next_widget_position();
+                            let background = ui.painter().add(egui::Shape::Noop);
+                            let mut x = origin.x;
+                            let mut height = ui.text_style_height(&TextStyle::Body);
+                            for (index, cell) in row.into_iter().enumerate().take(columns) {
+                                let mut cell_ui = ui.new_child(
+                                    egui::UiBuilder::new()
+                                        .id_salt((id, row_index, index))
+                                        .max_rect(egui::Rect::from_min_size(
+                                            egui::pos2(x, origin.y),
+                                            egui::vec2(widths[index], 0.0),
+                                        ))
+                                        .layout(
+                                            egui::Layout::left_to_right(egui::Align::TOP)
+                                                .with_main_wrap(options.wrap),
+                                        ),
+                                );
+                                let previous_style = self.text_style.clone();
+                                if row_index == 0 {
+                                    self.text_style.strong = true;
+                                }
+                                for (event, span) in cell {
+                                    let start = std::mem::replace(
                                         &mut self.line.should_start_newline,
                                         false,
                                     );
-                                    let tmp_end =
+                                    let end =
                                         std::mem::replace(&mut self.line.should_end_newline, false);
-                                    self.event(ui, e, src_span, cache, options, max_width);
-                                    self.line.should_start_newline = tmp_start;
-                                    self.line.should_end_newline = tmp_end;
+                                    self.event(
+                                        &mut cell_ui,
+                                        event,
+                                        span,
+                                        cache,
+                                        options,
+                                        widths[index],
+                                    );
+                                    self.line.should_start_newline = start;
+                                    self.line.should_end_newline = end;
                                 }
-                            });
+                                height = height.max(cell_ui.min_size().y);
+                                self.text_style = previous_style;
+                                cache.navigation.separator("\n");
+                                x += widths[index] + 12.0;
+                            }
+                            let row_rect =
+                                egui::Rect::from_min_size(origin, egui::vec2(total_width, height));
+                            if row_index % 2 == 1 {
+                                ui.painter().set(
+                                    background,
+                                    egui::Shape::rect_filled(
+                                        row_rect,
+                                        0.0,
+                                        ui.visuals().faint_bg_color,
+                                    ),
+                                );
+                            }
+                            ui.advance_cursor_after_rect(row_rect);
+                            ui.add_space(6.0);
                         }
-
-                        ui.end_row();
-                    }
+                    });
                 });
             });
-
-            self.is_table = false;
-            if events.peek().is_none() {
-                self.line.should_end_newline_forced = false;
-            }
-
-            self.line.try_insert_end(ui);
-        }
+        self.line.try_insert_end(ui);
     }
-
     fn event(
         &mut self,
         ui: &mut Ui,
@@ -717,12 +775,15 @@ impl CommonMarkViewerInternal {
             pulldown_cmark::Tag::TableRow => {}
             pulldown_cmark::Tag::TableCell => {}
             pulldown_cmark::Tag::Emphasis => {
+                self.inline_styles.push(self.text_style.clone());
                 self.text_style.emphasis = true;
             }
             pulldown_cmark::Tag::Strong => {
+                self.inline_styles.push(self.text_style.clone());
                 self.text_style.strong = true;
             }
             pulldown_cmark::Tag::Strikethrough => {
+                self.inline_styles.push(self.text_style.clone());
                 self.text_style.strikethrough = true;
             }
             pulldown_cmark::Tag::Link { dest_url, .. } => {
@@ -744,6 +805,8 @@ impl CommonMarkViewerInternal {
                 self.def_list.is_first_item = true;
             }
             pulldown_cmark::Tag::DefinitionListTitle => {
+                self.inline_styles.push(self.text_style.clone());
+                self.text_style.strong = true;
                 cache.navigation.separator("\n");
                 // we disable newline as the first title should not insert a newline
                 // as we have already done that upon the DefinitionList Tag
@@ -811,13 +874,13 @@ impl CommonMarkViewerInternal {
                 ui.label("  ");
             }
             pulldown_cmark::TagEnd::Emphasis => {
-                self.text_style.emphasis = false;
+                self.text_style = self.inline_styles.pop().unwrap_or_default();
             }
             pulldown_cmark::TagEnd::Strong => {
-                self.text_style.strong = false;
+                self.text_style = self.inline_styles.pop().unwrap_or_default();
             }
             pulldown_cmark::TagEnd::Strikethrough => {
-                self.text_style.strikethrough = false;
+                self.text_style = self.inline_styles.pop().unwrap_or_default();
             }
             pulldown_cmark::TagEnd::Link => {
                 if let Some(link) = self.link.take() {
@@ -839,8 +902,10 @@ impl CommonMarkViewerInternal {
             pulldown_cmark::TagEnd::MetadataBlock(_) => {}
 
             pulldown_cmark::TagEnd::DefinitionList => self.line.try_insert_end(ui),
-            pulldown_cmark::TagEnd::DefinitionListTitle
-            | pulldown_cmark::TagEnd::DefinitionListDefinition => {}
+            pulldown_cmark::TagEnd::DefinitionListTitle => {
+                self.text_style = self.inline_styles.pop().unwrap_or_default();
+            }
+            pulldown_cmark::TagEnd::DefinitionListDefinition => {}
             pulldown_cmark::TagEnd::Superscript | pulldown_cmark::TagEnd::Subscript => {}
         }
     }

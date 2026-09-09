@@ -62,9 +62,14 @@ impl Search {
             };
             if self.jump
                 && index == self.selected
-                && let Some((rect, _)) = rects.first()
+                && let Some((rect, clip)) = rects.first()
             {
-                ui.scroll_to_rect(*rect, Some(egui::Align::Center));
+                // Nested objects reveal their own horizontal search target.
+                // Keep the parent jump within that object's horizontal viewport.
+                let mut target = *rect;
+                target.min.x = target.min.x.clamp(clip.left(), clip.right());
+                target.max.x = target.max.x.clamp(clip.left(), clip.right());
+                ui.scroll_to_rect(target, Some(egui::Align::Center));
             }
             let color = if index == self.selected {
                 egui::Color32::from_rgba_unmultiplied(255, 140, 0, 100)

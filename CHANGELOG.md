@@ -4,6 +4,19 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-09-09
+
+- Fix multiline code backgrounds and table row/column alignment; remove stray cell delimiters and empty trailing rows.
+- Add Settings → Word wrap, enabled by default for prose, table cells, and code. Disabling it preserves long lines with horizontal scrolling.
+
+- Add document-level horizontal overflow scrolling and visible, space-reserving scrollbars for the document, tables, and code blocks; keep long words wrapping and code frames inside their own container.
+
+- Fixed nested blockquote boundaries, definition-list indentation, and nested inline style restoration.
+- Preserve spaces between formatted text spans.
+- Wrap prose in a bounded reading column and size table columns by content, with cell wrapping and independent horizontal overflow.
+- Replace failed-image dots with readable alt-text placeholders, error details, and Retry.
+- Load Windows Indic and Thai/Lao font fallbacks on demand; verify Hindi/Devanagari and Thai sample glyphs.
+
 ## [0.1.2] - 2026-09-09
 
 - Local Markdown links open or activate tabs in the current window, including relative paths and heading fragments.

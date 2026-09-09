@@ -419,6 +419,12 @@ impl ViewerWindow {
                 self.open_find();
             }
             ui.menu_button("Settings", |ui| {
+                let wrap_id = egui::Id::new("word_wrap");
+                let mut wrap = ui.ctx().data(|data| data.get_temp::<bool>(wrap_id).unwrap_or(true));
+                if ui.checkbox(&mut wrap, "Word wrap").on_hover_text("Wrap prose, table cells, and code. Shared by this session's windows.").changed() {
+                    ui.ctx().data_mut(|data| data.insert_temp(wrap_id, wrap));
+                    ui.ctx().request_repaint();
+                }
                 ui.checkbox(&mut self.show_outline, "Outline sidebar    Ctrl+H");
                 let mut automatic = crate::network::automatic_images(ui.ctx());
                 if ui.checkbox(&mut automatic, "Automatically load remote images").on_hover_text("Shared by this session's windows. Turning off hides remote images and stops new automatic requests; requests already running may finish.").changed() {
@@ -886,11 +892,25 @@ impl ViewerWindow {
         }
         tab.apply_keyboard_scroll(ui.ctx(), ui.available_height());
         // Keep the complete parser stream intact: upstream's virtualized path can split nested lists.
-        let output = egui::ScrollArea::vertical()
-            .id_salt(("document", tab.id))
-            .vertical_scroll_offset(tab.scroll_offset)
-            .auto_shrink([false, false])
-            .show(ui, |ui| tab.document_ui(ui));
+        let output = ui
+            .scope(|ui| {
+                // Reserve space for visible bars instead of fading overlays over text.
+                // Nested table/code scroll areas inherit the same style.
+                ui.spacing_mut().scroll = egui::style::ScrollStyle::solid();
+                ui.spacing_mut().scroll.content_margin = egui::Margin::same(4);
+                egui::ScrollArea::both()
+                    .id_salt(("document", tab.id))
+                    .vertical_scroll_offset(tab.scroll_offset)
+                    .auto_shrink([false, false])
+                    .show_viewport(ui, |ui, viewport| {
+                        // A horizontal scroll area otherwise offers unlimited width.
+                        // Keep prose wrapping to the visible viewport, while allowing
+                        // oversized objects to grow the scrollable content bounds.
+                        ui.set_max_width((viewport.width() - 8.0).clamp(1.0, 960.0));
+                        tab.document_ui(ui);
+                    })
+            })
+            .inner;
         tab.scroll_offset = output.state.offset.y;
         tab.max_scroll_offset = (output.content_size.y - output.inner_rect.height()).max(0.0);
         if let Some(error) = tab.navigation_error.take() {
@@ -1042,6 +1062,8 @@ impl DocumentTab {
     }
 
     fn document_ui(&mut self, ui: &mut egui::Ui) {
+        // Keep ordinary prose readable, regardless of the natural width of nearby blocks.
+        ui.set_max_width(ui.available_width().min(960.0));
         let document = &self.document;
         self.markdown_cache.navigation.capture_text = self.search.open;
         self.markdown_cache.navigation.clear();
@@ -1060,6 +1082,10 @@ impl DocumentTab {
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let max_image_width = ui.available_width().max(1.0) as usize;
         CommonMarkViewer::new()
+            .wrap(ui.ctx().data(|data| {
+                data.get_temp::<bool>(egui::Id::new("word_wrap"))
+                    .unwrap_or(true)
+            }))
             .default_implicit_uri_scheme(document.base_uri.clone())
             .max_image_width(Some(max_image_width))
             .show_alt_text_on_hover(true)

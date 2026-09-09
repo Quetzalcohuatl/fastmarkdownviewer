@@ -20,13 +20,22 @@ pub fn delayed_events<'e>(
 ) -> Vec<(pulldown_cmark::Event<'e>, Range<usize>)> {
     let mut curr_event = events.next();
     let mut total_events = Vec::new();
+    let mut nesting = 0usize;
     loop {
         if let Some(event) = curr_event.take() {
             total_events.push(event.1.clone());
+            if let (_, (pulldown_cmark::Event::Start(ref tag), _)) = event {
+                if end_at(tag.to_end()) {
+                    nesting += 1;
+                }
+            }
             if let (_, (pulldown_cmark::Event::End(tag), _range)) = event
                 && end_at(tag)
             {
-                return total_events;
+                if nesting == 0 {
+                    return total_events;
+                }
+                nesting -= 1;
             }
         } else {
             return total_events;
@@ -78,6 +87,7 @@ fn parse_row<'e>(
         if let pulldown_cmark::Event::End(pulldown_cmark::TagEnd::TableCell) = e {
             row.push(column);
             column = Vec::new();
+            continue;
         }
 
         if let pulldown_cmark::Event::End(pulldown_cmark::TagEnd::TableHead) = e {
@@ -104,7 +114,9 @@ pub fn parse_table<'e>(events: &mut impl Iterator<Item = EventIteratorItem<'e>>)
     let mut rows = Vec::new();
     while all_events.peek().is_some() {
         let row = parse_row(&mut all_events);
-        rows.push(row);
+        if !row.is_empty() {
+            rows.push(row);
+        }
     }
 
     Table { header, rows }

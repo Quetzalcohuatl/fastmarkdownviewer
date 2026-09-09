@@ -633,6 +633,7 @@ impl CommonMarkViewerInternal {
                     .navigation
                     .headings
                     .push(egui_commonmark_backend::navigation::Heading {
+                        id: id.as_ref().map(ToString::to_string),
                         level: level as u8,
                         text: String::new(),
                         position: ui.next_widget_position(),

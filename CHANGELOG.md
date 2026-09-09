@@ -4,6 +4,11 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- Local Markdown links open or activate tabs in the current window, including relative paths and heading fragments.
+- Heading anchors use outline geometry, practical lowercase slugs, explicit IDs, and consistent duplicate suffixes.
+- Added tab context-menu Rename file and Show in Explorer actions. Rename changes the filename on disk, rejects collisions/non-Markdown extensions, and preserves tab state.
+- Evaluated two native Mermaid renderers in an isolated corpus harness; deferred app integration because of SVG text compatibility and size costs. See `docs/MERMAID_EVALUATION.md`.
+
 ## [0.1.1] - 2026-09-08
 
 - Added a session-wide automatic remote-image setting, enabled by default, with individual Load image buttons when disabled.

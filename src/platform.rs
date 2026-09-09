@@ -1,4 +1,6 @@
-use std::{io, path::Path, process::Command};
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+use std::process::Command;
+use std::{io, path::Path};
 
 #[must_use]
 pub fn choose_markdown_file() -> Option<std::path::PathBuf> {
@@ -17,13 +19,31 @@ pub fn open_browser(url: &url::Url) -> io::Result<()> {
     open::that(url.as_str())
 }
 
-/// Start an independent viewer process for a Markdown path.
+/// Reveal a file in the system file manager, selecting it where supported.
 ///
 /// # Errors
 ///
-/// Returns an OS error when the executable cannot be located or started.
-pub fn open_markdown(path: &Path) -> io::Result<()> {
-    Command::new(std::env::current_exe()?).arg(path).spawn()?;
+/// Returns an OS error when the path is missing or the file manager cannot start.
+pub fn reveal_in_file_manager(path: &Path) -> io::Result<()> {
+    let path = path.canonicalize()?;
+    #[cfg(target_os = "windows")]
+    {
+        let text = path.to_string_lossy();
+        let normal = text.strip_prefix(r"\\?\UNC\").map_or_else(
+            || text.strip_prefix(r"\\?\").unwrap_or(&text).to_owned(),
+            |unc| format!(r"\\{unc}"),
+        );
+        Command::new("explorer.exe")
+            .arg(format!("/select,{normal}"))
+            .spawn()?;
+    }
+    #[cfg(target_os = "macos")]
+    Command::new("open").arg("-R").arg(&path).spawn()?;
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    open::that(
+        path.parent()
+            .ok_or_else(|| io::Error::other("No parent folder"))?,
+    )?;
     Ok(())
 }
 

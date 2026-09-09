@@ -23,6 +23,8 @@ the same locked Rust suite with `cargo test --locked --all-targets`.
 - Ctrl+F across formatted text and code, next/previous results, Escape, and horizontal match reveal;
 - tab switching/closing and per-tab scroll preservation;
 - tab reordering while preserving the active document and existing tear-out behavior;
+- real heading/cross-document link clicks, tab deduplication, explicit/duplicate anchors, and missing-heading/file errors;
+- tab context-menu file reveal and rename, plus filename validation, collision rejection, reloaded paths/base URIs, and retained tab state;
 - F5 / Ctrl+R reload, preserved reading state, and failure recovery;
 - default-on remote images, blocking without a request, individual loading, cached-image blocking, and texture release on tab close;
 - duplicate and Setext outline navigation, Ctrl+H toggling, and empty-window shortcut help;

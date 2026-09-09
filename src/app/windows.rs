@@ -126,6 +126,7 @@ impl ViewerApp {
             drag_cancelled: false,
             detach_request: None,
             close_requested: false,
+            rename_dialog: None,
         };
         Some(Spawn {
             window: child,

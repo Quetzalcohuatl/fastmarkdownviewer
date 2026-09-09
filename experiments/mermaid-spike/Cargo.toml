@@ -1,0 +1,24 @@
+[package]
+name = "mermaid-spike"
+version = "0.0.0"
+edition = "2024"
+publish = false
+license = "MIT OR Apache-2.0"
+
+[workspace]
+
+[features]
+mmdr = ["dep:mermaid-rs-renderer"]
+merman = ["dep:merman"]
+
+[dependencies]
+mermaid-rs-renderer = { version = "=0.3.1", default-features = false, optional = true }
+merman = { version = "=0.7.0", default-features = false, features = ["render"], optional = true }
+resvg = { version = "=0.45.1", default-features = false }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

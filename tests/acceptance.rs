@@ -41,7 +41,7 @@ fn link_policy_handles_queries_fragments_and_unsafe_schemes() {
     ));
     assert_eq!(
         links::resolve("#same-page", Some(source)),
-        LinkAction::Inert
+        LinkAction::Anchor("same-page".into())
     );
     assert_eq!(
         links::resolve("mailto:test@example.com", Some(source)),

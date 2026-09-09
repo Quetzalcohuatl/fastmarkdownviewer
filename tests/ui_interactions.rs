@@ -32,7 +32,7 @@ impl egui::DroppedFile for TestDrop {
 struct TestServices {
     selected_file: Mutex<Option<PathBuf>>,
     browser_urls: Mutex<Vec<Url>>,
-    markdown_paths: Mutex<Vec<PathBuf>>,
+    revealed_paths: Mutex<Vec<PathBuf>>,
 }
 
 impl AppServices for TestServices {
@@ -45,8 +45,8 @@ impl AppServices for TestServices {
         Ok(())
     }
 
-    fn open_markdown(&self, path: &Path) -> io::Result<()> {
-        self.markdown_paths.lock().unwrap().push(path.to_owned());
+    fn reveal_in_file_manager(&self, path: &Path) -> io::Result<()> {
+        self.revealed_paths.lock().unwrap().push(path.to_owned());
         Ok(())
     }
 }
@@ -479,16 +479,8 @@ fn accessibility_clicks_dispatch_safe_links_and_leave_unsafe_links_inert() {
         services.browser_urls.lock().unwrap().as_slice(),
         &[Url::parse("https://example.com/test").unwrap()]
     );
-    assert_eq!(
-        services.markdown_paths.lock().unwrap().as_slice(),
-        &[file
-            .path()
-            .canonicalize()
-            .unwrap()
-            .parent()
-            .unwrap()
-            .join("chapter.md")]
-    );
+    assert!(services.revealed_paths.lock().unwrap().is_empty());
+    assert!(app.error_message().unwrap().contains("chapter.md"));
 }
 
 #[test]
@@ -932,4 +924,187 @@ fn remote_images_default_on_can_be_blocked_and_loaded_individually() {
             .sum::<usize>(),
         0
     );
+}
+
+#[test]
+fn clicking_heading_and_cross_document_links_navigates_in_window() {
+    let dir = tempfile::tempdir().unwrap();
+    let source = dir.path().join("README.md");
+    let other = dir.path().join("other.md");
+    std::fs::write(
+        &source,
+        format!(
+            "[Jump](#section)\n\n[Other](other.md#target)\n\n{}\n# Section\n\n{}",
+            "body\n\n".repeat(40),
+            "tail\n\n".repeat(20)
+        ),
+    )
+    .unwrap();
+    std::fs::write(
+        &other,
+        format!(
+            "# Other\n\n{}\n# Target\n\n{}",
+            "body\n\n".repeat(40),
+            "tail\n\n".repeat(20)
+        ),
+    )
+    .unwrap();
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Path(source));
+    let output = run_frame(&context, &mut app, input(vec![]));
+    let jump = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::Label,
+        "Jump",
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            jump,
+            None,
+        )]),
+    );
+    for _ in 0..90 {
+        run_frame(&context, &mut app, input(vec![]));
+    }
+    assert!(app.document_scroll_offset() > 500.0);
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![key(egui::Key::Home, egui::Modifiers::NONE)]),
+    );
+    let output = run_frame(&context, &mut app, input(vec![]));
+    let other_link = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::Label,
+        "Other",
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            other_link,
+            None,
+        )]),
+    );
+    for _ in 0..90 {
+        run_frame(&context, &mut app, input(vec![]));
+    }
+    assert_eq!(app.tab_count(), 2);
+    assert_eq!(
+        app.document_path(),
+        Some(other.canonicalize().unwrap().as_path())
+    );
+    assert!(app.document_scroll_offset() > 500.0);
+}
+
+#[test]
+#[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::too_many_lines)] // Exercises the complete context-menu/dialog transaction.
+fn tab_menu_reveals_and_renames_the_real_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let source = dir.path().join("old.md");
+    std::fs::write(&source, "# Original").unwrap();
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let services = Arc::new(TestServices::default());
+    let mut app = ViewerApp::with_services(InitialState::Path(source.clone()), services.clone());
+    for action in [
+        if cfg!(target_os = "windows") {
+            "Show in Explorer"
+        } else {
+            "Show in file manager"
+        },
+        "Rename file…",
+    ] {
+        let output = run_frame(&context, &mut app, input(vec![]));
+        let update = accesskit_update(&output);
+        let tab = node_with_text(update, egui::accesskit::Role::Button, "old.md");
+        let bounds = update
+            .nodes
+            .iter()
+            .find(|(id, _)| *id == tab)
+            .unwrap()
+            .1
+            .bounds()
+            .unwrap();
+        let pos = egui::pos2(
+            bounds.x0.midpoint(bounds.x1) as f32,
+            bounds.y0.midpoint(bounds.y1) as f32,
+        );
+        for pressed in [true, false] {
+            run_frame(
+                &context,
+                &mut app,
+                input(vec![
+                    egui::Event::PointerMoved(pos),
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Secondary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ]),
+            );
+        }
+        let output = run_frame(&context, &mut app, input(vec![]));
+        let item = node_with_text(
+            accesskit_update(&output),
+            egui::accesskit::Role::Button,
+            action,
+        );
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![accesskit_action(
+                egui::accesskit::Action::Click,
+                item,
+                None,
+            )]),
+        );
+    }
+    assert_eq!(
+        services.revealed_paths.lock().unwrap().as_slice(),
+        &[source.canonicalize().unwrap()]
+    );
+    run_frame(&context, &mut app, input(vec![]));
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![
+            key(egui::Key::A, egui::Modifiers::COMMAND),
+            egui::Event::Text("renamed".into()),
+        ]),
+    );
+    let output = run_frame(&context, &mut app, input(vec![]));
+    let rename = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::Button,
+        "Rename",
+    );
+    run_frame(
+        &context,
+        &mut app,
+        input(vec![accesskit_action(
+            egui::accesskit::Action::Click,
+            rename,
+            None,
+        )]),
+    );
+    assert!(!source.exists());
+    assert_eq!(
+        app.document_path(),
+        Some(
+            dir.path()
+                .join("renamed.md")
+                .canonicalize()
+                .unwrap()
+                .as_path()
+        )
+    );
+    assert_eq!(app.tab_count(), 1);
 }

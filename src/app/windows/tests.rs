@@ -317,3 +317,95 @@ fn reload_keeps_tab_and_reading_state_and_failed_reload_keeps_document() {
     assert!(app.error_message().unwrap().contains("Could not reload"));
     assert!(app.root.tabs[0].document.source.contains("Updated"));
 }
+
+#[test]
+fn markdown_links_reuse_tabs_and_navigate_heading_slugs() {
+    let dir = tempfile::tempdir().unwrap();
+    let source = dir.path().join("README.md");
+    let target = dir.path().join("other.md");
+    std::fs::write(&source, "# Home\n").unwrap();
+    std::fs::write(
+        &target,
+        format!(
+            "# Same!\n\n{}\n# Same!\n\n{}\n# Tail {{#custom}}\n\n{}",
+            "paragraph\n\n".repeat(70),
+            "middle\n\n".repeat(70),
+            "end\n\n".repeat(30)
+        ),
+    )
+    .unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(source));
+    app.root.handle_link("other.md#same-1");
+    assert_eq!(app.root.tabs.len(), 2);
+    for _ in 0..90 {
+        frame(&context, &mut app, input(vec![]));
+    }
+    assert!(app.root.document_scroll_offset() > 500.0);
+    let second_position = app.root.document_scroll_offset();
+    app.root.handle_link("#custom");
+    for _ in 0..90 {
+        frame(&context, &mut app, input(vec![]));
+    }
+    assert!(app.root.document_scroll_offset() > second_position);
+    app.root.handle_link("#same");
+    for _ in 0..90 {
+        frame(&context, &mut app, input(vec![]));
+    }
+    assert!(
+        app.root.document_scroll_offset() < 100.0,
+        "offset {} headings {:?}",
+        app.root.document_scroll_offset(),
+        app.root.tabs[app.root.active]
+            .markdown_cache
+            .navigation
+            .headings
+    );
+    app.root.handle_link("./other.md#missing");
+    assert_eq!(app.root.tabs.len(), 2);
+    frame(&context, &mut app, input(vec![]));
+    assert!(
+        app.root
+            .error_message()
+            .unwrap()
+            .contains("Heading not found")
+    );
+    app.root.handle_link("README.md");
+    assert_eq!(app.root.active, 0);
+    assert_eq!(app.root.tabs.len(), 2);
+    app.root.handle_link("missing.md#same");
+    assert_eq!(app.root.active, 0);
+    assert!(app.root.error_message().unwrap().contains("missing.md"));
+}
+
+#[test]
+fn rename_preserves_tab_order_active_tab_and_reading_state() {
+    let dir = tempfile::tempdir().unwrap();
+    let source = dir.path().join("old.md");
+    let second = dir.path().join("second.md");
+    std::fs::write(&source, "# Original\n").unwrap();
+    std::fs::write(&second, "# Second\n").unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(source.clone()));
+    app.root.load(&second);
+    let tab_id = app.root.tabs[0].id;
+    app.root.tabs[0].scroll_offset = 123.0;
+    app.root.tabs[0].search.query = "Original".into();
+    app.root
+        .rename_tab(&context, tab_id, "new.markdown")
+        .unwrap();
+    assert_eq!(app.root.active, 1);
+    assert_eq!(app.root.tabs[0].id, tab_id);
+    assert_eq!(
+        app.root.tabs[0].scroll_offset.to_bits(),
+        123.0_f32.to_bits()
+    );
+    assert_eq!(app.root.tabs[0].search.query, "Original");
+    assert_eq!(app.root.tabs[0].document.title, "new.markdown");
+    assert!(!source.exists());
+    app.root.load(&dir.path().join("new.markdown"));
+    assert_eq!(app.root.tabs.len(), 2);
+    assert_eq!(app.root.active, 0);
+    assert!(app.root.rename_tab(&context, tab_id, "second.md").is_err());
+    assert_eq!(app.root.tabs[0].document.title, "new.markdown");
+}

@@ -3,6 +3,7 @@ use std::{ops::Range, sync::Arc};
 
 #[derive(Debug, Clone)]
 pub struct Heading {
+    pub id: Option<String>,
     pub level: u8,
     pub text: String,
     pub position: Pos2,

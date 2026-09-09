@@ -61,12 +61,12 @@ pub trait AppServices: Send + Sync {
     /// Returns an error when the platform cannot open the URL.
     fn open_browser(&self, url: &Url) -> io::Result<()>;
 
-    /// Open a validated Markdown path in another viewer process.
+    /// Reveal a document in the system file manager.
     ///
     /// # Errors
     ///
-    /// Returns an error when the platform cannot start another viewer.
-    fn open_markdown(&self, path: &Path) -> io::Result<()>;
+    /// Returns an error when the platform cannot reveal the file.
+    fn reveal_in_file_manager(&self, path: &Path) -> io::Result<()>;
 }
 
 #[derive(Debug, Default)]
@@ -81,8 +81,8 @@ impl AppServices for PlatformServices {
         platform::open_browser(url)
     }
 
-    fn open_markdown(&self, path: &Path) -> io::Result<()> {
-        platform::open_markdown(path)
+    fn reveal_in_file_manager(&self, path: &Path) -> io::Result<()> {
+        platform::reveal_in_file_manager(path)
     }
 }
 
@@ -96,6 +96,8 @@ struct DocumentTab {
     max_scroll_offset: f32,
     search: crate::search::Search,
     heading_target: Option<usize>,
+    fragment_target: Option<String>,
+    navigation_error: Option<String>,
     fonts_checked: bool,
     image_uris: Arc<Mutex<HashSet<String>>>,
 }
@@ -113,6 +115,13 @@ struct DetachRequest {
     size: egui::Vec2,
 }
 
+struct RenameDialog {
+    tab_id: u64,
+    name: String,
+    focus: bool,
+    error: Option<String>,
+}
+
 // Independent UI preferences and one-shot input/lifetime flags are not exclusive states.
 #[allow(clippy::struct_excessive_bools)]
 struct ViewerWindow {
@@ -128,6 +137,7 @@ struct ViewerWindow {
     drag_cancelled: bool,
     detach_request: Option<DetachRequest>,
     close_requested: bool,
+    rename_dialog: Option<RenameDialog>,
 }
 
 impl ViewerWindow {
@@ -146,6 +156,7 @@ impl ViewerWindow {
             drag_cancelled: false,
             detach_request: None,
             close_requested: false,
+            rename_dialog: None,
         };
         match initial {
             InitialState::Empty => {}
@@ -214,6 +225,8 @@ impl ViewerWindow {
                     max_scroll_offset: 0.0,
                     search: crate::search::Search::default(),
                     heading_target: None,
+                    fragment_target: None,
+                    navigation_error: None,
                     fonts_checked: false,
                     image_uris: Arc::default(),
                 });
@@ -249,6 +262,7 @@ impl ViewerWindow {
                 tab.markdown_cache = CommonMarkCache::default();
                 tab.math = MathRenderer::default();
                 tab.heading_target = None;
+                tab.fragment_target = None;
                 tab.fonts_checked = false;
                 tab.search.invalidate();
                 self.error = None;
@@ -298,7 +312,20 @@ impl ViewerWindow {
         let document_path = self.document_path();
         let result = match links::resolve(destination, document_path) {
             LinkAction::Browser(url) => self.services.open_browser(&url),
-            LinkAction::Markdown(path) => self.services.open_markdown(&path),
+            LinkAction::Markdown { path, fragment } => {
+                self.load(&path);
+                if self.error.is_none() {
+                    self.tabs[self.active].fragment_target = fragment;
+                }
+                return;
+            }
+            LinkAction::Anchor(fragment) => {
+                self.error = None;
+                if let Some(tab) = self.tabs.get_mut(self.active) {
+                    tab.fragment_target = Some(fragment);
+                }
+                return;
+            }
             LinkAction::Inert => return,
         };
         if let Err(error) = result {
@@ -322,6 +349,7 @@ impl ViewerWindow {
         });
         for destination in destinations {
             self.handle_link(&destination);
+            context.request_repaint();
         }
     }
 
@@ -515,6 +543,8 @@ impl ViewerWindow {
         }
         let mut close = None;
         let mut detach = None;
+        let mut rename = None;
+        let mut reveal = None;
         let mut tab_rects = Vec::new();
         egui::ScrollArea::horizontal()
             .id_salt("tabs")
@@ -537,6 +567,14 @@ impl ViewerWindow {
                                 self.tab_drag = Some(TabDrag { tab_id: tab.id, origin, latest: origin });
                             }
                             response.context_menu(|ui| {
+                                if ui.button("Rename file…").clicked() {
+                                    rename = Some((tab.id, tab.document.title.clone()));
+                                    ui.close();
+                                }
+                                if ui.button(if cfg!(target_os = "windows") { "Show in Explorer" } else { "Show in file manager" }).clicked() {
+                                    reveal = Some(tab.document.path.clone());
+                                    ui.close();
+                                }
                                 if ui.button("Move to new window").clicked() {
                                     detach = Some(tab.id);
                                     ui.close();
@@ -571,11 +609,96 @@ impl ViewerWindow {
             self.close_tab(index, ui.ctx());
             self.tab_drag = None;
         }
+        if let Some((tab_id, name)) = rename {
+            self.rename_dialog = Some(RenameDialog {
+                tab_id,
+                name,
+                focus: true,
+                error: None,
+            });
+        }
+        if let Some(path) = reveal
+            && let Err(error) = self.services.reveal_in_file_manager(&path)
+        {
+            self.error = Some(format!("Could not show file: {error}"));
+        }
         if let Some(tab_id) = detach {
             self.request_detach(ui.ctx(), tab_id, None);
         }
         self.finish_tab_drag(ui.ctx(), &tab_rects);
         ui.separator();
+    }
+
+    fn rename_tab(
+        &mut self,
+        context: &egui::Context,
+        tab_id: u64,
+        name: &str,
+    ) -> Result<(), String> {
+        let tab = self
+            .tabs
+            .iter_mut()
+            .find(|tab| tab.id == tab_id)
+            .ok_or("The tab is no longer open.")?;
+        let document = crate::file_actions::rename_document(&tab.document.path, name)?;
+        for uri in tab
+            .image_uris
+            .lock()
+            .expect("image references lock")
+            .drain()
+        {
+            context.forget_image(&uri);
+        }
+        tab.document = document;
+        tab.markdown_cache = CommonMarkCache::default();
+        tab.math = MathRenderer::default();
+        tab.heading_target = None;
+        tab.fragment_target = None;
+        tab.search.invalidate();
+        tab.fonts_checked = false;
+        context.request_repaint();
+        Ok(())
+    }
+
+    fn rename_ui(&mut self, context: &egui::Context) {
+        let Some(mut dialog) = self.rename_dialog.take() else {
+            return;
+        };
+        let mut submit = false;
+        let mut cancel = false;
+        egui::Modal::new(egui::Id::new("rename file")).show(context, |ui| {
+            ui.heading("Rename file");
+            ui.label("Filename only. The file stays in its current folder.");
+            let response = ui.text_edit_singleline(&mut dialog.name);
+            if dialog.focus {
+                response.request_focus();
+                dialog.focus = false;
+            }
+            if let Some(error) = &dialog.error {
+                ui.colored_label(ui.visuals().error_fg_color, error);
+            }
+            ui.horizontal(|ui| {
+                submit = ui.button("Rename").clicked();
+                cancel = ui.button("Cancel").clicked();
+            });
+            submit |=
+                ui.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Enter));
+            cancel |=
+                ui.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Escape));
+        });
+        if cancel {
+            return;
+        }
+        if submit {
+            match self.rename_tab(context, dialog.tab_id, &dialog.name) {
+                Ok(()) => {
+                    self.error = None;
+                    return;
+                }
+                Err(error) => dialog.error = Some(error),
+            }
+        }
+        self.rename_dialog = Some(dialog);
     }
 
     fn finish_tab_drag(&mut self, context: &egui::Context, tab_rects: &[(u64, egui::Rect)]) {
@@ -770,6 +893,9 @@ impl ViewerWindow {
             .show(ui, |ui| tab.document_ui(ui));
         tab.scroll_offset = output.state.offset.y;
         tab.max_scroll_offset = (output.content_size.y - output.inner_rect.height()).max(0.0);
+        if let Some(error) = tab.navigation_error.take() {
+            self.error = Some(error);
+        }
     }
 
     fn apply_zoom_input(context: &egui::Context) {
@@ -806,8 +932,12 @@ impl ViewerWindow {
         let context = ui.ctx().clone();
         Self::apply_zoom_input(&context);
         self.handle_drops(&context);
-        self.shortcuts(&context);
-        if context.input_mut(|input| input.consume_key(egui::Modifiers::COMMAND, egui::Key::O)) {
+        if self.rename_dialog.is_none() {
+            self.shortcuts(&context);
+        }
+        if self.rename_dialog.is_none()
+            && context.input_mut(|input| input.consume_key(egui::Modifiers::COMMAND, egui::Key::O))
+        {
             self.open_dialog();
         }
         if let Some(tab) = self.tabs.get_mut(self.active)
@@ -864,6 +994,7 @@ impl ViewerWindow {
             });
 
         self.intercept_links(&context);
+        self.rename_ui(&context);
     }
 }
 
@@ -938,6 +1069,33 @@ impl DocumentTab {
             .show(ui, &mut self.markdown_cache, &document.source);
         let navigation = &mut self.markdown_cache.navigation;
         navigation.scroll_target = None;
+        if let Some(fragment) = self.fragment_target.take() {
+            if fragment.is_empty() {
+                self.scroll_offset = 0.0;
+                ui.scroll_to_rect(
+                    egui::Rect::from_min_size(ui.min_rect().min, egui::vec2(1.0, 1.0)),
+                    Some(egui::Align::TOP),
+                );
+            } else {
+                let mut used = HashSet::new();
+                self.heading_target = navigation.headings.iter().position(|heading| {
+                    let base = heading
+                        .id
+                        .clone()
+                        .unwrap_or_else(|| links::heading_slug(&heading.text));
+                    let mut slug = base.clone();
+                    let mut suffix = 1;
+                    while !used.insert(slug.clone()) {
+                        slug = format!("{base}-{suffix}");
+                        suffix += 1;
+                    }
+                    slug == fragment
+                });
+                if self.heading_target.is_none() {
+                    self.navigation_error = Some(format!("Heading not found: #{fragment}"));
+                }
+            }
+        }
         if let Some(index) = self.heading_target.take()
             && let Some(heading) = navigation.headings.get(index)
         {

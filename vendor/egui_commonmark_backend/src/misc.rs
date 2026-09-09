@@ -204,8 +204,8 @@ impl Link {
         self,
         ui: &mut Ui,
         cache: &mut CommonMarkCache,
-        options: &CommonMarkOptions,
-        scroll_to_heading: &mut Option<String>,
+        _options: &CommonMarkOptions,
+        _scroll_to_heading: &mut Option<String>,
     ) {
         let Self { destination, text } = self;
 
@@ -236,8 +236,6 @@ impl Link {
         if response.clicked() || response.middle_clicked() {
             if cache.link_hooks().contains_key(&destination) {
                 cache.link_hooks_mut().insert(destination, true);
-            } else if options.enable_scroll_to_heading && destination.starts_with('#') {
-                scroll_to_heading.replace(destination[1..].to_owned());
             } else {
                 ui.ctx().open_url(egui::OpenUrl::new_tab(destination));
             }

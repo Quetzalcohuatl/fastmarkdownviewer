@@ -26,6 +26,34 @@ fn executable_renders_diagram_pixels() {
     assert!(image.pixels().any(|p| p.0[0] < 150 && p.0[3] > 0));
 }
 
+#[cfg(target_os = "windows")]
+#[test]
+fn diagram_labels_render_without_windows_fonts() {
+    let directory = tempfile::tempdir().unwrap();
+    let input = directory.path().join("input.mmd");
+    let output = directory.path().join("output.png");
+    fs::write(
+        &input,
+        "flowchart LR\n A[Portable font fallback] --> B[Readable]",
+    )
+    .unwrap();
+    let status = Command::new(env!("CARGO_BIN_EXE_FastMarkdownViewer"))
+        .env("WINDIR", directory.path())
+        .env_remove("LOCALAPPDATA")
+        .args([
+            std::ffi::OsStr::new("--internal-mermaid"),
+            input.as_os_str(),
+            output.as_os_str(),
+        ])
+        .status()
+        .unwrap();
+    assert!(
+        status.success(),
+        "bundled fonts must work without Windows font files"
+    );
+    assert!(image::open(output).unwrap().width() > 100);
+}
+
 #[test]
 fn malformed_diagram_returns_error_without_image() {
     let (status, directory) = render("flowchart LR\n A[Unclosed label");

@@ -1264,6 +1264,13 @@ fn settings_selects_solarized_light_and_system_restores_standard_palettes() {
 
 #[test]
 fn settings_text_font_selection_updates_rendered_fonts() {
+    let (font_label, font_file) = if cfg!(target_os = "windows") {
+        ("Georgia", "georgia.ttf")
+    } else if cfg!(target_os = "macos") {
+        ("Helvetica", "Helvetica.ttc")
+    } else {
+        ("DejaVu Sans", "DejaVuSans.ttf")
+    };
     let context = egui::Context::default();
     fonts::install(&context);
     context.enable_accesskit();
@@ -1271,7 +1278,7 @@ fn settings_text_font_selection_updates_rendered_fonts() {
     for (role, label) in [
         (egui::accesskit::Role::Button, "Settings"),
         (egui::accesskit::Role::Button, "Text font:"),
-        (egui::accesskit::Role::RadioButton, "Georgia"),
+        (egui::accesskit::Role::RadioButton, font_label),
     ] {
         let output = run_frame(&context, &mut app, input(vec![]));
         let node = node_with_text(accesskit_update(&output), role, label);
@@ -1289,7 +1296,7 @@ fn settings_text_font_selection_updates_rendered_fonts() {
     context.fonts_mut(|fonts| {
         assert_eq!(
             fonts.definitions().families[&egui::FontFamily::Proportional][0],
-            "georgia.ttf"
+            font_file
         );
     });
     assert_eq!(app.tab_count(), 1);

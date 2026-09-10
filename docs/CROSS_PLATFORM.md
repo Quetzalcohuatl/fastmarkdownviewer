@@ -35,6 +35,7 @@ are not advertised by this preview. Use the in-app file dialog or drag-and-drop.
 The command-line executable lives in FastMarkdownViewer.app/Contents/MacOS.
 
 Primary shortcuts use Cmd on macOS; tab cycling remains Ctrl+Tab.
+Use Cmd+Shift+O for the outline on macOS; Cmd+H is the system Hide shortcut.
 Installed font choices and script coverage depend on local fonts. The bundled
 default text and emoji fonts remain available on every platform; Mermaid uses
 bundled Latin fonts when system fonts are unavailable. Font collection fallback
@@ -57,6 +58,10 @@ python3 scripts/package-unix.py --platform linux-x86_64 --binary target/release/
 
 For a Mac, substitute macos-aarch64 or macos-x86_64 in the packaging command.
 Packages and checksums are uploaded by the Experimental desktop builds workflow.
+
+When building from WSL with the source on a Windows drive, pass `--output` with
+a directory on the Linux filesystem (for example /home/your-user/fmv-packages)
+so executable and Debian package permissions are preserved correctly.
 
 ## Desktop acceptance checklist
 

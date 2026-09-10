@@ -80,7 +80,11 @@ pub fn app_icon() -> eframe::egui::IconData {
 #[must_use]
 pub fn shortcut_label(label: &str) -> std::borrow::Cow<'_, str> {
     if cfg!(target_os = "macos") && !label.contains("Ctrl+Tab") {
-        label.replace("Ctrl+", "Cmd+").into()
+        // Cmd+H belongs to macOS (Hide). Advertise our existing alternate instead.
+        label
+            .replace("Ctrl+H", "Cmd+Shift+O")
+            .replace("Ctrl+", "Cmd+")
+            .into()
     } else {
         label.into()
     }

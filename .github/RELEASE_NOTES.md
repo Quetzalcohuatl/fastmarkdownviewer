@@ -1,10 +1,12 @@
-FastMarkdownViewer v0.1.4 adds more reading themes and separate text/code font choices, including Solarized Light.
+FastMarkdownViewer v0.1.5 adds offline Mermaid diagrams without a browser engine or an external diagram service.
 
-- **Settings → Color theme:** Solarized Light, Solarized Dark, Quiet Light, Monokai, and Tomorrow Night Blue join System, Light, and Dark. Code highlighting follows the palette, including switches between two light or two dark themes.
-- **Settings → Text font / Code font:** choose supported installed fonts independently. Available choices include Segoe UI, Arial, Calibri, Georgia, Times New Roman, Consolas, Courier New, Cascadia Code/Mono, JetBrains Mono, and Fira Code. Only installed choices appear; no fonts are downloaded or redistributed. Emoji and multilingual fallbacks are retained.
-- Appearance changes apply across windows in the current process. Returning to System restores the standard Windows-following light/dark behavior. Settings remain session-only and reset on restart.
-- The repository now includes `torturetest2.md` (28 supported-behavior cases), `torturetest3.md` (20 unclaimed/limited-feature cases), local companion assets, and research from 10 open-source viewers. These are manual test suites, not a claim that every exploratory case passes.
+- Mermaid fences render above their original searchable, selectable, copyable source.
+- Rendering uses patched Rusty in a hidden child process. Unsupported syntax, rendering failures, and oversized diagrams show an error with the source retained.
+- Fixes include malformed flowchart labels, nested-subgraph membership, and shaped mindmap root labels. The previously crashing 2,000-edge chain is rejected before layout.
+- All three Mermaid examples in torturetest3.md render. PlantUML, Graphviz, and active HTML/CSS rendering are not added.
 
-The themes are lightweight native interpretations of familiar editor palettes, not VS Code extension or arbitrary theme-file support. Font selection is a curated installed-font list. The release has 73 automated tests, including menu selection, syntax-palette changes, independent fonts, and fallback preservation. No new viewer dependencies were added.
+This is a supported subset, not full Mermaid.js compatibility. Diagrams currently use a white canvas and Rusty's default palette. Limits include 64 KiB source, 512 flowchart vertices, 1,024 edges, 32 subgraphs, 4-megapixel images, and a 10-second timeout. Diagram caches are limited to 32 entries and 32 MiB per tab. Temporary rendering files are cleaned up after completion; abrupt application termination can leave them behind.
 
-Download the Windows x64 portable EXE, portable ZIP, or per-user installer below. Builds remain unsigned; verify with SHA256SUMS.txt and GitHub provenance attestations. Automatic remote images remain enabled by default and can be disabled in Settings; see PRIVACY.md.
+Validation: 78 automated tests passed locally, including executable rendering and error handling, plus actual-window visual checks. The preview EXE was about 19 MB, approximately 2.1 MB larger than v0.1.4.
+
+Download the Windows x64 portable EXE, portable ZIP, or per-user installer below. Builds remain unsigned; verify SHA256SUMS.txt and GitHub provenance attestations. See PRIVACY.md for network and temporary-file behavior.

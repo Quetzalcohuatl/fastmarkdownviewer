@@ -1,0 +1,15 @@
+flowchart TD
+    subgraph Client[Desktop application]
+        Open[Open Markdown file] --> Parse{Contains diagram?}
+        Parse -->|No| Text[Render document]
+        Parse -->|Yes| Queue[Queue background work]
+    end
+    Queue --> Cache{Cached result?}
+    Cache -->|Yes| Display[Display diagram]
+    Cache -->|No| Render[Parse and lay out diagram]
+    Render --> Validate{Within limits?}
+    Validate -->|Yes| Save[Cache rendered image]
+    Save --> Display
+    Validate -->|No| Fallback[Show source and error]
+    Display --> Text
+    Fallback --> Text

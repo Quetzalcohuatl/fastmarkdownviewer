@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant User
+    participant Viewer
+    participant Worker
+    User->>Viewer: Open document
+    Viewer-->>User: Display text immediately
+    loop Visible diagrams
+        Viewer->>Worker: Request render
+        alt Valid diagram
+            Worker-->>Viewer: Rendered image
+        else Invalid syntax
+            Worker-->>Viewer: Error and original source
+        end
+    end
+    Note over Viewer,Worker: Keep scrolling responsive

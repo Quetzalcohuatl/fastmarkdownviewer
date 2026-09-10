@@ -1,0 +1,8 @@
+flowchart TD
+    subgraph App
+        subgraph Reader
+            A[Open] --> B[Parse]
+        end
+        B --> C[Render]
+    end
+    C --> D[Screen]

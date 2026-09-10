@@ -82,6 +82,7 @@ impl eframe::App for Capture {
 }
 
 fn main() -> eframe::Result {
+    fast_markdown_viewer::mermaid::handle_helper_args();
     let mut arguments = std::env::args_os().skip(1);
     let document = PathBuf::from(arguments.next().expect("input Markdown path"));
     let output = PathBuf::from(arguments.next().expect("output PNG path"));

@@ -16,3 +16,5 @@ Vendored `egui_commonmark_backend` 0.25.0, under its original MIT OR Apache-2.0 
 12. Size code backgrounds from actual content height, honor the wrapping setting, and omit closed-cell delimiters/empty terminal rows from parsed tables.
 
 The upstream optional `better_syntax_highlighting` API is retained but is not enabled by this application; the local lazy highlighter uses syntect's default syntax/theme dumps and pure-Rust regex engine directly. Original licenses are preserved. No upstream submission is claimed.
+
+- Render Mermaid callbacks and their retained code source in a vertical layout; other fences use the original source renderer.

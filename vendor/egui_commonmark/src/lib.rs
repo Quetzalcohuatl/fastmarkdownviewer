@@ -224,6 +224,12 @@ impl<'f> CommonMarkViewer<'f> {
         self
     }
 
+    /// Render a Mermaid diagram above its original source code block.
+    pub fn render_diagram_fn(mut self, func: Option<&'f dyn Fn(&mut egui::Ui, &str)>) -> Self {
+        self.options.diagram_fn = func;
+        self
+    }
+
     /// Intercept images before any texture or network lookup.
     pub fn image_gate(mut self, gate: Option<&'f egui_commonmark_backend::ImageGateFn>) -> Self {
         self.options.image_gate = gate;

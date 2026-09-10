@@ -8,6 +8,7 @@ use fast_markdown_viewer::{
 };
 
 fn main() -> eframe::Result {
+    fast_markdown_viewer::mermaid::handle_helper_args();
     let command = cli::parse(std::env::args_os());
     if command == Command::Version {
         println!("FastMarkdownViewer {}", env!("CARGO_PKG_VERSION"));

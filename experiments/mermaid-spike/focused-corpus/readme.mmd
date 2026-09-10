@@ -1,0 +1,7 @@
+flowchart LR
+    A["Open README.md"] --> B{Cached?}
+    B -->|Yes| C[Display]
+    B -->|No| D[Parse]
+    D --> C
+    C -.->|Reload| D
+    %% This comment should not become a node

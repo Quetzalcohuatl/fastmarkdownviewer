@@ -76,6 +76,7 @@ struct DocumentTab {
     document: Document,
     markdown_cache: CommonMarkCache,
     math: MathRenderer,
+    mermaid: crate::mermaid::MermaidRenderer,
     scroll_offset: f32,
     max_scroll_offset: f32,
     search: crate::search::Search,
@@ -205,6 +206,7 @@ impl ViewerWindow {
                     document,
                     markdown_cache: CommonMarkCache::default(),
                     math: MathRenderer::default(),
+                    mermaid: crate::mermaid::MermaidRenderer::default(),
                     scroll_offset: 0.0,
                     max_scroll_offset: 0.0,
                     search: crate::search::Search::default(),
@@ -245,6 +247,7 @@ impl ViewerWindow {
                 tab.document = document;
                 tab.markdown_cache = CommonMarkCache::default();
                 tab.math = MathRenderer::default();
+                tab.mermaid = crate::mermaid::MermaidRenderer::default();
                 tab.heading_target = None;
                 tab.fragment_target = None;
                 tab.fonts_checked = false;
@@ -646,6 +649,7 @@ impl ViewerWindow {
         tab.document = document;
         tab.markdown_cache = CommonMarkCache::default();
         tab.math = MathRenderer::default();
+        tab.mermaid = crate::mermaid::MermaidRenderer::default();
         tab.heading_target = None;
         tab.fragment_target = None;
         tab.search.invalidate();
@@ -1059,6 +1063,8 @@ impl DocumentTab {
         let render_math = move |ui: &mut egui::Ui, formula: &str, inline: bool| {
             math.show(ui, formula, inline);
         };
+        let mermaid = self.mermaid.clone();
+        let render_diagram = move |ui: &mut egui::Ui, source: &str| mermaid.show(ui, source);
         let references = self.image_uris.clone();
         let image_gate = move |ui: &mut egui::Ui, uri: &str, alt: &str| {
             references
@@ -1079,6 +1085,7 @@ impl DocumentTab {
             .show_alt_text_on_hover(true)
             .enable_scroll_to_heading(true)
             .render_math_fn(Some(&render_math))
+            .render_diagram_fn(Some(&render_diagram))
             .image_gate(Some(&image_gate))
             .show(ui, &mut self.markdown_cache, &document.source);
         let navigation = &mut self.markdown_cache.navigation;

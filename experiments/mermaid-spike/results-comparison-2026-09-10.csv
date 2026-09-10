@@ -1,0 +1,268 @@
+renderer,fixture,status,exit_code,sampled_peak_bytes,output,error,run
+mmdr-text,chain-200.mmd,ok,0,30887936,render_ms=139.113 font_ms=1.063 raster_ms=20.371 pipeline_ms=160.712 svg_bytes=170521 width=119 height=15075,,1
+mmdr-text,chain-2000.mmd,error,2,43876352,,ERROR: Diagram exceeds prototype's 16 megapixel limit,1
+mmdr-text,class.mmd,ok,0,11661312,render_ms=13.259 font_ms=0.585 raster_ms=1.085 pipeline_ms=15.041 svg_bytes=3416 width=181 height=278,,1
+mmdr-text,er.mmd,ok,0,7815168,render_ms=14.218 font_ms=0.617 raster_ms=1.368 pipeline_ms=16.312 svg_bytes=4378 width=201 height=255,,1
+mmdr-text,flowchart.mmd,ok,0,12845056,render_ms=26.040 font_ms=0.641 raster_ms=1.239 pipeline_ms=28.104 svg_bytes=4461 width=474 height=147,,1
+mmdr-text,gantt.mmd,ok,0,5992448,render_ms=13.642 font_ms=0.849 raster_ms=1.893 pipeline_ms=16.476 svg_bytes=4745 width=641 height=154,,1
+mmdr-text,gitgraph.mmd,ok,0,4952064,render_ms=14.041 font_ms=0.591 raster_ms=1.241 pipeline_ms=15.976 svg_bytes=3507 width=225 height=163,,1
+mmdr-text,invalid-trailing.mmd,ok,0,5791744,render_ms=16.558 font_ms=0.599 raster_ms=0.817 pipeline_ms=18.072 svg_bytes=2529 width=396 height=79,,1
+mmdr-text,invalid.mmd,error,2,4825088,,ERROR: unexpected token 'notADiagram' at 1:1; expected unknown or missing Mermaid diagram header,1
+mmdr-text,labels.mmd,ok,0,6012928,render_ms=16.033 font_ms=0.589 raster_ms=1.331 pipeline_ms=18.042 svg_bytes=2154 width=488 height=117,,1
+mmdr-text,malformed-flowchart.mmd,error,2,4050944,,ERROR: unexpected token '-->' at 3:5; expected node identifier,1
+mmdr-text,mindmap.mmd,ok,0,10530816,render_ms=14.443 font_ms=0.612 raster_ms=1.650 pipeline_ms=16.804 svg_bytes=7717 width=808 height=180,,1
+mmdr-text,oversize.mmd,error,2,2686976,,ERROR: Diagram exceeds prototype's 64 KiB input limit,1
+mmdr-text,pie.mmd,ok,0,12001280,render_ms=14.230 font_ms=0.625 raster_ms=2.161 pipeline_ms=17.145 svg_bytes=2710 width=456 height=360,,1
+mmdr-text,sequence-realistic.mmd,ok,0,7127040,render_ms=13.748 font_ms=0.610 raster_ms=3.963 pipeline_ms=18.424 svg_bytes=10986 width=659 height=653,,1
+mmdr-text,sequence.mmd,ok,0,4902912,render_ms=13.750 font_ms=0.569 raster_ms=1.430 pipeline_ms=15.875 svg_bytes=4700 width=450 height=265,,1
+mmdr-text,state.mmd,ok,0,4952064,render_ms=13.730 font_ms=0.570 raster_ms=1.103 pipeline_ms=15.533 svg_bytes=3861 width=145 height=183,,1
+mmdr-text,styled.mmd,ok,0,12099584,render_ms=15.028 font_ms=0.594 raster_ms=0.782 pipeline_ms=16.492 svg_bytes=1979 width=328 height=75,,1
+mmdr-text,unicode.mmd,ok,0,55083008,render_ms=15.315 font_ms=8.297 raster_ms=1.388 pipeline_ms=25.403 svg_bytes=3731 width=885 height=75,,1
+mmdr-text,workflow.mmd,ok,0,18198528,render_ms=238.281 font_ms=0.846 raster_ms=4.380 pipeline_ms=243.602 svg_bytes=15479 width=958 height=1365,,1
+rusty-text,chain-200.mmd,ok,0,26013696,render_ms=8.885 font_ms=0.756 raster_ms=16.449 pipeline_ms=26.183 svg_bytes=116548 width=106 height=16633,,1
+rusty-text,chain-2000.mmd,aborted,-1073741571,14553088,,thread 'main' (31048) has overflowed its stack,1
+rusty-text,class.mmd,ok,0,2682880,render_ms=0.263 font_ms=0.666 raster_ms=0.914 pipeline_ms=1.944 svg_bytes=2191 width=184 height=213,,1
+rusty-text,er.mmd,ok,0,2682880,render_ms=0.259 font_ms=0.592 raster_ms=1.046 pipeline_ms=2.008 svg_bytes=2735 width=160 height=225,,1
+rusty-text,flowchart.mmd,ok,0,3764224,render_ms=0.719 font_ms=0.624 raster_ms=1.031 pipeline_ms=2.956 svg_bytes=2835 width=492 height=156,,1
+rusty-text,gantt.mmd,ok,0,10125312,render_ms=0.137 font_ms=0.575 raster_ms=1.484 pipeline_ms=2.284 svg_bytes=4206 width=840 height=226,,1
+rusty-text,gitgraph.mmd,ok,0,8749056,render_ms=0.170 font_ms=0.716 raster_ms=0.672 pipeline_ms=1.777 svg_bytes=1472 width=357 height=200,,1
+rusty-text,invalid-trailing.mmd,error,2,4108288,,"ERROR: unexpected token at byte 64: ""???""",1
+rusty-text,invalid.mmd,error,2,3915776,,"ERROR: unexpected token at byte 0: ""notADiagram
+    {{{ unexpected input""",1
+rusty-text,labels.mmd,ok,0,2793472,render_ms=0.599 font_ms=0.641 raster_ms=1.201 pipeline_ms=2.898 svg_bytes=1441 width=756 height=90,,1
+rusty-text,malformed-flowchart.mmd,ok,0,2682880,render_ms=0.203 font_ms=0.603 raster_ms=0.381 pipeline_ms=1.283 svg_bytes=487 width=81 height=73,,1
+rusty-text,mindmap.mmd,ok,0,10629120,render_ms=0.327 font_ms=0.602 raster_ms=1.543 pipeline_ms=2.580 svg_bytes=3616 width=472 height=542,,1
+rusty-text,oversize.mmd,error,2,3899392,,ERROR: Diagram exceeds prototype's 64 KiB input limit,1
+rusty-text,pie.mmd,ok,0,7090176,render_ms=0.096 font_ms=0.577 raster_ms=1.104 pipeline_ms=1.866 svg_bytes=1805 width=620 height=420,,1
+rusty-text,sequence-realistic.mmd,ok,0,12795904,render_ms=0.171 font_ms=0.589 raster_ms=3.252 pipeline_ms=4.104 svg_bytes=7166 width=775 height=574,,1
+rusty-text,sequence.mmd,ok,0,9101312,render_ms=0.126 font_ms=0.566 raster_ms=1.072 pipeline_ms=1.867 svg_bytes=2873 width=353 height=254,,1
+rusty-text,state.mmd,ok,0,9043968,render_ms=0.319 font_ms=0.574 raster_ms=0.972 pipeline_ms=1.954 svg_bytes=2589 width=154 height=238,,1
+rusty-text,styled.mmd,ok,0,3637248,render_ms=0.289 font_ms=0.699 raster_ms=0.715 pipeline_ms=1.791 svg_bytes=1292 width=300 height=73,,1
+rusty-text,unicode.mmd,ok,0,51761152,render_ms=0.320 font_ms=8.275 raster_ms=1.323 pipeline_ms=10.026 svg_bytes=2518 width=794 height=73,,1
+rusty-text,workflow.mmd,ok,0,20340736,render_ms=1.188 font_ms=0.663 raster_ms=5.224 pipeline_ms=7.179 svg_bytes=10359 width=956 height=1335,,1
+selkie-text,chain-200.mmd,ok,0,30896128,render_ms=33.138 font_ms=0.720 raster_ms=20.984 pipeline_ms=54.936 svg_bytes=105544 width=86 height=20629,,1
+selkie-text,chain-2000.mmd,aborted,-1073740791,22294528,,"thread 'main' (30420) panicked at C:\Users\theco\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\selkie-rs-0.3.0\src\layout\dagre\rank\network_simplex.rs:360:9:
+dfs_assign recursion overflow: counter=1001, v=N1001, parent=Some(""N1000"")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",1
+selkie-text,class.mmd,ok,0,10502144,render_ms=0.927 font_ms=0.730 raster_ms=1.161 pipeline_ms=2.910 svg_bytes=6080 width=142 height=320,,1
+selkie-text,er.mmd,ok,0,11059200,render_ms=0.930 font_ms=0.622 raster_ms=1.488 pipeline_ms=3.135 svg_bytes=5947 width=252 height=403,,1
+selkie-text,flowchart.mmd,ok,0,11190272,render_ms=5.676 font_ms=0.619 raster_ms=1.113 pipeline_ms=7.549 svg_bytes=4862 width=494 height=126,,1
+selkie-text,gantt.mmd,ok,0,10940416,render_ms=2.804 font_ms=0.605 raster_ms=2.421 pipeline_ms=5.993 svg_bytes=6652 width=784 height=148,,1
+selkie-text,gitgraph.mmd,ok,0,2686976,render_ms=1.068 font_ms=0.611 raster_ms=1.219 pipeline_ms=2.983 svg_bytes=6003 width=282 height=205,,1
+selkie-text,invalid-trailing.mmd,ok,0,11767808,render_ms=2.735 font_ms=0.678 raster_ms=1.266 pipeline_ms=4.766 svg_bytes=4742 width=234 height=583,,1
+selkie-text,invalid.mmd,error,2,5443584,,ERROR: Unknown diagram type: Could not detect diagram type,1
+selkie-text,labels.mmd,ok,0,11284480,render_ms=2.430 font_ms=0.607 raster_ms=1.226 pipeline_ms=4.355 svg_bytes=3545 width=504 height=106,,1
+selkie-text,malformed-flowchart.mmd,error,2,2691072,,"ERROR: Parse error:  --> 2:7
+  |
+2 |     A[Unclosed label
+  |       ^---
+  |
+  = expected quoted_string or md_string",1
+selkie-text,mindmap.mmd,ok,0,14090240,render_ms=3.910 font_ms=0.661 raster_ms=1.638 pipeline_ms=6.294 svg_bytes=9175 width=567 height=330,,1
+selkie-text,oversize.mmd,error,2,3907584,,ERROR: Diagram exceeds prototype's 64 KiB input limit,1
+selkie-text,pie.mmd,ok,0,4132864,render_ms=2.192 font_ms=0.639 raster_ms=2.350 pipeline_ms=5.274 svg_bytes=2934 width=584 height=450,,1
+selkie-text,sequence-realistic.mmd,ok,0,13119488,render_ms=0.664 font_ms=0.635 raster_ms=3.589 pipeline_ms=4.975 svg_bytes=8838 width=681 height=571,,1
+selkie-text,sequence.mmd,ok,0,10760192,render_ms=0.568 font_ms=0.611 raster_ms=1.425 pipeline_ms=2.714 svg_bytes=5627 width=450 height=258,,1
+selkie-text,state.mmd,ok,0,21266432,render_ms=18.072 font_ms=0.655 raster_ms=1.183 pipeline_ms=20.007 svg_bytes=4363 width=124 height=230,,1
+selkie-text,styled.mmd,ok,0,10747904,render_ms=2.773 font_ms=0.661 raster_ms=0.799 pipeline_ms=4.329 svg_bytes=3544 width=293 height=69,,1
+selkie-text,unicode.mmd,ok,0,51376128,render_ms=3.165 font_ms=8.300 raster_ms=1.420 pipeline_ms=12.989 svg_bytes=4395 width=803 height=69,,1
+selkie-text,workflow.mmd,ok,0,24072192,render_ms=4.337 font_ms=0.657 raster_ms=4.266 pipeline_ms=9.347 svg_bytes=10549 width=1034 height=1473,,1
+merman-text,chain-200.mmd,ok,0,38137856,render_ms=67.543 font_ms=1.053 raster_ms=23.587 pipeline_ms=92.278 svg_bytes=266305 width=111 height=20870,,1
+merman-text,chain-2000.mmd,error,2,56950784,,ERROR: Diagram exceeds prototype's 16 megapixel limit,1
+merman-text,class.mmd,ok,0,6672384,render_ms=2.366 font_ms=0.710 raster_ms=1.372 pipeline_ms=4.543 svg_bytes=14206 width=163 height=294,,1
+merman-text,er.mmd,ok,0,3649536,render_ms=2.310 font_ms=0.628 raster_ms=1.544 pipeline_ms=4.575 svg_bytes=12985 width=146 height=329,,1
+merman-text,flowchart.mmd,ok,0,13099008,render_ms=2.495 font_ms=0.654 raster_ms=1.383 pipeline_ms=4.619 svg_bytes=12855 width=493 height=118,,1
+merman-text,gantt.mmd,ok,0,3018752,render_ms=1.862 font_ms=0.634 raster_ms=2.912 pipeline_ms=5.501 svg_bytes=8291 width=1184 height=148,,1
+merman-text,gitgraph.mmd,ok,0,4636672,render_ms=1.392 font_ms=0.626 raster_ms=1.353 pipeline_ms=3.471 svg_bytes=7922 width=272 height=173,,1
+merman-text,invalid-trailing.mmd,error,2,6500352,,"ERROR: Diagram parse error (flowchart-v2): User { error: LexError { message: ""Unexpected character at 64"" } }",1
+merman-text,invalid.mmd,error,2,5046272,,"ERROR: No diagram type detected matching given configuration for text: notADiagram
+    {{{ unexpected input",1
+merman-text,labels.mmd,ok,0,13086720,render_ms=2.328 font_ms=0.646 raster_ms=1.506 pipeline_ms=4.566 svg_bytes=10478 width=468 height=118,,1
+merman-text,malformed-flowchart.mmd,error,2,4399104,,"ERROR: Diagram parse error (flowchart-v2): User { error: LexError { message: ""Unterminated node label (missing `]`)"" } }",1
+merman-text,mindmap.mmd,ok,0,12189696,render_ms=7.081 font_ms=0.843 raster_ms=2.593 pipeline_ms=10.601 svg_bytes=27074 width=358 height=473,,1
+merman-text,oversize.mmd,error,2,2686976,,ERROR: Diagram exceeds prototype's 64 KiB input limit,1
+merman-text,pie.mmd,ok,0,13430784,render_ms=1.488 font_ms=0.633 raster_ms=2.376 pipeline_ms=4.583 svg_bytes=2533 width=590 height=450,,1
+merman-text,sequence-realistic.mmd,ok,0,11452416,render_ms=1.896 font_ms=0.642 raster_ms=3.476 pipeline_ms=6.100 svg_bytes=25144 width=746 height=595,,1
+merman-text,sequence.mmd,ok,0,12599296,render_ms=1.613 font_ms=0.654 raster_ms=1.429 pipeline_ms=3.785 svg_bytes=20997 width=450 height=259,,1
+merman-text,state.mmd,ok,0,8417280,render_ms=3.656 font_ms=0.672 raster_ms=1.634 pipeline_ms=6.052 svg_bytes=77329 width=107 height=234,,1
+merman-text,styled.mmd,ok,0,2686976,render_ms=1.996 font_ms=0.637 raster_ms=1.002 pipeline_ms=3.722 svg_bytes=9931 width=319 height=70,,1
+merman-text,unicode.mmd,ok,0,55513088,render_ms=2.477 font_ms=8.567 raster_ms=1.695 pipeline_ms=12.828 svg_bytes=12087 width=882 height=70,,1
+merman-text,workflow.mmd,ok,0,8429568,render_ms=5.451 font_ms=0.659 raster_ms=4.383 pipeline_ms=10.579 svg_bytes=28891 width=941 height=1379,,1
+mmdr-text,chain-200.mmd,ok,0,31526912,render_ms=138.678 font_ms=1.040 raster_ms=20.381 pipeline_ms=160.211 svg_bytes=170521 width=119 height=15075,,2
+mmdr-text,chain-2000.mmd,error,2,43819008,,ERROR: Diagram exceeds prototype's 16 megapixel limit,2
+mmdr-text,class.mmd,ok,0,11657216,render_ms=13.442 font_ms=0.568 raster_ms=1.065 pipeline_ms=15.189 svg_bytes=3416 width=181 height=278,,2
+mmdr-text,er.mmd,ok,0,11091968,render_ms=14.256 font_ms=0.637 raster_ms=1.392 pipeline_ms=16.396 svg_bytes=4378 width=201 height=255,,2
+mmdr-text,flowchart.mmd,ok,0,12845056,render_ms=26.001 font_ms=0.603 raster_ms=1.269 pipeline_ms=27.983 svg_bytes=4461 width=474 height=147,,2
+mmdr-text,gantt.mmd,ok,0,11157504,render_ms=13.318 font_ms=0.603 raster_ms=1.894 pipeline_ms=15.928 svg_bytes=4745 width=641 height=154,,2
+mmdr-text,gitgraph.mmd,ok,0,4878336,render_ms=13.563 font_ms=0.597 raster_ms=1.201 pipeline_ms=15.470 svg_bytes=3507 width=225 height=163,,2
+mmdr-text,invalid-trailing.mmd,ok,0,12255232,render_ms=14.987 font_ms=0.650 raster_ms=0.784 pipeline_ms=16.526 svg_bytes=2529 width=396 height=79,,2
+mmdr-text,invalid.mmd,error,2,4820992,,ERROR: unexpected token 'notADiagram' at 1:1; expected unknown or missing Mermaid diagram header,2
+mmdr-text,labels.mmd,ok,0,12886016,render_ms=14.806 font_ms=0.654 raster_ms=1.378 pipeline_ms=16.943 svg_bytes=2154 width=488 height=117,,2
+mmdr-text,malformed-flowchart.mmd,error,2,2691072,,ERROR: unexpected token '-->' at 3:5; expected node identifier,2
+mmdr-text,mindmap.mmd,ok,0,4878336,render_ms=13.157 font_ms=0.572 raster_ms=1.552 pipeline_ms=15.435 svg_bytes=7717 width=808 height=180,,2
+mmdr-text,oversize.mmd,error,2,0,,ERROR: Diagram exceeds prototype's 64 KiB input limit,2
+mmdr-text,pie.mmd,ok,0,4739072,render_ms=13.559 font_ms=0.581 raster_ms=2.092 pipeline_ms=16.340 svg_bytes=2710 width=456 height=360,,2
+mmdr-text,sequence-realistic.mmd,ok,0,14802944,render_ms=13.732 font_ms=0.578 raster_ms=3.958 pipeline_ms=18.380 svg_bytes=10986 width=659 height=653,,2
+mmdr-text,sequence.mmd,ok,0,11362304,render_ms=13.438 font_ms=0.612 raster_ms=1.511 pipeline_ms=15.677 svg_bytes=4700 width=450 height=265,,2
+mmdr-text,state.mmd,ok,0,4878336,render_ms=15.061 font_ms=0.601 raster_ms=1.118 pipeline_ms=16.897 svg_bytes=3861 width=145 height=183,,2
+mmdr-text,styled.mmd,ok,0,12390400,render_ms=17.988 font_ms=0.560 raster_ms=0.758 pipeline_ms=19.416 svg_bytes=1979 width=328 height=75,,2
+mmdr-text,unicode.mmd,ok,0,55083008,render_ms=15.445 font_ms=8.296 raster_ms=1.364 pipeline_ms=25.222 svg_bytes=3731 width=885 height=75,,2
+mmdr-text,workflow.mmd,ok,0,20795392,render_ms=242.930 font_ms=0.711 raster_ms=4.397 pipeline_ms=248.144 svg_bytes=15479 width=958 height=1365,,2
+rusty-text,chain-200.mmd,ok,0,28196864,render_ms=9.035 font_ms=0.761 raster_ms=16.342 pipeline_ms=26.226 svg_bytes=116548 width=106 height=16633,,2
+rusty-text,chain-2000.mmd,aborted,-1073741571,14548992,,thread 'main' (4764) has overflowed its stack,2
+rusty-text,class.mmd,ok,0,9052160,render_ms=0.276 font_ms=0.730 raster_ms=0.949 pipeline_ms=2.050 svg_bytes=2191 width=184 height=213,,2
+rusty-text,er.mmd,ok,0,2998272,render_ms=0.269 font_ms=0.640 raster_ms=1.012 pipeline_ms=2.022 svg_bytes=2735 width=160 height=225,,2
+rusty-text,flowchart.mmd,ok,0,9359360,render_ms=0.333 font_ms=0.607 raster_ms=1.016 pipeline_ms=2.047 svg_bytes=2835 width=492 height=156,,2
+rusty-text,gantt.mmd,ok,0,10047488,render_ms=0.134 font_ms=0.623 raster_ms=1.556 pipeline_ms=2.403 svg_bytes=4206 width=840 height=226,,2
+rusty-text,gitgraph.mmd,ok,0,2682880,render_ms=0.110 font_ms=0.619 raster_ms=0.691 pipeline_ms=1.516 svg_bytes=1472 width=357 height=200,,2
+rusty-text,invalid-trailing.mmd,error,2,3981312,,"ERROR: unexpected token at byte 64: ""???""",2
+rusty-text,invalid.mmd,error,2,3915776,,"ERROR: unexpected token at byte 0: ""notADiagram
+    {{{ unexpected input""",2
+rusty-text,labels.mmd,ok,0,7983104,render_ms=0.288 font_ms=0.639 raster_ms=1.231 pipeline_ms=2.246 svg_bytes=1441 width=756 height=90,,2
+rusty-text,malformed-flowchart.mmd,ok,0,8384512,render_ms=0.209 font_ms=0.708 raster_ms=0.383 pipeline_ms=1.395 svg_bytes=487 width=81 height=73,,2
+rusty-text,mindmap.mmd,ok,0,10567680,render_ms=0.160 font_ms=0.625 raster_ms=1.671 pipeline_ms=2.548 svg_bytes=3616 width=472 height=542,,2
+rusty-text,oversize.mmd,error,2,3973120,,ERROR: Diagram exceeds prototype's 64 KiB input limit,2
+rusty-text,pie.mmd,ok,0,2686976,render_ms=0.103 font_ms=0.625 raster_ms=1.090 pipeline_ms=2.021 svg_bytes=1805 width=620 height=420,,2
+rusty-text,sequence-realistic.mmd,ok,0,2682880,render_ms=0.175 font_ms=0.605 raster_ms=3.267 pipeline_ms=4.174 svg_bytes=7166 width=775 height=574,,2
+rusty-text,sequence.mmd,ok,0,3833856,render_ms=0.127 font_ms=0.615 raster_ms=1.187 pipeline_ms=2.026 svg_bytes=2873 width=353 height=254,,2
+rusty-text,state.mmd,ok,0,9043968,render_ms=0.323 font_ms=0.648 raster_ms=3.807 pipeline_ms=4.872 svg_bytes=2589 width=154 height=238,,2
+rusty-text,styled.mmd,ok,0,2682880,render_ms=0.277 font_ms=0.675 raster_ms=0.700 pipeline_ms=1.746 svg_bytes=1292 width=300 height=73,,2
+rusty-text,unicode.mmd,ok,0,51769344,render_ms=0.330 font_ms=8.920 raster_ms=1.332 pipeline_ms=10.673 svg_bytes=2518 width=794 height=73,,2
+rusty-text,workflow.mmd,ok,0,20340736,render_ms=1.206 font_ms=0.653 raster_ms=5.290 pipeline_ms=7.239 svg_bytes=10359 width=956 height=1335,,2
+selkie-text,chain-200.mmd,ok,0,30896128,render_ms=33.892 font_ms=0.864 raster_ms=20.964 pipeline_ms=55.814 svg_bytes=105544 width=86 height=20629,,2
+selkie-text,chain-2000.mmd,aborted,-1073740791,22343680,,"thread 'main' (26116) panicked at C:\Users\theco\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\selkie-rs-0.3.0\src\layout\dagre\rank\network_simplex.rs:360:9:
+dfs_assign recursion overflow: counter=1001, v=N1001, parent=Some(""N1000"")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",2
+selkie-text,class.mmd,ok,0,10424320,render_ms=0.951 font_ms=0.714 raster_ms=1.229 pipeline_ms=2.994 svg_bytes=6080 width=142 height=320,,2
+selkie-text,er.mmd,ok,0,9920512,render_ms=0.976 font_ms=0.656 raster_ms=1.513 pipeline_ms=3.240 svg_bytes=5947 width=252 height=403,,2
+selkie-text,flowchart.mmd,ok,0,11255808,render_ms=2.781 font_ms=0.642 raster_ms=1.129 pipeline_ms=4.649 svg_bytes=4885 width=494 height=126,,2
+selkie-text,gantt.mmd,ok,0,6164480,render_ms=1.355 font_ms=0.622 raster_ms=2.392 pipeline_ms=4.458 svg_bytes=6652 width=784 height=148,,2
+selkie-text,gitgraph.mmd,ok,0,9392128,render_ms=1.141 font_ms=1.987 raster_ms=1.293 pipeline_ms=4.508 svg_bytes=6003 width=282 height=205,,2
+selkie-text,invalid-trailing.mmd,ok,0,11751424,render_ms=2.756 font_ms=0.648 raster_ms=1.270 pipeline_ms=4.761 svg_bytes=4847 width=234 height=583,,2
+selkie-text,invalid.mmd,error,2,2686976,,ERROR: Unknown diagram type: Could not detect diagram type,2
+selkie-text,labels.mmd,ok,0,4972544,render_ms=3.021 font_ms=0.662 raster_ms=1.222 pipeline_ms=5.029 svg_bytes=3545 width=504 height=106,,2
+selkie-text,malformed-flowchart.mmd,error,2,5533696,,"ERROR: Parse error:  --> 2:7
+  |
+2 |     A[Unclosed label
+  |       ^---
+  |
+  = expected quoted_string or md_string",2
+selkie-text,mindmap.mmd,ok,0,6545408,render_ms=5.094 font_ms=0.741 raster_ms=1.639 pipeline_ms=7.565 svg_bytes=9175 width=567 height=330,,2
+selkie-text,oversize.mmd,error,2,3907584,,ERROR: Diagram exceeds prototype's 64 KiB input limit,2
+selkie-text,pie.mmd,ok,0,4919296,render_ms=2.247 font_ms=0.620 raster_ms=2.305 pipeline_ms=5.271 svg_bytes=2934 width=584 height=450,,2
+selkie-text,sequence-realistic.mmd,ok,0,11522048,render_ms=0.666 font_ms=0.654 raster_ms=3.564 pipeline_ms=4.973 svg_bytes=8838 width=681 height=571,,2
+selkie-text,sequence.mmd,ok,0,2686976,render_ms=0.578 font_ms=0.670 raster_ms=1.470 pipeline_ms=2.816 svg_bytes=5627 width=450 height=258,,2
+selkie-text,state.mmd,ok,0,21463040,render_ms=17.942 font_ms=0.723 raster_ms=1.112 pipeline_ms=19.874 svg_bytes=4363 width=124 height=230,,2
+selkie-text,styled.mmd,ok,0,10743808,render_ms=2.732 font_ms=0.688 raster_ms=0.777 pipeline_ms=4.288 svg_bytes=3544 width=293 height=69,,2
+selkie-text,unicode.mmd,ok,0,43782144,render_ms=2.707 font_ms=8.892 raster_ms=1.470 pipeline_ms=13.158 svg_bytes=4395 width=803 height=69,,2
+selkie-text,workflow.mmd,ok,0,24084480,render_ms=4.339 font_ms=0.703 raster_ms=4.276 pipeline_ms=9.418 svg_bytes=10549 width=1034 height=1473,,2
+merman-text,chain-200.mmd,ok,0,37474304,render_ms=62.324 font_ms=1.062 raster_ms=23.254 pipeline_ms=86.732 svg_bytes=266305 width=111 height=20870,,2
+merman-text,chain-2000.mmd,error,2,56926208,,ERROR: Diagram exceeds prototype's 16 megapixel limit,2
+merman-text,class.mmd,ok,0,6635520,render_ms=2.145 font_ms=0.633 raster_ms=1.357 pipeline_ms=4.226 svg_bytes=14206 width=163 height=294,,2
+merman-text,er.mmd,ok,0,12533760,render_ms=2.213 font_ms=0.693 raster_ms=1.510 pipeline_ms=4.558 svg_bytes=12985 width=146 height=329,,2
+merman-text,flowchart.mmd,ok,0,3629056,render_ms=2.490 font_ms=0.661 raster_ms=1.318 pipeline_ms=4.568 svg_bytes=12855 width=493 height=118,,2
+merman-text,gantt.mmd,ok,0,13135872,render_ms=1.728 font_ms=0.658 raster_ms=3.058 pipeline_ms=5.529 svg_bytes=8291 width=1184 height=148,,2
+merman-text,gitgraph.mmd,ok,0,2764800,render_ms=1.342 font_ms=0.661 raster_ms=1.340 pipeline_ms=3.454 svg_bytes=7892 width=272 height=172,,2
+merman-text,invalid-trailing.mmd,error,2,6475776,,"ERROR: Diagram parse error (flowchart-v2): User { error: LexError { message: ""Unexpected character at 64"" } }",2
+merman-text,invalid.mmd,error,2,5054464,,"ERROR: No diagram type detected matching given configuration for text: notADiagram
+    {{{ unexpected input",2
+merman-text,labels.mmd,ok,0,4657152,render_ms=2.270 font_ms=0.632 raster_ms=1.512 pipeline_ms=4.505 svg_bytes=10478 width=468 height=118,,2
+merman-text,malformed-flowchart.mmd,error,2,6492160,,"ERROR: Diagram parse error (flowchart-v2): User { error: LexError { message: ""Unterminated node label (missing `]`)"" } }",2
+merman-text,mindmap.mmd,ok,0,13008896,render_ms=7.388 font_ms=0.718 raster_ms=2.538 pipeline_ms=10.737 svg_bytes=27074 width=358 height=473,,2
+merman-text,oversize.mmd,error,2,4743168,,ERROR: Diagram exceeds prototype's 64 KiB input limit,2
+merman-text,pie.mmd,ok,0,13500416,render_ms=1.346 font_ms=0.638 raster_ms=2.505 pipeline_ms=4.578 svg_bytes=2533 width=590 height=450,,2
+merman-text,sequence-realistic.mmd,ok,0,7471104,render_ms=1.848 font_ms=0.663 raster_ms=3.795 pipeline_ms=6.394 svg_bytes=25144 width=746 height=595,,2
+merman-text,sequence.mmd,ok,0,12541952,render_ms=1.623 font_ms=0.679 raster_ms=1.470 pipeline_ms=3.868 svg_bytes=20997 width=450 height=259,,2
+merman-text,state.mmd,ok,0,13008896,render_ms=3.665 font_ms=0.822 raster_ms=1.699 pipeline_ms=6.271 svg_bytes=77323 width=107 height=234,,2
+merman-text,styled.mmd,ok,0,12484608,render_ms=2.068 font_ms=0.708 raster_ms=1.068 pipeline_ms=3.939 svg_bytes=9931 width=319 height=70,,2
+merman-text,unicode.mmd,ok,0,54542336,render_ms=2.598 font_ms=9.271 raster_ms=1.616 pipeline_ms=13.570 svg_bytes=12087 width=882 height=70,,2
+merman-text,workflow.mmd,ok,0,24072192,render_ms=5.422 font_ms=0.693 raster_ms=4.637 pipeline_ms=10.841 svg_bytes=28891 width=941 height=1379,,2
+mmdr-text,chain-200.mmd,ok,0,29560832,render_ms=138.870 font_ms=0.902 raster_ms=20.631 pipeline_ms=160.494 svg_bytes=170521 width=119 height=15075,,3
+mmdr-text,chain-2000.mmd,error,2,43597824,,ERROR: Diagram exceeds prototype's 16 megapixel limit,3
+mmdr-text,class.mmd,ok,0,8732672,render_ms=13.702 font_ms=0.600 raster_ms=1.125 pipeline_ms=15.517 svg_bytes=3416 width=181 height=278,,3
+mmdr-text,er.mmd,ok,0,10170368,render_ms=14.472 font_ms=0.625 raster_ms=1.352 pipeline_ms=16.540 svg_bytes=4378 width=201 height=255,,3
+mmdr-text,flowchart.mmd,ok,0,12500992,render_ms=27.341 font_ms=0.641 raster_ms=1.241 pipeline_ms=29.316 svg_bytes=4461 width=474 height=147,,3
+mmdr-text,gantt.mmd,ok,0,9388032,render_ms=13.886 font_ms=0.619 raster_ms=1.875 pipeline_ms=16.471 svg_bytes=4745 width=641 height=154,,3
+mmdr-text,gitgraph.mmd,ok,0,7102464,render_ms=13.958 font_ms=0.584 raster_ms=1.196 pipeline_ms=15.842 svg_bytes=3507 width=225 height=163,,3
+mmdr-text,invalid-trailing.mmd,ok,0,12259328,render_ms=16.404 font_ms=0.608 raster_ms=0.830 pipeline_ms=17.935 svg_bytes=2529 width=396 height=79,,3
+mmdr-text,invalid.mmd,error,2,4820992,,ERROR: unexpected token 'notADiagram' at 1:1; expected unknown or missing Mermaid diagram header,3
+mmdr-text,labels.mmd,ok,0,6012928,render_ms=15.415 font_ms=0.578 raster_ms=1.330 pipeline_ms=17.414 svg_bytes=2154 width=488 height=117,,3
+mmdr-text,malformed-flowchart.mmd,error,2,4177920,,ERROR: unexpected token '-->' at 3:5; expected node identifier,3
+mmdr-text,mindmap.mmd,ok,0,9584640,render_ms=13.868 font_ms=0.760 raster_ms=1.714 pipeline_ms=16.477 svg_bytes=7717 width=808 height=180,,3
+mmdr-text,oversize.mmd,error,2,0,,ERROR: Diagram exceeds prototype's 64 KiB input limit,3
+mmdr-text,pie.mmd,ok,0,12001280,render_ms=14.893 font_ms=0.674 raster_ms=2.024 pipeline_ms=17.684 svg_bytes=2710 width=456 height=360,,3
+mmdr-text,sequence-realistic.mmd,ok,0,14802944,render_ms=14.140 font_ms=0.568 raster_ms=3.851 pipeline_ms=18.648 svg_bytes=10986 width=659 height=653,,3
+mmdr-text,sequence.mmd,ok,0,4820992,render_ms=13.776 font_ms=0.563 raster_ms=1.402 pipeline_ms=15.836 svg_bytes=4700 width=450 height=265,,3
+mmdr-text,state.mmd,ok,0,10661888,render_ms=14.171 font_ms=0.589 raster_ms=1.100 pipeline_ms=15.951 svg_bytes=3861 width=145 height=183,,3
+mmdr-text,styled.mmd,ok,0,5005312,render_ms=15.788 font_ms=0.559 raster_ms=0.764 pipeline_ms=17.198 svg_bytes=1979 width=328 height=75,,3
+mmdr-text,unicode.mmd,ok,0,55087104,render_ms=16.135 font_ms=8.221 raster_ms=1.334 pipeline_ms=25.778 svg_bytes=3731 width=885 height=75,,3
+mmdr-text,workflow.mmd,ok,0,24199168,render_ms=244.238 font_ms=0.831 raster_ms=4.225 pipeline_ms=249.386 svg_bytes=15479 width=958 height=1365,,3
+rusty-text,chain-200.mmd,ok,0,28176384,render_ms=8.927 font_ms=0.742 raster_ms=16.222 pipeline_ms=25.976 svg_bytes=116548 width=106 height=16633,,3
+rusty-text,chain-2000.mmd,aborted,-1073741571,14544896,,thread 'main' (24236) has overflowed its stack,3
+rusty-text,class.mmd,ok,0,9052160,render_ms=0.261 font_ms=0.683 raster_ms=0.920 pipeline_ms=1.956 svg_bytes=2191 width=184 height=213,,3
+rusty-text,er.mmd,ok,0,8953856,render_ms=0.259 font_ms=0.660 raster_ms=1.067 pipeline_ms=2.076 svg_bytes=2735 width=160 height=225,,3
+rusty-text,flowchart.mmd,ok,0,7933952,render_ms=0.341 font_ms=0.624 raster_ms=1.018 pipeline_ms=2.076 svg_bytes=2835 width=492 height=156,,3
+rusty-text,gantt.mmd,ok,0,2678784,render_ms=0.131 font_ms=0.589 raster_ms=1.480 pipeline_ms=2.285 svg_bytes=4206 width=840 height=226,,3
+rusty-text,gitgraph.mmd,ok,0,8753152,render_ms=0.107 font_ms=0.589 raster_ms=0.703 pipeline_ms=1.495 svg_bytes=1472 width=357 height=200,,3
+rusty-text,invalid-trailing.mmd,error,2,3989504,,"ERROR: unexpected token at byte 64: ""???""",3
+rusty-text,invalid.mmd,error,2,3919872,,"ERROR: unexpected token at byte 0: ""notADiagram
+    {{{ unexpected input""",3
+rusty-text,labels.mmd,ok,0,9093120,render_ms=0.287 font_ms=0.685 raster_ms=1.262 pipeline_ms=2.319 svg_bytes=1441 width=756 height=90,,3
+rusty-text,malformed-flowchart.mmd,ok,0,2682880,render_ms=0.194 font_ms=0.574 raster_ms=0.381 pipeline_ms=1.241 svg_bytes=487 width=81 height=73,,3
+rusty-text,mindmap.mmd,ok,0,10653696,render_ms=0.155 font_ms=0.597 raster_ms=1.568 pipeline_ms=2.400 svg_bytes=3616 width=472 height=542,,3
+rusty-text,oversize.mmd,error,2,3973120,,ERROR: Diagram exceeds prototype's 64 KiB input limit,3
+rusty-text,pie.mmd,ok,0,10317824,render_ms=0.096 font_ms=0.612 raster_ms=1.130 pipeline_ms=1.926 svg_bytes=1805 width=620 height=420,,3
+rusty-text,sequence-realistic.mmd,ok,0,12435456,render_ms=0.168 font_ms=0.606 raster_ms=3.244 pipeline_ms=4.103 svg_bytes=7166 width=775 height=574,,3
+rusty-text,sequence.mmd,ok,0,0,render_ms=0.122 font_ms=0.589 raster_ms=1.095 pipeline_ms=1.898 svg_bytes=2873 width=353 height=254,,3
+rusty-text,state.mmd,ok,0,0,render_ms=0.320 font_ms=0.629 raster_ms=0.940 pipeline_ms=1.976 svg_bytes=2589 width=154 height=238,,3
+rusty-text,styled.mmd,ok,0,8749056,render_ms=0.260 font_ms=0.633 raster_ms=0.656 pipeline_ms=1.634 svg_bytes=1292 width=300 height=73,,3
+rusty-text,unicode.mmd,ok,0,49881088,render_ms=0.312 font_ms=8.846 raster_ms=1.354 pipeline_ms=10.594 svg_bytes=2518 width=794 height=73,,3
+rusty-text,workflow.mmd,ok,0,20344832,render_ms=1.215 font_ms=0.641 raster_ms=5.320 pipeline_ms=7.262 svg_bytes=10359 width=956 height=1335,,3
+selkie-text,chain-200.mmd,ok,0,30892032,render_ms=33.486 font_ms=0.799 raster_ms=20.729 pipeline_ms=55.106 svg_bytes=105544 width=86 height=20629,,3
+selkie-text,chain-2000.mmd,aborted,-1073740791,22265856,,"thread 'main' (28764) panicked at C:\Users\theco\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\selkie-rs-0.3.0\src\layout\dagre\rank\network_simplex.rs:360:9:
+dfs_assign recursion overflow: counter=1001, v=N1001, parent=Some(""N1000"")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",3
+selkie-text,class.mmd,ok,0,4546560,render_ms=0.936 font_ms=0.746 raster_ms=1.183 pipeline_ms=2.961 svg_bytes=6080 width=142 height=320,,3
+selkie-text,er.mmd,ok,0,0,render_ms=1.040 font_ms=0.660 raster_ms=1.509 pipeline_ms=3.304 svg_bytes=5947 width=252 height=403,,3
+selkie-text,flowchart.mmd,ok,0,11259904,render_ms=2.890 font_ms=0.670 raster_ms=1.198 pipeline_ms=4.850 svg_bytes=4885 width=494 height=126,,3
+selkie-text,gantt.mmd,ok,0,8769536,render_ms=1.306 font_ms=0.637 raster_ms=2.412 pipeline_ms=4.439 svg_bytes=6652 width=784 height=148,,3
+selkie-text,gitgraph.mmd,ok,0,0,render_ms=1.093 font_ms=0.641 raster_ms=1.239 pipeline_ms=3.062 svg_bytes=6003 width=282 height=205,,3
+selkie-text,invalid-trailing.mmd,ok,0,11751424,render_ms=2.880 font_ms=0.660 raster_ms=1.318 pipeline_ms=4.942 svg_bytes=4847 width=234 height=583,,3
+selkie-text,invalid.mmd,error,2,5066752,,ERROR: Unknown diagram type: Could not detect diagram type,3
+selkie-text,labels.mmd,ok,0,0,render_ms=2.409 font_ms=0.636 raster_ms=1.229 pipeline_ms=4.359 svg_bytes=3545 width=504 height=106,,3
+selkie-text,malformed-flowchart.mmd,error,2,5525504,,"ERROR: Parse error:  --> 2:7
+  |
+2 |     A[Unclosed label
+  |       ^---
+  |
+  = expected quoted_string or md_string",3
+selkie-text,mindmap.mmd,ok,0,5869568,render_ms=4.316 font_ms=0.694 raster_ms=1.651 pipeline_ms=6.749 svg_bytes=9175 width=567 height=330,,3
+selkie-text,oversize.mmd,error,2,3989504,,ERROR: Diagram exceeds prototype's 64 KiB input limit,3
+selkie-text,pie.mmd,ok,0,11841536,render_ms=2.387 font_ms=0.684 raster_ms=2.395 pipeline_ms=5.563 svg_bytes=2934 width=584 height=450,,3
+selkie-text,sequence-realistic.mmd,ok,0,2686976,render_ms=0.681 font_ms=0.638 raster_ms=3.476 pipeline_ms=4.889 svg_bytes=8838 width=681 height=571,,3
+selkie-text,sequence.mmd,ok,0,10760192,render_ms=0.569 font_ms=0.638 raster_ms=1.461 pipeline_ms=2.760 svg_bytes=5627 width=450 height=258,,3
+selkie-text,state.mmd,ok,0,21286912,render_ms=18.267 font_ms=0.785 raster_ms=1.387 pipeline_ms=20.531 svg_bytes=4363 width=124 height=230,,3
+selkie-text,styled.mmd,ok,0,2691072,render_ms=2.623 font_ms=0.682 raster_ms=0.759 pipeline_ms=4.171 svg_bytes=3544 width=293 height=69,,3
+selkie-text,unicode.mmd,ok,0,53633024,render_ms=2.843 font_ms=9.146 raster_ms=1.450 pipeline_ms=13.527 svg_bytes=4395 width=803 height=69,,3
+selkie-text,workflow.mmd,ok,0,24166400,render_ms=4.294 font_ms=0.719 raster_ms=4.361 pipeline_ms=9.463 svg_bytes=10549 width=1034 height=1473,,3
+merman-text,chain-200.mmd,ok,0,37756928,render_ms=62.171 font_ms=1.123 raster_ms=23.276 pipeline_ms=86.660 svg_bytes=266305 width=111 height=20870,,3
+merman-text,chain-2000.mmd,error,2,57077760,,ERROR: Diagram exceeds prototype's 16 megapixel limit,3
+merman-text,class.mmd,ok,0,12492800,render_ms=2.216 font_ms=0.683 raster_ms=1.321 pipeline_ms=4.309 svg_bytes=14206 width=163 height=294,,3
+merman-text,er.mmd,ok,0,4898816,render_ms=2.246 font_ms=0.649 raster_ms=1.571 pipeline_ms=4.550 svg_bytes=12985 width=146 height=329,,3
+merman-text,flowchart.mmd,ok,0,13017088,render_ms=2.463 font_ms=0.650 raster_ms=1.316 pipeline_ms=4.513 svg_bytes=12855 width=493 height=118,,3
+merman-text,gantt.mmd,ok,0,12476416,render_ms=1.752 font_ms=0.647 raster_ms=2.914 pipeline_ms=5.396 svg_bytes=8291 width=1184 height=148,,3
+merman-text,gitgraph.mmd,ok,0,0,render_ms=1.364 font_ms=0.652 raster_ms=1.345 pipeline_ms=3.448 svg_bytes=7888 width=272 height=173,,3
+merman-text,invalid-trailing.mmd,error,2,6500352,,"ERROR: Diagram parse error (flowchart-v2): User { error: LexError { message: ""Unexpected character at 64"" } }",3
+merman-text,invalid.mmd,error,2,5050368,,"ERROR: No diagram type detected matching given configuration for text: notADiagram
+    {{{ unexpected input",3
+merman-text,labels.mmd,ok,0,8151040,render_ms=2.307 font_ms=0.682 raster_ms=1.516 pipeline_ms=4.598 svg_bytes=10478 width=468 height=118,,3
+merman-text,malformed-flowchart.mmd,error,2,0,,"ERROR: Diagram parse error (flowchart-v2): User { error: LexError { message: ""Unterminated node label (missing `]`)"" } }",3
+merman-text,mindmap.mmd,ok,0,6950912,render_ms=7.405 font_ms=0.687 raster_ms=2.496 pipeline_ms=10.680 svg_bytes=27074 width=358 height=473,,3
+merman-text,oversize.mmd,error,2,4747264,,ERROR: Diagram exceeds prototype's 64 KiB input limit,3
+merman-text,pie.mmd,ok,0,12775424,render_ms=1.229 font_ms=0.658 raster_ms=2.391 pipeline_ms=4.359 svg_bytes=2533 width=590 height=450,,3
+merman-text,sequence-realistic.mmd,ok,0,16211968,render_ms=1.856 font_ms=0.676 raster_ms=3.412 pipeline_ms=6.038 svg_bytes=25144 width=746 height=595,,3
+merman-text,sequence.mmd,ok,0,12566528,render_ms=1.515 font_ms=0.657 raster_ms=1.432 pipeline_ms=3.694 svg_bytes=20997 width=450 height=259,,3
+merman-text,state.mmd,ok,0,4329472,render_ms=3.610 font_ms=0.732 raster_ms=1.622 pipeline_ms=6.047 svg_bytes=77289 width=107 height=234,,3
+merman-text,styled.mmd,ok,0,12509184,render_ms=2.011 font_ms=0.658 raster_ms=1.033 pipeline_ms=3.799 svg_bytes=9931 width=319 height=70,,3
+merman-text,unicode.mmd,ok,0,55283712,render_ms=2.475 font_ms=8.758 raster_ms=1.664 pipeline_ms=12.993 svg_bytes=12087 width=882 height=70,,3
+merman-text,workflow.mmd,ok,0,24346624,render_ms=5.200 font_ms=0.673 raster_ms=4.520 pipeline_ms=10.477 svg_bytes=28891 width=941 height=1379,,3

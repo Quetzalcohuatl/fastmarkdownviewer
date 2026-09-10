@@ -11,3 +11,5 @@ Vendored `egui_commonmark` 0.25.0, under its original MIT OR Apache-2.0 license.
 - Lay out table rows explicitly with shared column origins and a height equal to the tallest cell. Expose a default-on wrapping option for prose, tables, and code.
 
 Use the stable `show` path; upstream `show_scrollable` can split nested list parser state. Original licenses and crate provenance are retained. No upstream submission is claimed.
+
+- Expose an optional Mermaid diagram callback while retaining source rendering.

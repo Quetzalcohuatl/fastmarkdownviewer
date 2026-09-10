@@ -33,6 +33,7 @@ pub struct CommonMarkOptions<'f> {
     /// Whether to present a mutable ui for things like checkboxes
     pub mutable: bool,
     pub math_fn: Option<&'f crate::RenderMathFn>,
+    pub diagram_fn: Option<&'f dyn Fn(&mut Ui, &str)>,
     pub html_fn: Option<&'f crate::RenderHtmlFn>,
     pub image_gate: Option<&'f crate::ImageGateFn>,
     /// Whether to enable scrolling to headings by their ID.
@@ -81,6 +82,7 @@ impl Default for CommonMarkOptions<'_> {
             alerts: AlertBundle::gfm(),
             mutable: false,
             math_fn: None,
+            diagram_fn: None,
             html_fn: None,
             image_gate: None,
             enable_scroll_to_heading: false,
@@ -321,6 +323,27 @@ pub struct CodeBlock {
 
 impl CodeBlock {
     pub fn end(
+        &self,
+        ui: &mut Ui,
+        cache: &mut CommonMarkCache,
+        options: &CommonMarkOptions,
+        max_width: f32,
+    ) {
+        if self.lang.as_deref().is_some_and(|lang| {
+            lang.split_whitespace()
+                .next()
+                .is_some_and(|name| name.eq_ignore_ascii_case("mermaid"))
+        }) && let Some(render) = options.diagram_fn {
+            ui.vertical(|ui| {
+                render(ui, &self.content);
+                self.show_source(ui, cache, options, max_width);
+            });
+        } else {
+            self.show_source(ui, cache, options, max_width);
+        }
+    }
+
+    fn show_source(
         &self,
         ui: &mut Ui,
         cache: &mut CommonMarkCache,

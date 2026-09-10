@@ -6,6 +6,8 @@ pub mod file_actions;
 pub mod fonts;
 pub mod links;
 pub mod math;
+pub mod mermaid;
+mod mermaid_worker;
 pub mod network;
 pub mod platform;
 pub mod render_source;

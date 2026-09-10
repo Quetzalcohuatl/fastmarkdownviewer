@@ -3,6 +3,48 @@ use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
 use fast_markdown_viewer::appearance::ThemeChoice;
 
 #[test]
+fn mermaid_callback_keeps_source_and_ignores_other_fences() {
+    let context = egui::Context::default();
+    let mut cache = CommonMarkCache::default();
+    let calls = std::cell::RefCell::new(Vec::new());
+    let callback = |ui: &mut egui::Ui, source: &str| {
+        calls.borrow_mut().push(source.to_owned());
+        ui.label("Rendered diagram");
+    };
+    let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+        CommonMarkViewer::new()
+            .render_diagram_fn(Some(&callback))
+            .show(
+                ui,
+                &mut cache,
+                "```mermaid\nflowchart LR\nA --> B\n```\n\n```rust\nfn main() {}\n```",
+            );
+    });
+    assert!(!calls.borrow().is_empty());
+    assert!(
+        calls
+            .borrow()
+            .iter()
+            .all(|source| source == "flowchart LR\nA --> B\n")
+    );
+    assert!(
+        cache
+            .navigation
+            .regions
+            .iter()
+            .any(|region| region.galley.text().contains("A --> B"))
+    );
+    assert!(
+        cache
+            .navigation
+            .regions
+            .iter()
+            .any(|region| region.galley.text().contains("fn main"))
+    );
+    output.textures_delta.clear();
+}
+
+#[test]
 fn feature_matrix_renders_without_panicking() {
     let context = egui::Context::default();
     let mut cache = CommonMarkCache::default();

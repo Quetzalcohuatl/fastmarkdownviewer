@@ -2,7 +2,9 @@
 
 FastMarkdownViewer has no telemetry, analytics, crash reporting, update checks, recent-file list, settings store, or persistent cache.
 
-Opening a local document reads that file and any local images it references. The portable build does not write to the registry or AppData. The installed build writes only its program files, uninstall metadata, Start Menu shortcut, and its own per-user `Open with` registration.
+Opening a local document reads that file and any local images it references. The portable build does not write to the registry or save settings in AppData. The installed build writes only its program files, uninstall metadata, Start Menu shortcut, and its own per-user `Open with` registration.
+
+Mermaid rendering runs diagrams offline using a hidden child process of the same executable. Diagram source, output PNG, and any rendering error are exchanged through a temporary directory, removed when the render finishes or times out. Abrupt application termination can leave these temporary files behind. Rendering is serialized and has a 10-second timeout, a 64 KiB source limit, a 4-megapixel image limit, and a 32 MiB/32-entry image cache per tab. These are not a hard limit on child-process memory. Closing or reloading the tab releases its cached diagrams.
 
 The explicit **Rename file…** tab action changes the filename on disk in the same folder. It does not edit document contents or rewrite other documents' links. **Show in Explorer** passes the local path to the operating system's file manager.
 

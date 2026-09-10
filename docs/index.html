@@ -24,11 +24,11 @@
       <h1>Double-click Markdown.<br><em>Read it.</em></h1>
       <p class="lede">No editor chrome. No project index. No WebView. FastMarkdownViewer opens Markdown files as clean rendered documents.</p>
       <div class="actions">
-        <a class="button primary" href="{{REPOSITORY_URL}}/releases/tag/v0.1.4">Download v0.1.4</a>
+        <a class="button primary" href="{{REPOSITORY_URL}}/releases/tag/v0.1.5">Download v0.1.5</a>
         <a class="button secondary" href="{{REPOSITORY_URL}}">View source</a>
       </div>
-      <p class="release-note">New in v0.1.4: Solarized Light and other reading themes, plus separate text and code font choices.</p>
-      <p class="release-note">v0.1.4 is unsigned. Windows may show a SmartScreen warning; verification instructions are below.</p>
+      <p class="release-note">New in v0.1.5: Offline Mermaid diagrams with readable source fallback, while retaining Solarized themes and font choices.</p>
+      <p class="release-note">v0.1.5 is unsigned. Windows may show a SmartScreen warning; verification instructions are below.</p>
     </section>
 
     <section class="preview" aria-labelledby="preview-title">
@@ -69,16 +69,16 @@
       </div>
       <ol>
         <li><strong>Download together</strong><span>Get the EXE or ZIP and <code>SHA256SUMS.txt</code> from the same canonical GitHub Release.</span></li>
-        <li><strong>Compare SHA-256</strong><code>Get-FileHash .\FastMarkdownViewer-0.1.4-windows-x86_64.exe -Algorithm SHA256</code></li>
-        <li><strong>Verify provenance</strong><code>gh attestation verify .\FastMarkdownViewer-0.1.4-windows-x86_64.exe --repo {{REPOSITORY_SLUG}}</code></li>
+        <li><strong>Compare SHA-256</strong><code>Get-FileHash .\FastMarkdownViewer-0.1.5-windows-x86_64.exe -Algorithm SHA256</code></li>
+        <li><strong>Verify provenance</strong><code>gh attestation verify .\FastMarkdownViewer-0.1.5-windows-x86_64.exe --repo {{REPOSITORY_SLUG}}</code></li>
       </ol>
-      <p>Checksums and attestations establish origin and unchanged bytes. They do not suppress SmartScreen; v0.1.4 is transparently unsigned.</p>
+      <p>Checksums and attestations establish origin and unchanged bytes. They do not suppress SmartScreen; v0.1.5 is transparently unsigned.</p>
     </section>
 
     <section class="roadmap">
       <div class="eyebrow">After v0.1</div>
       <h2>Stability first. Reach second.</h2>
-      <p>Planned follow-ons include OSS code signing, Windows ARM64, macOS and Linux builds, high-contrast design, then prepared Scoop and winget manifests. Tabs, wildcard search, a heading outline, and lazy syntax highlighting are included. Editing, file watching, and Mermaid remain outside this release.</p>
+      <p>Planned follow-ons include OSS code signing, Windows ARM64, macOS and Linux builds, high-contrast design, then prepared Scoop and winget manifests. Tabs, wildcard search, a heading outline, and lazy syntax highlighting are included. Offline Mermaid rendering is included with resource limits and source fallback; editing and file watching remain outside this release.</p>
     </section>
   </main>
 

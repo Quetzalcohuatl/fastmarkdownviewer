@@ -2,7 +2,7 @@
 
 FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
-> **Stable:** v0.1.4 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
+> **Stable:** v0.1.5 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
 
 ## What v0.1 includes
 
@@ -61,7 +61,7 @@ Right-click a tab for **Rename file…** or **Show in Explorer**. Rename changes
 
 **Show in Explorer** opens the parent folder and selects the file. A portable platform abstraction also provides Finder selection on macOS and parent-folder opening elsewhere; Windows is the supported and tested target. Reading never edits document contents; filename changes happen only through the explicit rename action.
 
-Mermaid remains a readable code block. See [the native renderer evaluation](docs/MERMAID_EVALUATION.md) for the corpus, measurements, and reasons for deferring rendering.
+Mermaid support in v0.1.5 renders supported Mermaid fences using patched Rusty, with the source retained underneath. Rendering runs offline in a separate process with a 10-second timeout; unsupported or oversized diagrams show an error and their source. This is not full Mermaid.js compatibility. See [the Rusty fixes](docs/RUSTY_FIXES.md) for details.
 
 **Settings → Automatically load remote images** defaults to on. Turn it off to hide remote images and show individual **Load image** buttons. This setting applies to every window in the current session and resets on the next launch. Requests already running may finish. Ordinary links still open only when clicked.
 

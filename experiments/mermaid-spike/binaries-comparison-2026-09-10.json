@@ -1,0 +1,27 @@
+[
+  {
+    "variant": "baseline-current",
+    "bytes": 1299968,
+    "sha256": "ACAF1929738040E3BE1A3E17939164BA72C9A0B1B6A345293986A9F79135F562"
+  },
+  {
+    "variant": "mmdr-text",
+    "bytes": 5825536,
+    "sha256": "077EC2B2A3FAC75BBAB5C994E077D2BC05E5CE25AD1F5E4A8489B5CAC8CC9F70"
+  },
+  {
+    "variant": "rusty-text",
+    "bytes": 3480064,
+    "sha256": "9984B42F3DD2CA0624362B9BDFE3B26B99E9D05402513F43D5D4EEADACE5439D"
+  },
+  {
+    "variant": "selkie-text",
+    "bytes": 7874560,
+    "sha256": "CF0D76DA08C1601899AAA297D43580C39E03938E31505425C787B84F5D2CE375"
+  },
+  {
+    "variant": "merman-text",
+    "bytes": 11593216,
+    "sha256": "58E812747052014972396C2A4230AFEC51A982FBE20F830A2C1081B5412BE7E3"
+  }
+]

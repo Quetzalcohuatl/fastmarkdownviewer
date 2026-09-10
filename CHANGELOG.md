@@ -4,6 +4,13 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-09-10
+
+- Render Mermaid fences offline using patched Rusty, retaining searchable and copyable source below each diagram.
+- Isolate rendering in a hidden child process with a timeout and resource limits; retain readable errors and source for unsupported or oversized diagrams.
+- Fix malformed flowchart label handling, nested-subgraph membership, and shaped mindmap root labels; reject oversized flowcharts before recursive layout.
+- Add renderer comparison corpora and executable integration regressions. Other exploratory features in torturetest3.md remain unclaimed.
+
 ## [0.1.4] - 2026-09-09
 
 - Add Solarized Light/Dark, Quiet Light, Monokai, and Tomorrow Night Blue palettes with matching lazy code highlighting.

@@ -6,15 +6,22 @@ publish = false
 license = "MIT OR Apache-2.0"
 
 [workspace]
+members = ["vendor/rusty-mermaid-diagrams"]
+default-members = ["."]
 
 [features]
 mmdr = ["dep:mermaid-rs-renderer"]
 merman = ["dep:merman"]
+svg-text = ["resvg/text"]
+rusty = ["dep:rusty-mermaid"]
+selkie = ["dep:selkie-rs"]
 
 [dependencies]
 mermaid-rs-renderer = { version = "=0.3.1", default-features = false, optional = true }
 merman = { version = "=0.7.0", default-features = false, features = ["render"], optional = true }
 resvg = { version = "=0.45.1", default-features = false }
+rusty-mermaid = { version = "=0.2.0", default-features = false, features = ["svg"], optional = true }
+selkie-rs = { version = "=0.3.0", default-features = false, optional = true }
 
 [profile.release]
 opt-level = 3
@@ -22,3 +29,6 @@ lto = "thin"
 codegen-units = 1
 panic = "abort"
 strip = "symbols"
+
+[patch.crates-io]
+rusty-mermaid-diagrams = { path = "vendor/rusty-mermaid-diagrams" }

@@ -1,5 +1,9 @@
 # Mermaid feasibility — 2026-09-08
 
+**Latest:** [four-renderer comparison](MERMAID_COMPARISON.md) measures Rusty Mermaid at +2.08 MiB in the text-enabled harness. This supersedes the earlier shortlist, while retaining production-readiness caveats.
+
+**Follow-up:** the [2026-09-10 native prototype](MERMAID_PROTOTYPE.md) resolves the missing-label blocker and measures conditional font loading. Production support remains deferred because parser fidelity, layout quality, and viewer integration still need work. The measurements below describe the original experiment.
+
 **Decision: defer production Mermaid rendering.** Fenced Mermaid remains readable as code. Neither evaluated renderer is a clean fit for the existing SVG pipeline. No Mermaid dependency was added to the application manifest or lockfile.
 
 | | mermaid-rs-renderer 0.3.1 | merman 0.7.0 |

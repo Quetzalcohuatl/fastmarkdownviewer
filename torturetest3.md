@@ -20,7 +20,7 @@ T3-01-END.
 
 ## T3-02 — Mermaid diagrams
 
-Expected current behavior: readable code blocks, not diagrams. Source: [Glow #342](https://github.com/charmbracelet/glow/issues/342), [simov #299](https://github.com/simov/markdown-viewer/issues/299). Mermaid integration is explicitly deferred in this app.
+Expected in v0.1.5: diagrams above their readable source blocks. Unsupported syntax or diagrams exceeding resource limits retain their source with an error message. Published v0.1.4 shows only code blocks. Source: [Glow #342](https://github.com/charmbracelet/glow/issues/342), [simov #299](https://github.com/simov/markdown-viewer/issues/299).
 
 ```mermaid
 flowchart LR

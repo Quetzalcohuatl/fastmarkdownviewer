@@ -1,6 +1,6 @@
 [package]
 name = "fast-markdown-viewer"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2024"
 rust-version = "1.95"
 description = "A fast, read-only Markdown viewer"
@@ -31,7 +31,9 @@ ratex-layout = "0.1.14"
 ratex-parser = "0.1.14"
 ratex-svg = { version = "0.1.14", features = ["embed-fonts"] }
 ratex-types = "0.1.14"
-resvg = { version = "0.45.1", default-features = false }
+resvg = { version = "0.45.1", default-features = false, features = ["text"] }
+rusty-mermaid = { version = "=0.2.0", default-features = false, features = ["svg"] }
+tempfile = "3.23.0"
 rfd = { version = "0.15.4", default-features = false }
 ureq = { version = "2.12.1", default-features = false, features = ["tls"] }
 url = "2.5.7"
@@ -41,7 +43,6 @@ winresource = "0.1.23"
 
 [dev-dependencies]
 ttf-parser = "0.25.1"
-tempfile = "3.23.0"
 
 [profile.release]
 opt-level = 3
@@ -53,6 +54,8 @@ strip = "symbols"
 [patch.crates-io]
 egui_commonmark = { path = "vendor/egui_commonmark" }
 egui_commonmark_backend = { path = "vendor/egui_commonmark_backend" }
+
+rusty-mermaid-diagrams = { path = "experiments/mermaid-spike/vendor/rusty-mermaid-diagrams" }
 
 [lints.rust]
 unsafe_code = "forbid"

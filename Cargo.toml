@@ -31,10 +31,10 @@ ratex-layout = "0.1.14"
 ratex-parser = "0.1.14"
 ratex-svg = { version = "0.1.14", features = ["embed-fonts"] }
 ratex-types = "0.1.14"
-resvg = { version = "0.45.1", default-features = false, features = ["text"] }
+resvg = { version = "0.48.1", default-features = false, features = ["text"] }
 rusty-mermaid = { version = "=0.2.0", default-features = false, features = ["svg"] }
 tempfile = "3.23.0"
-rfd = { version = "0.15.4", default-features = false }
+rfd = { version = "0.17.2", default-features = false }
 ureq = { version = "2.12.1", default-features = false, features = ["tls"] }
 url = "2.5.7"
 

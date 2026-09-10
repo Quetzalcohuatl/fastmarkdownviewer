@@ -11,41 +11,72 @@ pub fn render(input: &Path, output: &Path) -> Result<(), String> {
         return Err("SVG exceeds 10 MiB output limit".into());
     }
     let mut options = resvg::usvg::Options::default();
-    {
-        // Explicit font files avoid a second system-wide font scan in usvg.
-        // The Mermaid library may still initialize its own measurement font database.
-        let windows = std::env::var_os("WINDIR").ok_or("WINDIR is not set")?;
-        let fonts = Path::new(&windows).join("Fonts");
-        for name in ["segoeui.ttf", "segoeuib.ttf", "segoeuii.ttf", "consola.ttf"] {
-            let bytes = std::fs::read(fonts.join(name)).map_err(|e| e.to_string())?;
+    // Bundled egui fonts keep labels readable even on systems with no installed fonts.
+    for font in eframe::egui::FontDefinitions::default().font_data.values() {
+        options.fontdb_mut().load_font_data(font.font.to_vec());
+    }
+    for name in [
+        "segoeui.ttf",
+        "segoeuib.ttf",
+        "segoeuii.ttf",
+        "consola.ttf",
+        "DejaVuSans.ttf",
+        "DejaVuSans-Bold.ttf",
+        "DejaVuSansMono.ttf",
+        "Arial.ttf",
+        "Arial Bold.ttf",
+        "Menlo.ttc",
+    ] {
+        if let Some(path) = crate::font_paths::find(name)
+            && let Ok(bytes) = std::fs::read(path)
+        {
             options.fontdb_mut().load_font_data(bytes);
         }
-        // Load large supplemental fonts only for scripts present in this diagram.
-        // These ranges are a heuristic, not universal glyph coverage.
-        let mut supplemental = Vec::new();
-        if svg
-            .chars()
-            .any(|c| matches!(c as u32, 0x3040..=0x30ff | 0x3400..=0x9fff))
-        {
-            supplemental.push("msyh.ttc");
-            supplemental.push("msgothic.ttc");
-        }
-        if svg
-            .chars()
-            .any(|c| matches!(c as u32, 0x1100..=0x11ff | 0x3130..=0x318f | 0xac00..=0xd7af))
-        {
-            supplemental.push("malgun.ttf");
-        }
-        for name in supplemental {
-            if let Ok(bytes) = std::fs::read(fonts.join(name)) {
-                options.fontdb_mut().load_font_data(bytes);
-            }
-        }
-        options.font_family = "Segoe UI".into();
-        options.fontdb_mut().set_sans_serif_family("Segoe UI");
-        options.fontdb_mut().set_serif_family("Segoe UI");
-        options.fontdb_mut().set_monospace_family("Consolas");
     }
+    let supplemental: &[&str] = if svg.chars().any(|c| {
+        matches!(c as u32,
+        0x1100..=0x11ff | 0x3040..=0x31ff | 0x3400..=0x9fff | 0xac00..=0xd7af)
+    }) {
+        &[
+            "msyh.ttc",
+            "msgothic.ttc",
+            "malgun.ttf",
+            "NotoSansCJK-Regular.ttc",
+            "PingFang.ttc",
+            "AppleSDGothicNeo.ttc",
+        ]
+    } else {
+        &[]
+    };
+    for name in supplemental {
+        if let Some(path) = crate::font_paths::find(name)
+            && let Ok(bytes) = std::fs::read(path)
+        {
+            options.fontdb_mut().load_font_data(bytes);
+        }
+    }
+    let sans = ["Segoe UI", "DejaVu Sans", "Arial", "Ubuntu"]
+        .into_iter()
+        .find(|name| {
+            options
+                .fontdb
+                .faces()
+                .any(|face| face.families.iter().any(|(family, _)| family == name))
+        })
+        .ok_or("No usable diagram font is available")?;
+    options.font_family = sans.into();
+    options.fontdb_mut().set_sans_serif_family(sans);
+    options.fontdb_mut().set_serif_family(sans);
+    let mono = ["Consolas", "DejaVu Sans Mono", "Menlo", "Hack"]
+        .into_iter()
+        .find(|name| {
+            options
+                .fontdb
+                .faces()
+                .any(|face| face.families.iter().any(|(family, _)| family == name))
+        })
+        .unwrap_or(sans);
+    options.fontdb_mut().set_monospace_family(mono);
     let tree = resvg::usvg::Tree::from_str(&svg, &options).map_err(|e| e.to_string())?;
     let size = tree.size().to_int_size();
     if u64::from(size.width()) * u64::from(size.height()) > 4_000_000 {

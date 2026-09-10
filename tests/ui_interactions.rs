@@ -269,7 +269,10 @@ fn empty_window_explains_find_and_heading_shortcuts() {
         "Show / hide headings",
         "Drag a tab outside",
     ] {
-        assert!(text.contains(expected), "missing shortcut help: {expected}");
+        assert!(
+            text.contains(fast_markdown_viewer::platform::shortcut_label(expected).as_ref()),
+            "missing shortcut help: {expected}"
+        );
     }
 }
 

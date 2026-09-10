@@ -364,7 +364,10 @@ impl ViewerWindow {
                     ("F5 / Ctrl+R", "Reload file"),
                     ("Ctrl+mouse wheel", "Zoom text"),
                 ] {
-                    ui.label(format!("{shortcut}   —   {action}"));
+                    ui.label(format!(
+                        "{}   —   {action}",
+                        crate::platform::shortcut_label(shortcut)
+                    ));
                 }
                 ui.add_space(8.0);
                 ui.weak("Drag a tab outside the window to open it in a new window.");
@@ -382,7 +385,7 @@ impl ViewerWindow {
                 if ui
                     .add_enabled(
                         !self.tabs.is_empty(),
-                        egui::Button::new("Close tab    Ctrl+W"),
+                        egui::Button::new(crate::platform::shortcut_label("Close tab    Ctrl+W")),
                     )
                     .clicked()
                 {
@@ -390,7 +393,7 @@ impl ViewerWindow {
                     ui.close();
                 }
                 ui.separator();
-                if ui.add_enabled(!self.tabs.is_empty(), egui::Button::new("Reload    F5 / Ctrl+R")).clicked() {
+                if ui.add_enabled(!self.tabs.is_empty(), egui::Button::new(crate::platform::shortcut_label("Reload    F5 / Ctrl+R"))).clicked() {
                     self.reload(ui.ctx());
                     ui.close();
                 }
@@ -400,7 +403,7 @@ impl ViewerWindow {
             });
             if ui
                 .add_enabled(!self.tabs.is_empty(), egui::Button::new("Find"))
-                .on_hover_text("Show / hide Find (Ctrl+F)")
+                .on_hover_text(crate::platform::shortcut_label("Show / hide Find (Ctrl+F)"))
                 .clicked()
             {
                 self.open_find();
@@ -412,7 +415,7 @@ impl ViewerWindow {
                     ui.ctx().data_mut(|data| data.insert_temp(wrap_id, wrap));
                     ui.ctx().request_repaint();
                 }
-                ui.checkbox(&mut self.show_outline, "Outline sidebar    Ctrl+H");
+                ui.checkbox(&mut self.show_outline, crate::platform::shortcut_label("Outline sidebar    Ctrl+H"));
                 let mut automatic = crate::network::automatic_images(ui.ctx());
                 if ui.checkbox(&mut automatic, "Automatically load remote images").on_hover_text("Shared by this session's windows. Turning off hides remote images and stops new automatic requests; requests already running may finish.").changed() {
                     crate::network::set_automatic_images(ui.ctx(), automatic);
@@ -585,7 +588,7 @@ impl ViewerWindow {
                             }
                             if ui
                                 .small_button("×")
-                                .on_hover_text("Close tab (Ctrl+W)")
+                                .on_hover_text(crate::platform::shortcut_label("Close tab (Ctrl+W)"))
                                 .clicked()
                             {
                                 close = Some(index);
@@ -595,7 +598,7 @@ impl ViewerWindow {
                     }
                     if ui
                         .button("+")
-                        .on_hover_text("Open file in a tab (Ctrl+O)")
+                        .on_hover_text(crate::platform::shortcut_label("Open file in a tab (Ctrl+O)"))
                         .clicked()
                     {
                         self.open_dialog();

@@ -1,5 +1,5 @@
 use eframe::egui;
-use std::{collections::HashSet, path::PathBuf, sync::Arc};
+use std::{collections::HashSet, sync::Arc};
 
 #[derive(Clone, Default)]
 struct FontState {
@@ -16,22 +16,19 @@ struct FontOption {
     code: bool,
 }
 
-fn font_path(name: &str) -> Option<PathBuf> {
-    let system = std::env::var_os("WINDIR")
-        .map_or_else(|| PathBuf::from("C:/Windows"), PathBuf::from)
-        .join("Fonts")
-        .join(name);
-    if system.is_file() {
-        return Some(system);
-    }
-    std::env::var_os("LOCALAPPDATA")
-        .map(PathBuf::from)
-        .map(|path| path.join("Microsoft/Windows/Fonts").join(name))
-        .filter(|path| path.is_file())
-}
-
 fn installed_choices() -> Vec<FontOption> {
     [
+        ("DejaVu Sans", &["DejaVuSans.ttf"][..], false),
+        ("DejaVu Sans Mono", &["DejaVuSansMono.ttf"][..], true),
+        (
+            "Liberation Sans",
+            &["LiberationSans-Regular.ttf"][..],
+            false,
+        ),
+        ("Liberation Mono", &["LiberationMono-Regular.ttf"][..], true),
+        ("Noto Sans", &["NotoSans-Regular.ttf"][..], false),
+        ("Helvetica", &["Helvetica.ttc"][..], false),
+        ("Menlo", &["Menlo.ttc"][..], true),
         ("Segoe UI", &["segoeui.ttf"][..], false),
         ("Arial", &["arial.ttf"][..], false),
         ("Calibri", &["calibri.ttf"][..], false),
@@ -64,7 +61,7 @@ fn installed_choices() -> Vec<FontOption> {
     .filter_map(|(label, files, code)| {
         files
             .iter()
-            .find(|file| font_path(file).is_some())
+            .find(|file| crate::font_paths::find(file).is_some())
             .map(|file| FontOption { label, file, code })
     })
     .collect()
@@ -249,7 +246,7 @@ pub fn install(context: &egui::Context) {
         "Noto Emoji",
         egui::FontData::from_static(include_bytes!("../assets/fonts/NotoEmoji-Variable.ttf")),
     );
-    for name in ["segoeui.ttf", "arial.ttf"] {
+    for name in ["segoeui.ttf", "arial.ttf", "DejaVuSans.ttf", "Arial.ttf"] {
         load_system(&mut state, name);
     }
     apply_definitions(context, &state);
@@ -273,7 +270,7 @@ fn load_system(state: &mut FontState, name: &'static str) -> bool {
     if !state.attempted.insert(name) {
         return false;
     }
-    let Some(path) = font_path(name) else {
+    let Some(path) = crate::font_paths::find(name) else {
         return false;
     };
     let Ok(bytes) = std::fs::read(path) else {
@@ -325,19 +322,54 @@ pub fn ensure_for_text(context: &egui::Context, text: &str) {
         }
     }
     if japanese {
-        changed |= load_system(&mut state, "msgothic.ttc");
+        changed |= load_system_family(
+            &mut state,
+            &[
+                "msgothic.ttc",
+                "NotoSansCJK-Regular.ttc",
+                "Hiragino Sans GB.ttc",
+                "PingFang.ttc",
+            ],
+        );
     }
     if chinese {
-        changed |= load_system(&mut state, "msyh.ttc");
+        changed |= load_system_family(
+            &mut state,
+            &["msyh.ttc", "NotoSansCJK-Regular.ttc", "PingFang.ttc"],
+        );
     }
     if korean {
-        changed |= load_system(&mut state, "malgun.ttf");
+        changed |= load_system_family(
+            &mut state,
+            &[
+                "malgun.ttf",
+                "NotoSansCJK-Regular.ttc",
+                "AppleSDGothicNeo.ttc",
+            ],
+        );
     }
     if indic {
-        changed |= load_system_family(&mut state, &["Nirmala.ttc", "Nirmala.ttf", "mangal.ttf"]);
+        changed |= load_system_family(
+            &mut state,
+            &[
+                "Nirmala.ttc",
+                "Nirmala.ttf",
+                "mangal.ttf",
+                "NotoSansDevanagari-Regular.ttf",
+                "Devanagari Sangam MN.ttc",
+            ],
+        );
     }
     if thai_lao {
-        changed |= load_system_family(&mut state, &["LeelawUI.ttf", "leelawad.ttf"]);
+        changed |= load_system_family(
+            &mut state,
+            &[
+                "LeelawUI.ttf",
+                "leelawad.ttf",
+                "NotoSansThai-Regular.ttf",
+                "Thonburi.ttc",
+            ],
+        );
     }
     if changed {
         apply_definitions(context, &state);

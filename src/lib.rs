@@ -3,6 +3,7 @@ pub mod appearance;
 pub mod cli;
 pub mod document;
 pub mod file_actions;
+mod font_paths;
 pub mod fonts;
 pub mod links;
 pub mod math;

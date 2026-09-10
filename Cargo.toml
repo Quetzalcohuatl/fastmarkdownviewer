@@ -38,6 +38,10 @@ rfd = { version = "0.15.4", default-features = false }
 ureq = { version = "2.12.1", default-features = false, features = ["tls"] }
 url = "2.5.7"
 
+[target.'cfg(target_os = "linux")'.dependencies]
+eframe = { version = "0.36.0", default-features = false, features = ["x11", "wayland"] }
+rfd = { version = "0.15.4", default-features = false, features = ["xdg-portal", "async-std"] }
+
 [build-dependencies]
 winresource = "0.1.23"
 

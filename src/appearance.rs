@@ -28,7 +28,7 @@ impl ThemeChoice {
     #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
-            Self::System => "Use Windows setting",
+            Self::System => "Use system setting",
             Self::Light => "Light",
             Self::Dark => "Dark",
             Self::SolarizedLight => "Solarized Light",

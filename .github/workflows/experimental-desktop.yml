@@ -1,0 +1,79 @@
+name: Experimental desktop builds
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main, 'feature/cross-platform']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: experimental-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_BUILD_JOBS: 2
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux-x86_64
+          - os: macos-15
+            platform: macos-aarch64
+          - os: macos-15-intel
+            platform: macos-x86_64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libwayland-dev libgl1-mesa-dev libegl1-mesa-dev libdbus-1-dev xvfb fonts-dejavu-core fonts-noto-core fonts-noto-cjk
+      - name: Install Rust
+        run: rustup toolchain install 1.95.0 --profile minimal --component clippy,rustfmt
+      - name: Check source
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo test --locked --all-targets
+      - name: Build optimized executable and capture tool
+        run: cargo build --locked --release --bin FastMarkdownViewer --example visual_check
+      - name: Exercise Linux graphics
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p target/evidence
+          LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/linux.png
+      - name: Exercise macOS graphics
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p target/evidence
+          target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/macos.png
+      - name: Package experimental build
+        run: python3 scripts/package-unix.py --platform '${{ matrix.platform }}' --binary target/release/FastMarkdownViewer
+      - name: Smoke-test packaged executable
+        shell: bash
+        run: |
+          binary=$(find dist -type f -name FastMarkdownViewer | head -n 1)
+          "$binary" --version
+          printf 'flowchart LR\n A[Open] --> B[Read]\n' > target/evidence/packaged.mmd
+          "$binary" --internal-mermaid target/evidence/packaged.mmd target/evidence/packaged.png
+          test -s target/evidence/packaged.png
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: experimental-${{ matrix.platform }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+            dist/*.sha256
+            target/evidence/*.png
+          if-no-files-found: error
+          retention-days: 14

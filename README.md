@@ -2,6 +2,10 @@
 
 FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
+Experimental macOS (Apple Silicon and Intel) and Linux x86_64 builds are being
+validated separately. See [cross-platform preview instructions](docs/CROSS_PLATFORM.md)
+for builds, platform requirements, and current desktop integration limits.
+
 > **Stable:** v0.1.5 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
 
 ## What v0.1 includes

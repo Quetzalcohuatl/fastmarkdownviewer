@@ -75,3 +75,13 @@ pub fn app_icon() -> eframe::egui::IconData {
         height: SIZE_U32,
     }
 }
+
+/// Format the primary keyboard modifier for this desktop.
+#[must_use]
+pub fn shortcut_label(label: &str) -> std::borrow::Cow<'_, str> {
+    if cfg!(target_os = "macos") && !label.contains("Ctrl+Tab") {
+        label.replace("Ctrl+", "Cmd+").into()
+    } else {
+        label.into()
+    }
+}

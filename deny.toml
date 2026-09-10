@@ -1,6 +1,7 @@
 [advisories]
 yanked = "deny"
 ignore = [
+    { id = "RUSTSEC-2026-0206", reason = "Unmaintained-only rustybuzz 0.20.1 inherited through usvg 0.45 SVG text rendering. No vulnerability or safe upgrade is listed. Mermaid rendering uses an isolated child with a timeout; revisit when the shared resvg/usvg stack can migrate to harfrust." },
     { id = "RUSTSEC-2025-0141", reason = "Unmaintained-only bincode 1.3.3 dependency required by syntect 5.3 syntax/theme dumps. Only bundled trusted dumps are loaded; no user-supplied serialized data. No safe upgrade or vulnerability is listed." },
     { id = "RUSTSEC-2026-0192", reason = "Unmaintained-only ttf-parser warning inherited through RaTeX; no safe upgrade is available and no vulnerability is disclosed." },
 ]

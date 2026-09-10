@@ -68,3 +68,5 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Rusty Mermaid SVG text rendering enables usvg 0.45.1's rustybuzz 0.20.1 dependency. RUSTSEC-2026-0206 marks rustybuzz as unmaintained, with no vulnerability or safe upgrade listed. This maintenance exception is tracked in deny.toml; revisit it when the shared resvg/usvg dependency can migrate to harfrust. Mermaid rendering runs in an isolated child process with a timeout.

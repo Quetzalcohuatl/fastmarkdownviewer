@@ -5,10 +5,235 @@ use std::{collections::HashSet, path::PathBuf, sync::Arc};
 struct FontState {
     definitions: egui::FontDefinitions,
     attempted: HashSet<&'static str>,
+    preferred: [Option<String>; 2],
+    available: Vec<FontOption>,
+}
+
+#[derive(Clone)]
+struct FontOption {
+    label: &'static str,
+    file: &'static str,
+    code: bool,
+}
+
+fn font_path(name: &str) -> Option<PathBuf> {
+    let system = std::env::var_os("WINDIR")
+        .map_or_else(|| PathBuf::from("C:/Windows"), PathBuf::from)
+        .join("Fonts")
+        .join(name);
+    if system.is_file() {
+        return Some(system);
+    }
+    std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .map(|path| path.join("Microsoft/Windows/Fonts").join(name))
+        .filter(|path| path.is_file())
+}
+
+fn installed_choices() -> Vec<FontOption> {
+    [
+        ("Segoe UI", &["segoeui.ttf"][..], false),
+        ("Arial", &["arial.ttf"][..], false),
+        ("Calibri", &["calibri.ttf"][..], false),
+        ("Georgia", &["georgia.ttf"][..], false),
+        ("Times New Roman", &["times.ttf"][..], false),
+        ("Consolas", &["consola.ttf"][..], true),
+        (
+            "Cascadia Code",
+            &["CascadiaCode.ttf", "CascadiaCode-Regular.ttf"][..],
+            true,
+        ),
+        (
+            "Cascadia Mono",
+            &["CascadiaMono.ttf", "CascadiaMono-Regular.ttf"][..],
+            true,
+        ),
+        ("Courier New", &["cour.ttf"][..], true),
+        (
+            "JetBrains Mono",
+            &["JetBrainsMono-Regular.ttf", "JetBrainsMonoNL-Regular.ttf"][..],
+            true,
+        ),
+        (
+            "Fira Code",
+            &["FiraCode-Regular.ttf", "FiraCode-VF.ttf"][..],
+            true,
+        ),
+    ]
+    .into_iter()
+    .filter_map(|(label, files, code)| {
+        files
+            .iter()
+            .find(|file| font_path(file).is_some())
+            .map(|file| FontOption { label, file, code })
+    })
+    .collect()
+}
+
+fn apply_definitions(context: &egui::Context, state: &FontState) {
+    // The saved definitions retain their original fallback order; changing a
+    // preference never deletes emoji or lazily installed script fallbacks.
+    let mut definitions = state.definitions.clone();
+    for (index, family) in [egui::FontFamily::Proportional, egui::FontFamily::Monospace]
+        .into_iter()
+        .enumerate()
+    {
+        if let Some(preferred) = &state.preferred[index] {
+            let fonts = definitions.families.entry(family).or_default();
+            fonts.retain(|font| font != preferred);
+            fonts.insert(0, preferred.clone());
+        }
+    }
+    context.set_fonts(definitions);
+    crate::appearance::repaint_all(context);
+}
+
+fn select(context: &egui::Context, file: Option<&'static str>, code: bool) -> Result<(), String> {
+    let Some(mut state) = context.data_mut(|data| data.remove_temp::<FontState>(state_id())) else {
+        return Err("Font settings are not initialized.".to_owned());
+    };
+    let result = if let Some(file) = file {
+        if state.definitions.font_data.contains_key(file) || load_system(&mut state, file) {
+            state.preferred[usize::from(code)] = Some(file.to_owned());
+            Ok(())
+        } else {
+            Err("This font could not be loaded. The previous font is still selected.".to_owned())
+        }
+    } else {
+        state.preferred[usize::from(code)] = None;
+        Ok(())
+    };
+    if result.is_ok() {
+        apply_definitions(context, &state);
+    }
+    context.data_mut(|data| data.insert_temp(state_id(), state));
+    result
+}
+
+/// Installed text and code fonts, loaded only when selected.
+pub fn menu(ui: &mut egui::Ui) {
+    let Some(state) = ui.ctx().data(|data| data.get_temp::<FontState>(state_id())) else {
+        return;
+    };
+    for (code, title) in [(false, "Text font"), (true, "Code font")] {
+        let current = &state.preferred[usize::from(code)];
+        let label = state
+            .available
+            .iter()
+            .find(|font| Some(font.file) == current.as_deref())
+            .map_or("Default", |font| font.label);
+        ui.menu_button(format!("{title}: {label}"), |ui| {
+            let mut choice = None;
+            if ui.radio(current.is_none(), "Default").clicked() {
+                choice = Some(None);
+            }
+            for font in state.available.iter().filter(|font| font.code == code) {
+                if ui
+                    .radio(current.as_deref() == Some(font.file), font.label)
+                    .clicked()
+                {
+                    choice = Some(Some(font.file));
+                }
+            }
+            ui.separator();
+            ui.weak("Installed fonts · session only");
+            if let Some(choice) = choice {
+                let error = select(ui.ctx(), choice, code).err().unwrap_or_default();
+                ui.ctx()
+                    .data_mut(|data| data.insert_temp(egui::Id::new("font_choice_error"), error));
+                ui.close();
+            }
+        });
+    }
+    if let Some(error) = ui
+        .ctx()
+        .data(|data| data.get_temp::<String>(egui::Id::new("font_choice_error")))
+        && !error.is_empty()
+    {
+        ui.colored_label(ui.visuals().error_fg_color, error);
+    }
 }
 
 fn state_id() -> egui::Id {
     egui::Id::new("document_font_fallbacks")
+}
+
+#[cfg(all(test, target_os = "windows"))]
+mod tests {
+    use super::*;
+
+    fn frame(context: &egui::Context) {
+        let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+            ui.label("Reading 日本語 中文 한국어 العربية עברית 🙂 हिन्दी ภาษาไทย");
+            ui.monospace("let answer = 42;");
+        });
+        output.textures_delta.clear();
+    }
+
+    #[test]
+    fn font_changes_preserve_independent_families_and_late_fallbacks() {
+        let context = egui::Context::default();
+        install(&context);
+        frame(&context);
+        let original = context.fonts_mut(|fonts| fonts.definitions().families.clone());
+        select(&context, Some("georgia.ttf"), false).unwrap();
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            assert_eq!(
+                fonts.definitions().families[&egui::FontFamily::Proportional][0],
+                "georgia.ttf"
+            );
+            assert_eq!(
+                fonts.definitions().families[&egui::FontFamily::Monospace][0],
+                original[&egui::FontFamily::Monospace][0]
+            );
+        });
+        select(&context, Some("consola.ttf"), true).unwrap();
+        ensure_for_text(&context, "日本語 中文 한국어 हिन्दी ภาษาไทย");
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            let definitions = fonts.definitions();
+            assert_eq!(
+                definitions.families[&egui::FontFamily::Proportional][0],
+                "georgia.ttf"
+            );
+            assert_eq!(
+                definitions.families[&egui::FontFamily::Monospace][0],
+                "consola.ttf"
+            );
+            for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+                for character in "日中한عא🙂हภ".chars() {
+                    assert!(
+                        definitions.families[&family].iter().any(|name| {
+                            let data = &definitions.font_data[name];
+                            ttf_parser::Face::parse(&data.font, data.index)
+                                .is_ok_and(|face| face.glyph_index(character).is_some())
+                        }),
+                        "lost fallback for {character}"
+                    );
+                }
+            }
+        });
+        assert!(select(&context, Some("fmv-intentionally-missing.ttf"), false).is_err());
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            assert_eq!(
+                fonts.definitions().families[&egui::FontFamily::Proportional][0],
+                "georgia.ttf"
+            );
+        });
+        select(&context, None, false).unwrap();
+        select(&context, None, true).unwrap();
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+                assert_eq!(
+                    fonts.definitions().families[&family][0],
+                    original[&family][0]
+                );
+            }
+        });
+    }
 }
 
 /// Install emoji and small system fallbacks. Large East Asian fonts load only when needed.
@@ -16,6 +241,8 @@ pub fn install(context: &egui::Context) {
     let mut state = FontState {
         definitions: egui::FontDefinitions::default(),
         attempted: HashSet::new(),
+        preferred: [None, None],
+        available: installed_choices(),
     };
     add(
         &mut state.definitions,
@@ -25,7 +252,7 @@ pub fn install(context: &egui::Context) {
     for name in ["segoeui.ttf", "arial.ttf"] {
         load_system(&mut state, name);
     }
-    context.set_fonts(state.definitions.clone());
+    apply_definitions(context, &state);
     context.data_mut(|data| data.insert_temp(state_id(), state));
 }
 
@@ -46,10 +273,10 @@ fn load_system(state: &mut FontState, name: &'static str) -> bool {
     if !state.attempted.insert(name) {
         return false;
     }
-    let directory = std::env::var_os("WINDIR")
-        .map_or_else(|| PathBuf::from("C:/Windows"), PathBuf::from)
-        .join("Fonts");
-    let Ok(bytes) = std::fs::read(directory.join(name)) else {
+    let Some(path) = font_path(name) else {
+        return false;
+    };
+    let Ok(bytes) = std::fs::read(path) else {
         return false;
     };
     add(
@@ -113,7 +340,7 @@ pub fn ensure_for_text(context: &egui::Context, text: &str) {
         changed |= load_system_family(&mut state, &["LeelawUI.ttf", "leelawad.ttf"]);
     }
     if changed {
-        context.set_fonts(state.definitions.clone());
+        apply_definitions(context, &state);
     }
     context.data_mut(|data| data.insert_temp(state_id(), state));
 }

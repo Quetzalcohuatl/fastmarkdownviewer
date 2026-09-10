@@ -2,7 +2,7 @@
 
 FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
-> **Stable:** v0.1.3 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
+> **Stable:** v0.1.4 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
 
 ## What v0.1 includes
 
@@ -19,6 +19,12 @@ FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is del
 - A portable executable and a per-user installer for Windows 10 22H2 and Windows 11 x64
 
 There is no editor, file watcher, search index, history database, updater, telemetry, or settings file.
+
+### Appearance
+
+Settings → Color theme offers System, Light, Dark, Solarized Light, Solarized Dark, Quiet Light, Monokai, and Tomorrow Night Blue. These are lightweight built-in interpretations of familiar editor palettes, not imported VS Code themes or extension support. Code highlighting follows the chosen palette, including changes between two light or two dark themes.
+
+Settings → Text font changes proportional text (including menus and headings); Code font independently changes code and inline code. Choices include Segoe UI, Arial, Calibri, Georgia, Times New Roman, Consolas, Courier New, Cascadia Code/Mono, JetBrains Mono, and Fira Code when their supported font filenames are installed in Windows or the user's Windows Fonts folder. Only available choices appear. Default restores the bundled family. Fonts load on selection, retain emoji/script fallbacks, and are never downloaded or redistributed. This is a curated font list, not an arbitrary installed-font browser; custom font files and editor ligature settings are not supported. Theme, font, and zoom changes apply to all windows in the current process and reset on restart. These appearance options were added in v0.1.4.
 
 ## Usage
 

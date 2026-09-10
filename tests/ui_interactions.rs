@@ -1204,3 +1204,95 @@ fn settings_word_wrap_is_enabled_by_default_and_toggles() {
     );
     assert_eq!(context.data(|data| data.get_temp::<bool>(id)), Some(true));
 }
+
+#[test]
+fn settings_selects_solarized_light_and_system_restores_standard_palettes() {
+    use fast_markdown_viewer::appearance::ThemeChoice;
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Path(fixture()));
+    for (role, label) in [
+        (egui::accesskit::Role::Button, "Settings"),
+        (egui::accesskit::Role::Button, "Color theme:"),
+        (egui::accesskit::Role::RadioButton, "Solarized Light"),
+    ] {
+        let output = run_frame(&context, &mut app, input(vec![]));
+        let node = node_with_text(accesskit_update(&output), role, label);
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![accesskit_action(
+                egui::accesskit::Action::Click,
+                node,
+                None,
+            )]),
+        );
+    }
+    run_frame(&context, &mut app, input(vec![]));
+    assert_eq!(
+        context.global_style().visuals.panel_fill,
+        egui::Color32::from_rgb(253, 246, 227)
+    );
+    assert!(!context.global_style().visuals.dark_mode);
+    context.set_zoom_factor(1.5);
+    for theme in ThemeChoice::ALL {
+        theme.apply(&context);
+        run_frame(&context, &mut app, input(vec![]));
+        assert_eq!(app.tab_count(), 1);
+        assert!(app.error_message().is_none());
+        assert!((context.zoom_factor() - 1.5).abs() < f32::EPSILON);
+    }
+    ThemeChoice::System.apply(&context);
+    for theme in [egui::Theme::Light, egui::Theme::Dark] {
+        let mut raw = input(vec![]);
+        raw.system_theme = Some(theme);
+        run_frame(&context, &mut app, raw);
+        let expected = if theme == egui::Theme::Light {
+            egui::Visuals::light()
+        } else {
+            egui::Visuals::dark()
+        };
+        assert_eq!(
+            context.global_style().visuals.panel_fill,
+            expected.panel_fill
+        );
+    }
+}
+
+#[test]
+fn settings_text_font_selection_updates_rendered_fonts() {
+    let context = egui::Context::default();
+    fonts::install(&context);
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Path(fixture()));
+    for (role, label) in [
+        (egui::accesskit::Role::Button, "Settings"),
+        (egui::accesskit::Role::Button, "Text font:"),
+        (egui::accesskit::Role::RadioButton, "Georgia"),
+    ] {
+        let output = run_frame(&context, &mut app, input(vec![]));
+        let node = node_with_text(accesskit_update(&output), role, label);
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![accesskit_action(
+                egui::accesskit::Action::Click,
+                node,
+                None,
+            )]),
+        );
+    }
+    run_frame(&context, &mut app, input(vec![]));
+    context.fonts_mut(|fonts| {
+        assert_eq!(
+            fonts.definitions().families[&egui::FontFamily::Proportional][0],
+            "georgia.ttf"
+        );
+    });
+    assert_eq!(app.tab_count(), 1);
+    assert!(has_actual_glyph(
+        &context,
+        &egui::FontId::proportional(16.0),
+        '日'
+    ));
+}

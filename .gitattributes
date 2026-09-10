@@ -6,3 +6,6 @@
 *.gif binary
 *.webp binary
 *.ico binary
+
+# Intentional two-space CommonMark hard-break probe in T2-11.
+torturetest2.md whitespace=-blank-at-eol

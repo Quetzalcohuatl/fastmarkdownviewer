@@ -1,4 +1,5 @@
 pub mod app;
+pub mod appearance;
 pub mod cli;
 pub mod document;
 pub mod file_actions;

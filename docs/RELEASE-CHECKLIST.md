@@ -1,5 +1,12 @@
 # v0.1 release checklist
 
+## v0.1.4 candidate validation — 2026-09-09
+
+- Formatting, Clippy, all 73 locked tests, and the optimized Windows build pass after the version bump. The lockfile changes only the application version; dependency policy checks passed for this feature set with existing exceptions.
+- The exact optimized candidate passes native open/scroll/two-window checks. Local packaging/checksums and a fresh per-user install, native installed-app smoke test, Open-with registration checks, and uninstall pass (local Inno Setup 6.7.3).
+- Solarized Light and Monokai framebuffer captures were inspected during feature validation. New UI tests cover theme/font selection, same-brightness syntax palette changes, fallback preservation, and returning to the system theme. Research-backed torture suites are manual probes, not assertions that all edge cases pass.
+- This is validation on the existing Windows host, not a pristine OS VM. The annotated tag workflow separately builds and verifies the public artifacts with pinned Inno Setup 6.7.1 and build provenance.
+
 FastMarkdownViewer uses a deliberately small release bar. A release is ready
 when its core job is reliable; optional platform expansion and exhaustive
 benchmarking do not block v0.1.

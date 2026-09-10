@@ -1,5 +1,6 @@
 use eframe::egui;
 use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
+use fast_markdown_viewer::appearance::ThemeChoice;
 
 #[test]
 fn feature_matrix_renders_without_panicking() {
@@ -74,5 +75,30 @@ fn syntax_highlighting_is_lazy_and_theme_aware() {
             "theme change did not rehighlight"
         );
         std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+    // Same-brightness palette changes must invalidate the syntax cache too.
+    let mut previous = Vec::new();
+    for theme in [
+        ThemeChoice::SolarizedLight,
+        ThemeChoice::QuietLight,
+        ThemeChoice::SolarizedDark,
+        ThemeChoice::Monokai,
+        ThemeChoice::TomorrowNightBlue,
+    ] {
+        theme.apply(&context);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        loop {
+            let colors = render(&mut cache, true);
+            if colors.len() > 1 && colors != previous {
+                previous = colors;
+                break;
+            }
+            assert!(
+                std::time::Instant::now() < deadline,
+                "{} did not rehighlight",
+                theme.label()
+            );
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
     }
 }

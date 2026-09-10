@@ -13,6 +13,7 @@ use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
 use url::Url;
 
 use crate::{
+    appearance::ThemeChoice,
     document::Document,
     links::{self, LinkAction},
     math::MathRenderer,
@@ -26,23 +27,6 @@ const LINE_SCROLL_POINTS: f32 = 48.0;
 const PAGE_SCROLL_FRACTION: f32 = 0.9;
 const MIN_ZOOM_FACTOR: f32 = 0.5;
 const MAX_ZOOM_FACTOR: f32 = 3.0;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ThemeChoice {
-    System,
-    Light,
-    Dark,
-}
-
-impl ThemeChoice {
-    const fn preference(self) -> egui::ThemePreference {
-        match self {
-            Self::System => egui::ThemePreference::System,
-            Self::Light => egui::ThemePreference::Light,
-            Self::Dark => egui::ThemePreference::Dark,
-        }
-    }
-}
 
 #[derive(Debug)]
 pub enum InitialState {
@@ -431,21 +415,25 @@ impl ViewerWindow {
                     crate::network::set_automatic_images(ui.ctx(), automatic);
                 }
                 ui.separator();
-                ui.label("Theme");
                 let mut theme = *self.theme.lock().expect("appearance lock");
                 let previous = theme;
-                ui.radio_value(&mut theme, ThemeChoice::System, "Use Windows setting");
-                ui.radio_value(&mut theme, ThemeChoice::Light, "Light");
-                ui.radio_value(&mut theme, ThemeChoice::Dark, "Dark");
+                ui.menu_button(format!("Color theme: {}", theme.label()), |ui| {
+                    for choice in ThemeChoice::ALL {
+                        if ui.radio_value(&mut theme, choice, choice.label()).clicked() {
+                            ui.close();
+                        }
+                    }
+                });
                 if theme != previous {
                     *self.theme.lock().expect("appearance lock") = theme;
-                    ui.ctx().set_theme(theme.preference());
+                    theme.apply(ui.ctx());
                 }
+                crate::fonts::menu(ui);
 
                 ui.separator();
                 ui.label(format!("Text size: {:.0}%", ui.ctx().zoom_factor() * 100.0));
                 egui::gui_zoom::zoom_menu_buttons(ui);
-                ui.weak("Theme and text size are shared by this session’s windows.");
+                ui.weak("Appearance is shared by this session’s windows.");
             });
         });
         ui.separator();

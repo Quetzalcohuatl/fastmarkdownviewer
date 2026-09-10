@@ -4,6 +4,12 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-09-09
+
+- Add Solarized Light/Dark, Quiet Light, Monokai, and Tomorrow Night Blue palettes with matching lazy code highlighting.
+- Add separate session-wide text/code font menus using installed Windows fonts while retaining emoji and multilingual fallbacks.
+- Add two research-backed manual torture-test suites with companion assets, covering supported behavior and unclaimed features.
+
 ## [0.1.3] - 2026-09-09
 
 - Fix multiline code backgrounds and table row/column alignment; remove stray cell delimiters and empty trailing rows.

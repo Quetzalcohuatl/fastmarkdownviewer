@@ -99,6 +99,14 @@ fn main() -> eframe::Result {
         Box::new(move |creation| {
             fonts::install(&creation.egui_ctx);
             network::install(&creation.egui_ctx);
+            // Optional palette for repeatable visual checks; not an application setting.
+            if let Ok(name) = std::env::var("FMV_VISUAL_THEME")
+                && let Some(theme) = fast_markdown_viewer::appearance::ThemeChoice::ALL
+                    .into_iter()
+                    .find(|theme| theme.label() == name)
+            {
+                theme.apply(&creation.egui_ctx);
+            }
             if no_wrap {
                 creation
                     .egui_ctx

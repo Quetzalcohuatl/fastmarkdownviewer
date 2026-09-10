@@ -12,11 +12,18 @@ const MAX_BLOCK_BYTES: usize = 256 * 1024;
 const MAX_CACHE_ENTRIES: usize = 128;
 const MAX_CACHE_BYTES: usize = 8 * 1024 * 1024;
 
+/// Select a built-in syntax palette. Unknown names fall back to the light/dark default.
+pub fn set_syntax_theme(context: &egui::Context, name: &str) {
+    context.data_mut(|data| data.insert_temp(egui::Id::new("markdown_syntax_theme"), name.to_owned()));
+    context.request_repaint();
+}
+
 struct Request {
     key: u64,
     text: String,
     language: String,
     dark: bool,
+    theme: String,
     font: FontId,
     context: egui::Context,
 }
@@ -62,8 +69,9 @@ impl HighlightCache {
             return plain();
         }
         let dark = ui.visuals().dark_mode;
+        let theme = ui.ctx().data(|data| data.get_temp::<String>(egui::Id::new("markdown_syntax_theme"))).unwrap_or_default();
         let mut hash = std::collections::hash_map::DefaultHasher::new();
-        (text, &language, dark, &font).hash(&mut hash);
+        (text, &language, dark, &theme, &font).hash(&mut hash);
         let key = hash.finish();
         if let Some(worker) = &self.worker {
             while let Ok((key, job)) = worker.receiver.try_recv() {
@@ -99,6 +107,7 @@ impl HighlightCache {
                     text: text.to_owned(),
                     language,
                     dark,
+                    theme,
                     font,
                     context: ui.ctx().clone(),
                 };
@@ -150,11 +159,8 @@ fn highlight(syntax: &SyntaxSet, themes: &ThemeSet, request: &Request) -> Layout
     let definition = syntax
         .find_syntax_by_token(language)
         .unwrap_or_else(|| syntax.find_syntax_plain_text());
-    let theme = &themes.themes[if request.dark {
-        "base16-ocean.dark"
-    } else {
-        "base16-ocean.light"
-    }];
+    let fallback = if request.dark { "base16-ocean.dark" } else { "base16-ocean.light" };
+    let theme = themes.themes.get(&request.theme).unwrap_or(&themes.themes[fallback]);
     let mut highlighter = HighlightLines::new(definition, theme);
     let mut job = LayoutJob::default();
     for line in LinesWithEndings::from(&request.text) {
@@ -173,7 +179,7 @@ fn highlight(syntax: &SyntaxSet, themes: &ThemeSet, request: &Request) -> Layout
         match highlighter.highlight_line(line, syntax) {
             Ok(spans) => {
                 for (style, text) in spans {
-                    let c = style.foreground;
+                    let c = palette_color(style.foreground, &request.theme);
                     job.append(
                         text,
                         0.0,
@@ -215,4 +221,23 @@ fn highlight(syntax: &SyntaxSet, themes: &ThemeSet, request: &Request) -> Layout
         );
     }
     job
+}
+
+// Map the bundled Ocean syntax categories into the familiar editor palettes.
+// Other built-ins (including both Solarized variants) use syntect's own colors.
+fn palette_color(mut color: syntect::highlighting::Color, theme: &str) -> syntect::highlighting::Color {
+    let source = [0xc0c5ce, 0x65737e, 0xa7adba, 0xbf616a, 0xd08770, 0xebcb8b, 0xa3be8c, 0x96b5b4, 0x8fa1b3, 0xb48ead, 0xab7967];
+    let target = match theme {
+        "Monokai" => [0xf8f8f2, 0xa6a68d, 0xf8f8f2, 0xf92672, 0xae81ff, 0xe6db74, 0xa6e22e, 0x66d9ef, 0x66d9ef, 0xf92672, 0xfd971f],
+        "Tomorrow Night Blue" => [0xffffff, 0x8fa9cc, 0xffffff, 0xff9da4, 0xffc58f, 0xffeead, 0xd1f1a9, 0x99ffff, 0xbbdaff, 0xebbbff, 0xffc58f],
+        _ => return color,
+    };
+    let value = u32::from_be_bytes([0, color.r, color.g, color.b]);
+    if let Some(index) = source.iter().position(|candidate| *candidate == value) {
+        let [_, r, g, b] = u32::to_be_bytes(target[index]);
+        color.r = r;
+        color.g = g;
+        color.b = b;
+    }
+    color
 }

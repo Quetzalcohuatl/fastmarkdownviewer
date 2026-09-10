@@ -37,5 +37,6 @@ pub type RenderHtmlFn = dyn Fn(&mut egui::Ui, &str);
 pub type ImageGateFn = dyn Fn(&mut egui::Ui, &str, &str) -> bool;
 
 mod highlighting;
+pub use highlighting::set_syntax_theme;
 /// Rendered text geometry used by the viewer for find and outline navigation.
 pub mod navigation;

@@ -2,7 +2,6 @@
 """Package an already-built native executable; never rebuild during packaging."""
 import argparse
 import hashlib
-import os
 from pathlib import Path
 import plistlib
 import shutil
@@ -57,6 +56,34 @@ else:
     archive = args.output / (name + '.tar.gz')
     with tarfile.open(archive, 'w:gz') as tar:
         tar.add(stage, arcname=name)
-digest = hashlib.sha256(archive.read_bytes()).hexdigest()
-(args.output / (archive.name + '.sha256')).write_text(f'{digest}  {archive.name}\n')
-print(archive)
+archives = [archive]
+if args.platform == 'linux-x86_64':
+    deb_root = args.output / (name + '-deb')
+    (deb_root / 'DEBIAN').mkdir(parents=True, exist_ok=False)
+    (deb_root / 'DEBIAN/control').write_text(
+        f'Package: fast-markdown-viewer\nVersion: {version}~experimental\n'
+        'Architecture: amd64\nMaintainer: FastMarkdownViewer contributors\n'
+        'Section: text\nPriority: optional\n'
+        'Depends: libc6 (>= 2.39), libgcc-s1, libx11-6, libxi6, libxcursor1, '
+        'libxrandr2, libxcb1, libxkbcommon0, libxkbcommon-x11-0, libegl1, libgl1, '
+        'libwayland-client0, xdg-desktop-portal\n'
+        'Recommends: xdg-desktop-portal-gtk | xdg-desktop-portal-kde | xdg-desktop-portal-gnome\n'
+        'Description: Experimental native read-only Markdown viewer\n')
+    for source, relative in [
+        (executable, 'usr/bin/FastMarkdownViewer'),
+        (stage / 'FastMarkdownViewer.desktop', 'usr/share/applications/FastMarkdownViewer.desktop'),
+        (stage / 'README.md', 'usr/share/doc/fast-markdown-viewer/README.md'),
+        (stage / 'THIRD_PARTY_NOTICES.md', 'usr/share/doc/fast-markdown-viewer/THIRD_PARTY_NOTICES.md'),
+        (stage / 'LICENSE-MIT', 'usr/share/doc/fast-markdown-viewer/LICENSE-MIT'),
+        (stage / 'LICENSE-APACHE', 'usr/share/doc/fast-markdown-viewer/LICENSE-APACHE'),
+    ]:
+        destination = deb_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+    deb = args.output / (name + '.deb')
+    subprocess.run(['dpkg-deb', '--root-owner-group', '--build', str(deb_root), str(deb)], check=True)
+    archives.append(deb)
+for archive in archives:
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    (args.output / (archive.name + '.sha256')).write_text(f'{digest}  {archive.name}\n')
+    print(archive)

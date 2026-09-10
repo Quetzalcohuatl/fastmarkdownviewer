@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: experimental-desktop-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -37,7 +37,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libwayland-dev libgl1-mesa-dev libegl1-mesa-dev libdbus-1-dev xvfb fonts-dejavu-core fonts-noto-core fonts-noto-cjk
+          sudo apt-get install -y build-essential pkg-config libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libxkbcommon-x11-0 libwayland-dev libgl1-mesa-dev libegl1-mesa-dev libdbus-1-dev xvfb fonts-dejavu-core fonts-noto-core fonts-noto-cjk
       - name: Install Rust
         run: rustup toolchain install 1.95.0 --profile minimal --component clippy,rustfmt
       - name: Check source
@@ -67,12 +67,21 @@ jobs:
           printf 'flowchart LR\n A[Open] --> B[Read]\n' > target/evidence/packaged.mmd
           "$binary" --internal-mermaid target/evidence/packaged.mmd target/evidence/packaged.png
           test -s target/evidence/packaged.png
+      - name: Install and exercise Linux package
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y ./dist/*.deb
+          cmp target/release/FastMarkdownViewer /usr/bin/FastMarkdownViewer
+          /usr/bin/FastMarkdownViewer --internal-mermaid target/evidence/packaged.mmd target/evidence/installed.png
+          test -s target/evidence/installed.png
+          sudo apt-get remove -y fast-markdown-viewer
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: experimental-${{ matrix.platform }}
           path: |
             dist/*.zip
             dist/*.tar.gz
+            dist/*.deb
             dist/*.sha256
             target/evidence/*.png
           if-no-files-found: error

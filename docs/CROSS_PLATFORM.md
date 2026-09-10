@@ -11,6 +11,13 @@ universal static Linux binary. X11 and Wayland are enabled; OpenGL/EGL and a
 working desktop session are required. File dialogs use XDG Desktop Portal;
 install the portal backend for your desktop (for example xdg-desktop-portal-gtk).
 
+On Ubuntu 24.04, prefer the .deb: `sudo apt install ./FastMarkdownViewer-*.deb`.
+It installs the executable and desktop entry and declares the runtime libraries,
+including libxkbcommon-x11-0 (which is not present on every fresh desktop).
+Remove it with `sudo apt remove fast-markdown-viewer`.
+For the tar.gz, install libxkbcommon-x11-0, libegl1, libgl1 and your desktop portal
+backend yourself if your distribution does not already include them.
+
 Extract the tar.gz and run `./FastMarkdownViewer path/to/document.md` or open the
 application and use Ctrl+O. To use the included desktop entry, put the executable
 on your PATH (for example in ~/.local/bin) and copy the .desktop file into

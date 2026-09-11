@@ -41,4 +41,4 @@ for platform in ['windows','linux']:
   good=[float(r['process_to_exit_ms']) for r in rows if r['exit_code']=='0' and r.get('content_verified')=='True']
   parts.append(f"| {f} | {app} | {len(good)}/{len(rows)} | {statistics.median(good):.1f} | {min(good):.1f}–{max(good):.1f} |" if good else f'| {f} | {app} | 0/{len(rows)} | — | — |')
  parts.append('')
-(root/'results.md').write_text('\n'.join(parts)+'\n',encoding='utf-8')
+(root/'results.md').write_text('\n'.join(parts).rstrip()+'\n',encoding='utf-8',newline='\n')

@@ -4,6 +4,10 @@ This study combines measured process resources with a sourced feature comparison
 Read the limitations with the numbers; smaller memory use can come from rendering
 less of the document.
 
+**Follow-up:** the [sustained CPU investigation](idle-fix.md) identifies and fixes
+a title-update repaint loop. The competitor numbers below intentionally retain
+the original pre-fix binaries; follow-up CPU measurements are stored separately.
+
 ## What the measurements show
 
 On the small Windows fixture, FMV's median process working set was **134.8 MiB**,

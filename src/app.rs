@@ -123,6 +123,8 @@ struct ViewerWindow {
     detach_request: Option<DetachRequest>,
     close_requested: bool,
     rename_dialog: Option<RenameDialog>,
+    // Viewport commands request repaint, so only send a changed native title.
+    native_title: Option<String>,
 }
 
 impl ViewerWindow {
@@ -142,6 +144,7 @@ impl ViewerWindow {
             detach_request: None,
             close_requested: false,
             rename_dialog: None,
+            native_title: None,
         };
         match initial {
             InitialState::Empty => {}
@@ -962,15 +965,6 @@ impl ViewerWindow {
             tab.fonts_checked = true;
         }
 
-        if let Some(tab) = self.tabs.get(self.active) {
-            context.send_viewport_cmd(egui::ViewportCommand::Title(format!(
-                "{} — FastMarkdownViewer",
-                tab.document.title
-            )));
-        } else {
-            context.send_viewport_cmd(egui::ViewportCommand::Title("FastMarkdownViewer".into()));
-        }
-
         ui.painter()
             .rect_filled(ui.max_rect(), 0.0, ui.visuals().panel_fill);
         egui::Frame::central_panel(ui.style())
@@ -1010,6 +1004,14 @@ impl ViewerWindow {
 
         self.intercept_links(&context);
         self.rename_ui(&context);
+        let title = self.tabs.get(self.active).map_or_else(
+            || "FastMarkdownViewer".to_owned(),
+            |tab| format!("{} — FastMarkdownViewer", tab.document.title),
+        );
+        if self.native_title.as_ref() != Some(&title) {
+            context.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
+            self.native_title = Some(title);
+        }
     }
 }
 

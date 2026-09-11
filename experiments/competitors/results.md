@@ -123,4 +123,3 @@ Output captured through a pipe; no terminal painting, browser or GUI measured. S
 | ordinary-5k.md | mdcat | 10/10 | 28.2 | 24.8–59.1 |
 | stress-2m.md | glow | 10/10 | 5102.8 | 4946.8–5452.2 |
 | stress-2m.md | mdcat | 10/10 | 360.8 | 340.2–420.8 |
-

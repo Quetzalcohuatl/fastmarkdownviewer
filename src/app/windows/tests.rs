@@ -28,6 +28,93 @@ fn frame(context: &egui::Context, app: &mut ViewerApp, input: egui::RawInput) ->
     output
 }
 
+#[test]
+fn idle_windows_stop_requesting_repaints() {
+    let (_directory, context, mut app, _center) = fixture();
+    for empty in [false, true] {
+        if empty {
+            app.root.tabs.clear();
+        }
+        let mut output = None;
+        for tick in 0..12 {
+            let mut raw = input(Vec::new());
+            raw.time = Some(f64::from(tick + if empty { 12 } else { 0 }));
+            output = Some(frame(&context, &mut app, raw));
+        }
+        let output = output.unwrap();
+        let viewport = &output.viewport_output[&egui::ViewportId::ROOT];
+        assert!(
+            viewport.repaint_delay > std::time::Duration::from_secs(1),
+            "An idle window must let the event loop sleep: {:?}",
+            viewport.repaint_delay
+        );
+    }
+}
+
+fn assert_native_title(output: &egui::FullOutput, id: egui::ViewportId, expected: &str) {
+    assert!(output.viewport_output[&id].commands.iter().any(
+        |command| matches!(command, egui::ViewportCommand::Title(title) if title == expected)
+    ));
+}
+
+#[test]
+fn native_title_tracks_open_switch_rename_and_last_tab_close() {
+    let (directory, context, mut app, _) = fixture();
+    let second = directory.path().join("second.md");
+    std::fs::write(&second, "# Second").unwrap();
+    app.root.load(&second);
+    assert_native_title(
+        &frame(&context, &mut app, input(Vec::new())),
+        egui::ViewportId::ROOT,
+        "second.md — FastMarkdownViewer",
+    );
+    app.root.active = 0;
+    assert_native_title(
+        &frame(&context, &mut app, input(Vec::new())),
+        egui::ViewportId::ROOT,
+        "tear-out.md — FastMarkdownViewer",
+    );
+    let id = app.root.tabs[0].id;
+    app.root.rename_tab(&context, id, "renamed.md").unwrap();
+    assert_native_title(
+        &frame(&context, &mut app, input(Vec::new())),
+        egui::ViewportId::ROOT,
+        "renamed.md — FastMarkdownViewer",
+    );
+    while !app.root.tabs.is_empty() {
+        app.root.close_tab(0, &context);
+    }
+    assert_native_title(
+        &frame(&context, &mut app, input(Vec::new())),
+        egui::ViewportId::ROOT,
+        "FastMarkdownViewer",
+    );
+}
+
+#[test]
+fn detached_window_title_updates_then_allows_sleep() {
+    let (_directory, context, mut app, start) = fixture();
+    let output = drag(&context, &mut app, start, egui::pos2(900.0, 150.0));
+    let id = *app.detached.first_key_value().unwrap().0;
+    let callback = output.viewport_output[&id].viewport_ui_cb.clone().unwrap();
+    child_frame(&context, id, &*callback, Vec::new(), false);
+    {
+        let mut window = app.detached[&id].state.lock().unwrap();
+        let tab_id = window.tabs[0].id;
+        window.rename_tab(&context, tab_id, "detached.md").unwrap();
+    }
+    assert_native_title(
+        &child_frame(&context, id, &*callback, Vec::new(), false),
+        id,
+        "detached.md — FastMarkdownViewer",
+    );
+    for _ in 0..30 {
+        child_frame(&context, id, &*callback, Vec::new(), false);
+    }
+    let output = child_frame(&context, id, &*callback, Vec::new(), false);
+    assert!(output.viewport_output[&id].repaint_delay > std::time::Duration::from_secs(1));
+}
+
 fn button(position: egui::Pos2, pressed: bool) -> egui::Event {
     egui::Event::PointerButton {
         pos: position,

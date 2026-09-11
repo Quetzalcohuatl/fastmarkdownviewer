@@ -1,0 +1,99 @@
+{
+  "fixtures": "C:/benchmark/fastmarkdownviewer/target/competitors/fixtures",
+  "files": [
+    "ordinary-5k.md",
+    "gfm-math-images-100k.md",
+    "stress-2m.md",
+    "images.md"
+  ],
+  "apps": [
+    {
+      "id": "fmv",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/release/FastMarkdownViewer.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/fmv/roaming",
+        "LOCALAPPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/fmv/local",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/fmv/webview"
+      }
+    },
+    {
+      "id": "aydiler",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/competitors/aydiler__md-viewer/unpacked/md-viewer.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/aydiler/roaming",
+        "LOCALAPPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/aydiler/local",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/aydiler/webview"
+      }
+    },
+    {
+      "id": "markmello",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/competitors/dartdavros__MarkMello/installed/MarkMello.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/markmello/roaming",
+        "LOCALAPPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/markmello/local",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/markmello/webview"
+      }
+    },
+    {
+      "id": "md-preview",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/competitors/vorojar__md-preview/MD-Preview-windows-x64.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/md-preview/roaming",
+        "LOCALAPPDATA": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/md-preview/local",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/fastmarkdownviewer/target/competitors/profiles/md-preview/webview"
+      }
+    },
+    {
+      "id": "marktext",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/competitors/marktext-stable/windows/marktext.exe",
+        "--user-data-dir=C:/benchmark/fastmarkdownviewer/target/competitors/profiles/marktext-stable",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "mdview-zig",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/competitors/nathannncurtis__mdview-zig/mdview.exe",
+        "{fixture}"
+      ]
+    }
+  ],
+  "cli_apps": [
+    {
+      "id": "glow",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/competitors/charmbracelet__glow/unpacked/glow_3.0.0_Windows_x86_64/glow.exe",
+        "-s",
+        "dark",
+        "-w",
+        "80",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "mdcat",
+      "command": [
+        "C:/benchmark/fastmarkdownviewer/target/competitors/swsnr__mdcat/unpacked/mdcat.exe",
+        "--ansi",
+        "--local",
+        "--columns",
+        "80",
+        "--no-pager",
+        "{fixture}"
+      ]
+    }
+  ]
+}

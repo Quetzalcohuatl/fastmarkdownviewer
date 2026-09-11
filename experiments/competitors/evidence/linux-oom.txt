@@ -1,0 +1,5 @@
+Sep 11 16:20:46 fmv-desktop-test kernel: Out of memory: Killed process 17016 (obsidian) total-vm:1524331408kB, anon-rss:3170476kB, file-rss:3712kB, shmem-rss:6344kB, UID:1000 pgtables:7700kB oom_score_adj:0
+Sep 11 16:19:43 fmv-desktop-test kernel: Out of memory: Killed process 15756 (obsidian) total-vm:1524315012kB, anon-rss:3171032kB, file-rss:3712kB, shmem-rss:6528kB, UID:1000 pgtables:7672kB oom_score_adj:0
+Sep 11 16:14:55 fmv-desktop-test kernel: Out of memory: Killed process 9391 (obsidian) total-vm:1524323276kB, anon-rss:3187808kB, file-rss:3584kB, shmem-rss:6732kB, UID:1000 pgtables:7704kB oom_score_adj:0
+Sep 11 16:14:02 fmv-desktop-test kernel: Out of memory: Killed process 7980 (obsidian) total-vm:1524328396kB, anon-rss:3187096kB, file-rss:3712kB, shmem-rss:4368kB, UID:1000 pgtables:7712kB oom_score_adj:0
+Sep 11 16:13:22 fmv-desktop-test kernel: Out of memory: Killed process 6893 (obsidian) total-vm:1524322952kB, anon-rss:3189744kB, file-rss:3584kB, shmem-rss:6016kB, UID:1000 pgtables:7700kB oom_score_adj:0

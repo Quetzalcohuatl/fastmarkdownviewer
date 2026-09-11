@@ -1,0 +1,203 @@
+{
+  "fixtures": "/home/fmv/bench-downloads/fixtures",
+  "files": [
+    "ordinary-5k.md",
+    "gfm-math-images-100k.md",
+    "stress-2m.md",
+    "images.md"
+  ],
+  "apps": [
+    {
+      "id": "fmv",
+      "command": [
+        "/usr/bin/FastMarkdownViewer",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/fmv/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/fmv/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/fmv/data"
+      }
+    },
+    {
+      "id": "aydiler",
+      "command": [
+        "/home/fmv/bench-downloads/aydiler__md-viewer/linux/md-viewer",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/aydiler/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/aydiler/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/aydiler/data"
+      }
+    },
+    {
+      "id": "markmello",
+      "command": [
+        "/home/fmv/bench-downloads/dartdavros__MarkMello/squashfs-root/usr/bin/MarkMello",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/markmello/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/markmello/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/markmello/data"
+      }
+    },
+    {
+      "id": "marky",
+      "command": [
+        "/usr/bin/marky",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/marky/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/marky/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/marky/data"
+      }
+    },
+    {
+      "id": "mdview-zig",
+      "command": [
+        "/usr/bin/mdview",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/mdview-zig/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/mdview-zig/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/mdview-zig/data"
+      }
+    },
+    {
+      "id": "md-preview",
+      "command": [
+        "/home/fmv/bench-downloads/vorojar__md-preview/linux/md-preview",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/md-preview/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/md-preview/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/md-preview/data"
+      }
+    },
+    {
+      "id": "marktext",
+      "command": [
+        "/home/fmv/bench-downloads/marktext-linux-0.19.1/marktext",
+        "--user-data-dir=/home/fmv/bench-downloads/profiles/marktext-stable",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/marktext-rc/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/marktext-rc/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/marktext-rc/data"
+      }
+    },
+    {
+      "id": "vscode-preview",
+      "command": [
+        "/home/fmv/anchors/vscode/VSCode-linux-x64/code",
+        "--user-data-dir=/home/fmv/anchors/profiles/vscode-preview",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/fmv/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/fmv/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/fmv/data"
+      },
+      "prepare": "vscode"
+    },
+    {
+      "id": "obsidian",
+      "command": [
+        "/home/fmv/anchors/obsidian/squashfs-root/obsidian",
+        "--user-data-dir=/home/fmv/anchors/profiles/obsidian",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/fmv/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/fmv/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/fmv/data"
+      },
+      "prepare": "obsidian"
+    },
+    {
+      "id": "typora",
+      "command": [
+        "/usr/share/typora/Typora",
+        "--user-data-dir=/home/fmv/anchors/profiles/typora",
+        "{fixture}"
+      ],
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/home/fmv/.Xauthority",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "XDG_CONFIG_HOME": "/home/fmv/bench-downloads/profiles/fmv/config",
+        "XDG_CACHE_HOME": "/home/fmv/bench-downloads/profiles/fmv/cache",
+        "XDG_DATA_HOME": "/home/fmv/bench-downloads/profiles/fmv/data"
+      },
+      "preserve_profile": true
+    }
+  ],
+  "cli_apps": [
+    {
+      "id": "glow",
+      "command": [
+        "/home/fmv/bench-downloads/charmbracelet__glow/linux/glow_3.0.0_Linux_x86_64/glow",
+        "-s",
+        "dark",
+        "-w",
+        "80",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "mdcat",
+      "command": [
+        "/home/fmv/bench-downloads/swsnr__mdcat/linux/mdcat-2.7.1-x86_64-unknown-linux-gnu/mdcat",
+        "--ansi",
+        "--local",
+        "--columns",
+        "80",
+        "--no-pager",
+        "{fixture}"
+      ]
+    }
+  ]
+}

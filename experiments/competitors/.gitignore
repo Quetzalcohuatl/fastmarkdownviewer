@@ -1,0 +1,3 @@
+# Downloaded upstream documents are local research inputs, not redistributed sources.
+upstream/
+__pycache__/

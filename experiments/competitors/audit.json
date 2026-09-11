@@ -1,0 +1,101 @@
+{
+  "scope": "Dataset completeness/identity only; not content correctness",
+  "datasets": {
+    "windows.csv": {
+      "samples": 120,
+      "sha256": "c86b3d0683d008ee68a69d36e2f5accf7ba7f9f18847be625a41abc433161bae",
+      "status_counts": {
+        "window-observed": 120
+      },
+      "executable_sha256": {
+        "aydiler": "c5fe8c07f3cd1678bd24c1b5ab55f5374932c0cba81deff5021b23270f30e44a",
+        "fmv": "75cdacca57fb606dae1b34e956475aea00cbf414d045cf68587ef3bd216fc373",
+        "markmello": "01cd62372517971d003c37cd1191d9290107e8944de6a8a586157923937880fd",
+        "marktext": "f783de63f5bf170e7a2ab58b3755425ddf339a6628923664957121fc779ecdfa",
+        "md-preview": "d24eb9ea9b38f1e57f40d76eec919ae319494a4764ef1e64975e50f5a4b1b10f",
+        "mdview-zig": "29f2b042e99deccc584ce0f44fe553320bae7682727dc2c9de9977ae59bc77be"
+      },
+      "negative_cpu_deltas_excluded_from_medians": 0,
+      "live_at_checkpoint": 115
+    },
+    "windows-anchors.csv": {
+      "samples": 60,
+      "sha256": "e4e69348bf6fa69705b6824e995d7f78b917d6273d844abbea199a7acaac30c6",
+      "status_counts": {
+        "window-observed": 55,
+        "renderer-exited": 5
+      },
+      "executable_sha256": {
+        "obsidian": "a00f15ad21a289d4db67df1196d5d99ec5cf31a6972f7777fb9b41e20d86088e",
+        "typora": "3a1807daf4f0f9e8d1257fac5f61429e9535debf230ffece8b7d931749108a57",
+        "vscode-preview": "cfa80a9347a8e6db4ee481bab3e3ecd01f3eae0363b7072e7cc2bbbe88edf1ae"
+      },
+      "negative_cpu_deltas_excluded_from_medians": 0,
+      "live_at_checkpoint": 55,
+      "document_rejection_exclusion": "5 Typora stress attempts retained but excluded from summarized resources because the pilot explicitly rejected the file as too large"
+    },
+    "linux.csv": {
+      "samples": 200,
+      "sha256": "ad854a4cb406939cf6d827b16f3dadfb30833898b6ba32a0c9ebbdc0c7b3bc86",
+      "status_counts": {
+        "window-observed": 175,
+        "exited--11": 20,
+        "renderer-exited": 5
+      },
+      "executable_sha256": {
+        "aydiler": "cb1f70db3b2150b91e7d49bb140c794a04ce0ab8e04d88d69727dbddcbac9a39",
+        "fmv": "60dc3377d0280fb2e48f54660d7cfebc5ee5f1334d2e23be9a844bde60045d7a",
+        "markmello": "dbd3760216650d16334de575263ba71d9234a9333ba7d673dbadbac260353705",
+        "marktext": "6d2a2ce754b755637076692a502cd29165d80d1b773d5b5482f4bfccf76a2acf",
+        "marky": "d9e29b70534adf2c2b6004de8c98cf81521ae158944a708b4fcdd21d7c99e452",
+        "md-preview": "06dc8f0622977971d368cd3243913f0c5502bb399802a429130bb1e0b53f2b87",
+        "mdview-zig": "7b3326a555c0d319e217b217932eef9369d9021322f68a4e7e0309d7a515655e",
+        "obsidian": "4d5379efcd4909bc9a9bff25636d9ef39ee4677cc83af9d285d7d89792015739",
+        "typora": "3d3804b5be42dedab376be01ac2dd19d60995d04d7b0f2938daac8d9f561a8ff",
+        "vscode-preview": "5dcf32d814a227f8626426e00708caa6c8f5469980322265a1c398a6458082bc"
+      },
+      "negative_cpu_deltas_excluded_from_medians": 2,
+      "live_at_checkpoint": 175,
+      "configuration_exclusion": "20 Obsidian attempts retained but excluded from summarized resources because the pilot displayed keyring setup",
+      "document_rejection_exclusion": "5 Typora stress attempts retained but excluded from summarized resources because the pilot explicitly rejected the file as too large"
+    },
+    "windows-cli.csv": {
+      "samples": 80,
+      "sha256": "8984d77f731969da38882a76f6df08364670c037923443441ea21809146b4913",
+      "status_counts": {
+        "0": 80
+      },
+      "executable_sha256": {
+        "glow": "0bebd662eb9da86b32b6abeaef10fe448a36d2a2a6aa629098ccd17b13f6cb9c",
+        "mdcat": "c429a89ebf3f2d3611c2373dab5ca160bc5e41c53c7ab1ac13bf6aa599ee93b3"
+      },
+      "negative_cpu_deltas_excluded_from_medians": 0
+    },
+    "linux-cli.csv": {
+      "samples": 80,
+      "sha256": "ea2695ff2485ddd444da66fe75cb270cdeb2ff1db90ece84d8e792822c6d23da",
+      "status_counts": {
+        "0": 80
+      },
+      "executable_sha256": {
+        "glow": "ee68de36f7ee162fe6656d35928ba4dfb44b4861dffab3e2b6255d1a3d7a13ea",
+        "mdcat": "7ff184e1ff2f5b9940992f115ced521d8e9de105a6c74d05043b8f211ed76dab"
+      },
+      "negative_cpu_deltas_excluded_from_medians": 0
+    },
+    "windows-late-cpu.csv": {
+      "samples": 2,
+      "sha256": "04d91664f6998587797cfcc4c9b89bbd92ae8f26dcfd118cf11861a4e891bb1e"
+    },
+    "linux-late-cpu.csv": {
+      "samples": 2,
+      "sha256": "3e287e696256b66f0b5820d0122a1f0767575a849a69b477d93782b0fcc18c33"
+    }
+  },
+  "fixture_sha256": {
+    "gfm-math-images-100k.md": "771478d23dc1d5ab205db29e23c97f4eb2e28d7a6ecf37cf87298b647bc42594",
+    "images.md": "5f37ffbf6cb09651723b404787caceef0c0a981b942242ae98566e4e034c9a1f",
+    "ordinary-5k.md": "0b7ad3f74990c566da95984bd29019d7c5399c2ac2995e08b1dd6c01d315731d",
+    "stress-2m.md": "009f32e8adcad5a962d96c6f864fb0412255cf4ed4b2b0c6aa0f684395daa23e"
+  }
+}

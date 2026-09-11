@@ -1,0 +1,245 @@
+{
+  "retrieved": "2026-09-11",
+  "sources": [
+    {
+      "repo": "aydiler/md-viewer",
+      "url": "https://github.com/aydiler/md-viewer",
+      "description": "Fast, lightweight markdown viewer for Linux with tabs, file explorer, and live reload",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "ceb9cdd5809defa56646ccbeb3f5e44cf0cd1e37"
+    },
+    {
+      "repo": "charmbracelet/glow",
+      "url": "https://github.com/charmbracelet/glow",
+      "description": "Render markdown on the CLI, with pizzazz! \ud83d\udc85\ud83c\udffb",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "674abae5407bf91f79f10159e753725892768d6c"
+    },
+    {
+      "repo": "dartdavros/MarkMello",
+      "url": "https://github.com/dartdavros/MarkMello",
+      "description": "MarkMello is an app for quickly opening and reading Markdown files, with an optional edit mode.",
+      "license": {
+        "key": "gpl-3.0",
+        "name": "GNU General Public License v3.0",
+        "spdx_id": "GPL-3.0",
+        "url": "https://api.github.com/licenses/gpl-3.0",
+        "node_id": "MDc6TGljZW5zZTk="
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "a29798db1cbba5addad6ca4627ed0a6ad94c0365"
+    },
+    {
+      "repo": "ekino/MarkdownViewer",
+      "url": "https://github.com/ekino/MarkdownViewer",
+      "description": "A native lightweight macOS Markdown viewer",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "b0d8a1a9ac3fa9bdb66001ce51db82bf85ac266c"
+    },
+    {
+      "repo": "GRVYDEV/marky",
+      "url": "https://github.com/GRVYDEV/marky",
+      "description": "A lightweight easy to use markdown viewer",
+      "license": {
+        "key": "apache-2.0",
+        "name": "Apache License 2.0",
+        "spdx_id": "Apache-2.0",
+        "url": "https://api.github.com/licenses/apache-2.0",
+        "node_id": "MDc6TGljZW5zZTI="
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "24829fd10d6de1b65f1e972845253bdba95d2202"
+    },
+    {
+      "repo": "joeyespo/grip",
+      "url": "https://github.com/joeyespo/grip",
+      "description": "Preview GitHub README.md files locally before committing them.",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "master",
+      "readme_sha": "be556d221872a3a718ce821aef49fcfcc05dbc18"
+    },
+    {
+      "repo": "leaanthony/mdview",
+      "url": "https://github.com/leaanthony/mdview",
+      "description": "A minimal markdown viewer built with Wails v3. Opens a file, swaps themes, and that's it.",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "a21284b82c3f24a7dea8680628bb14e1e569a136"
+    },
+    {
+      "repo": "marktext/marktext",
+      "url": "https://github.com/marktext/marktext",
+      "description": "\ud83d\udcddA simple and elegant markdown editor, available for Linux, macOS and Windows.",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "develop",
+      "readme_sha": "7cdbc71b6d627882b91efb00496fefa1ed83d12c"
+    },
+    {
+      "repo": "nathannncurtis/mdview-zig",
+      "url": "https://github.com/nathannncurtis/mdview-zig",
+      "description": "Fast, native markdown viewer \u2014 Zig + DirectWrite/Cairo/CoreText, ~285KB, cross-platform",
+      "license": {
+        "key": "gpl-3.0",
+        "name": "GNU General Public License v3.0",
+        "spdx_id": "GPL-3.0",
+        "url": "https://api.github.com/licenses/gpl-3.0",
+        "node_id": "MDc6TGljZW5zZTk="
+      },
+      "archived": false,
+      "default_branch": "master",
+      "readme_sha": "3640dd303491b59e11bd076d1774445eac6a4263"
+    },
+    {
+      "repo": "newuni/md-viewer",
+      "url": "https://github.com/newuni/md-viewer",
+      "description": "Native macOS Markdown viewer with Finder Quick Look extension, live preview, and CLI export.",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "f9aae8db0b02db6d8adba11bd0f91c130eae7c06"
+    },
+    {
+      "repo": "rajatarya/mdviewer",
+      "url": "https://github.com/rajatarya/mdviewer",
+      "description": "A fast, lightweight native Markdown viewer for macOS",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "64401c1c9c783821e28029cd2d4f195d4d27e2b9"
+    },
+    {
+      "repo": "simov/markdown-viewer",
+      "url": "https://github.com/simov/markdown-viewer",
+      "description": "Markdown Viewer / Browser Extension",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "9d0be28cf7cdad8e1e57ffbd82f33c97e2b22bae"
+    },
+    {
+      "repo": "swsnr/mdcat",
+      "url": "https://github.com/swsnr/mdcat",
+      "description": "cat for markdown",
+      "license": {
+        "key": "mpl-2.0",
+        "name": "Mozilla Public License 2.0",
+        "spdx_id": "MPL-2.0",
+        "url": "https://api.github.com/licenses/mpl-2.0",
+        "node_id": "MDc6TGljZW5zZTE0"
+      },
+      "archived": true,
+      "default_branch": "main",
+      "readme_sha": "0d5ccb2fd3a1d63a10e6462a0aff2fbc068c018a"
+    },
+    {
+      "repo": "Textualize/frogmouth",
+      "url": "https://github.com/Textualize/frogmouth",
+      "description": "A Markdown browser for your terminal",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "3d4a6737da3461335dc910fbce7b9d56205da47b"
+    },
+    {
+      "repo": "trsdn/mdviewer",
+      "url": "https://github.com/trsdn/mdviewer",
+      "description": "Minimal macOS Markdown viewer with Dark Mode",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "main",
+      "readme_sha": "ce7bec7396d81e931dfef5897ccd4cf87c049f2c"
+    },
+    {
+      "repo": "vorojar/md-preview",
+      "url": "https://github.com/vorojar/md-preview",
+      "description": "Native, local-first Markdown preview and quick editor. Multi-document tabs, session restore, macOS Finder workflow, offline Mermaid/KaTeX. Rust + system WebView, no Electron.",
+      "license": {
+        "key": "mit",
+        "name": "MIT License",
+        "spdx_id": "MIT",
+        "url": "https://api.github.com/licenses/mit",
+        "node_id": "MDc6TGljZW5zZTEz"
+      },
+      "archived": false,
+      "default_branch": "master",
+      "readme_sha": "be8d363b0eb775b0cd8afb759804f8409cba9c18"
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 # Feature comparison — 2026-09-11
 
+Later development builds add [saved preferences and session restoration](../../README.md#saved-settings-and-sessions).
+The tables below retain the capabilities of the originally benchmarked builds.
+
 **D** = documented by upstream (not necessarily verified in the tested binary).
 **V** = observed in our small-fixture spot check. **P** = partial or narrower support.
 **—** = explicitly absent/by design. **?** = not established; never infer absence

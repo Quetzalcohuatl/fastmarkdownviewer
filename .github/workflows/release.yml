@@ -13,6 +13,12 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  desktop:
+    uses: ./.github/workflows/experimental-desktop.yml
+
   windows-x86_64:
     runs-on: windows-2022
     steps:
@@ -83,7 +89,36 @@ jobs:
           $version = $env:GITHUB_REF_NAME.TrimStart('v')
           .\scripts\test-windows-installer.ps1 -Installer ".\release\FastMarkdownViewer-Setup-$version.exe" -Fixture .\tests\fixtures\feature-matrix.md -Headless
 
-      - name: Attest build provenance
+      - name: Retain verified Windows assets
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-windows
+          path: release/*
+          if-no-files-found: error
+
+  publish:
+    needs: [checks, desktop, windows-x86_64]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Download verified assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download "$GITHUB_RUN_ID" --name release-windows --dir release
+          gh run download "$GITHUB_RUN_ID" --pattern 'desktop-*' --dir desktop
+          find desktop -type f -exec cp {} release/ \;
+          cd release
+          sha256sum --check SHA256SUMS.txt
+          for checksum in *.sha256; do sha256sum --check "$checksum"; done
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          files = sorted(p for p in Path('.').iterdir() if p.suffix in {'.exe', '.zip', '.gz', '.deb'})
+          assert len(files) == 7, [str(p) for p in files]
+          Path('SHA256SUMS.txt').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in files))
+          PY
+      - name: Attest all platform assets
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
           subject-path: release/*

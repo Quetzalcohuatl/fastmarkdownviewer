@@ -25,6 +25,10 @@ enum WindowEvent {
 
 /// One process with independently repainted native document windows.
 pub struct ViewerApp {
+    #[cfg(target_os = "macos")]
+    native_events: Option<fmv_macos_events::Inbox>,
+    persistence: Option<(std::path::PathBuf, egui::Context)>,
+    exit_session: Option<Vec<crate::persistence::Window>>,
     root: ViewerWindow,
     detached: BTreeMap<egui::ViewportId, DetachedWindow>,
     pending: Arc<Mutex<Vec<WindowEvent>>>,
@@ -41,11 +45,137 @@ impl ViewerApp {
     #[must_use]
     pub fn with_services(initial: InitialState, services: Arc<dyn AppServices>) -> Self {
         Self {
+            #[cfg(target_os = "macos")]
+            native_events: None,
+            persistence: None,
+            exit_session: None,
             root: ViewerWindow::with_services(initial, services),
             detached: BTreeMap::new(),
             pending: Arc::default(),
             next_window_id: 0,
             root_closed: false,
+        }
+    }
+
+    /// Restore local preferences; reopen the last session only for a bare launch.
+    #[must_use]
+    pub fn with_saved_state(initial: InitialState, context: &egui::Context) -> Self {
+        let Some(path) = crate::persistence::path() else {
+            return Self::new(initial);
+        };
+        Self::restore_from(initial, context, path)
+    }
+
+    fn restore_from(
+        initial: InitialState,
+        context: &egui::Context,
+        path: std::path::PathBuf,
+    ) -> Self {
+        let state = crate::persistence::read(&path);
+        let restore_session = matches!(initial, InitialState::Empty);
+        let mut app = Self::new(initial);
+        *app.root.theme.lock().expect("appearance lock") = state.theme;
+        state.theme.apply(context);
+        context.set_zoom_factor(state.zoom);
+        crate::fonts::restore(context, &state.fonts);
+        crate::network::set_automatic_images(context, state.automatic_images);
+        context.data_mut(|data| data.insert_temp(egui::Id::new("word_wrap"), state.word_wrap));
+        if restore_session {
+            let mut windows = state.windows.into_iter();
+            if let Some(window) = windows.next() {
+                app.root.restore_session(window);
+            }
+            for saved in windows.filter(|window| !window.tabs.is_empty()) {
+                let mut window =
+                    ViewerWindow::with_services(InitialState::Empty, app.root.services.clone());
+                window.theme = app.root.theme.clone();
+                window.tab_ids = app.root.tab_ids.clone();
+                window.restore_session(saved);
+                app.spawn(Spawn {
+                    window,
+                    position: None,
+                    size: egui::vec2(900.0, 700.0),
+                });
+            }
+        }
+        app.persistence = Some((path, context.clone()));
+        app
+    }
+
+    fn session(&self) -> Vec<crate::persistence::Window> {
+        let mut windows = Vec::new();
+        if !self.root_closed {
+            windows.push(self.root.session());
+        }
+        windows.extend(
+            self.detached
+                .values()
+                .map(|window| window.state.lock().expect("document window lock").session()),
+        );
+        windows
+    }
+
+    /// Connect Finder open/quit events to the existing document and exit paths.
+    #[cfg(target_os = "macos")]
+    #[must_use]
+    pub fn with_native_events(
+        mut self,
+        inbox: fmv_macos_events::Inbox,
+        context: &egui::Context,
+    ) -> Self {
+        let wake_context = context.clone();
+        inbox.set_wake(move || wake_context.request_repaint_of(egui::ViewportId::ROOT));
+        self.native_events = Some(inbox);
+        self.process_native_events(context);
+        self
+    }
+
+    #[cfg(target_os = "macos")]
+    fn process_native_events(&mut self, context: &egui::Context) {
+        let events = self
+            .native_events
+            .as_ref()
+            .map(fmv_macos_events::Inbox::drain)
+            .unwrap_or_default();
+        for event in events {
+            match event {
+                fmv_macos_events::Event::Open(paths) => self.open_external_files(&paths, context),
+                fmv_macos_events::Event::Quit => context
+                    .data_mut(|data| data.insert_temp(egui::Id::new("quit_application"), true)),
+            }
+        }
+    }
+
+    #[cfg(any(target_os = "macos", test))]
+    fn open_external_files(&mut self, paths: &[std::path::PathBuf], context: &egui::Context) {
+        for path in paths {
+            let canonical = path.canonicalize().unwrap_or_else(|_| path.clone());
+            let existing = self.detached.iter().find_map(|(&id, window)| {
+                let mut window = window.state.lock().expect("document window lock");
+                let index = window
+                    .tabs
+                    .iter()
+                    .position(|tab| tab.document.path == canonical)?;
+                window.active = index;
+                Some(id)
+            });
+            if let Some(id) = existing {
+                context.send_viewport_cmd_to(id, egui::ViewportCommand::Minimized(false));
+                context.send_viewport_cmd_to(id, egui::ViewportCommand::Focus);
+            } else {
+                self.root_closed = false;
+                self.root.close_requested = false;
+                self.root.load(path);
+                context.send_viewport_cmd_to(
+                    egui::ViewportId::ROOT,
+                    egui::ViewportCommand::Visible(true),
+                );
+                context.send_viewport_cmd_to(
+                    egui::ViewportId::ROOT,
+                    egui::ViewportCommand::Minimized(false),
+                );
+                context.send_viewport_cmd_to(egui::ViewportId::ROOT, egui::ViewportCommand::Focus);
+            }
         }
     }
 
@@ -142,6 +272,9 @@ impl ViewerApp {
             match event {
                 WindowEvent::Spawn(spawn) => self.spawn(*spawn),
                 WindowEvent::Close(id) => {
+                    if self.root_closed && self.detached.len() == 1 {
+                        self.exit_session = Some(self.session());
+                    }
                     self.detached.remove(&id);
                 }
             }
@@ -149,10 +282,21 @@ impl ViewerApp {
     }
 
     fn handle_root_close(&mut self, context: &egui::Context) {
+        if context
+            .data_mut(|data| data.remove_temp::<bool>(egui::Id::new("quit_application")))
+            .unwrap_or(false)
+        {
+            self.exit_session = Some(self.session());
+            self.root_closed = true;
+            self.detached.clear();
+            context.send_viewport_cmd(egui::ViewportCommand::Close);
+            return;
+        }
         let close =
             self.root.close_requested || context.input(|input| input.viewport().close_requested());
         if close && !self.root_closed {
             if self.detached.is_empty() {
+                self.exit_session = Some(self.session());
                 context.send_viewport_cmd(egui::ViewportCommand::Close);
             } else {
                 // egui's root must exist until the process exits. Hide it while independent
@@ -224,8 +368,33 @@ impl ViewerApp {
     }
 }
 
+impl Drop for ViewerApp {
+    fn drop(&mut self) {
+        let Some((path, context)) = &self.persistence else {
+            return;
+        };
+        let state = crate::persistence::State {
+            theme: *self.root.theme.lock().expect("appearance lock"),
+            fonts: crate::fonts::preferences(context),
+            zoom: context.zoom_factor(),
+            automatic_images: crate::network::automatic_images(context),
+            word_wrap: context.data(|data| {
+                data.get_temp::<bool>(egui::Id::new("word_wrap"))
+                    .unwrap_or(true)
+            }),
+            windows: self.exit_session.take().unwrap_or_else(|| self.session()),
+            ..crate::persistence::State::default()
+        };
+        if let Err(error) = crate::persistence::write(path, &state) {
+            eprintln!("Could not save FastMarkdownViewer settings: {error}");
+        }
+    }
+}
+
 impl eframe::App for ViewerApp {
     fn logic(&mut self, context: &egui::Context, _frame: &mut eframe::Frame) {
+        #[cfg(target_os = "macos")]
+        self.process_native_events(context);
         // eframe can skip UI when every window is minimized/occluded. Lifetime
         // events must still be processed so the final close always exits.
         self.process_events();

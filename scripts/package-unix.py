@@ -16,7 +16,7 @@ parser.add_argument('--output', type=Path, default=Path('dist'))
 args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
 version = tomllib.loads((root / 'Cargo.toml').read_text())['package']['version']
-name = f'FastMarkdownViewer-{version}-experimental-{args.platform}'
+name = f'FastMarkdownViewer-{version}-{args.platform}'
 stage = args.output / name
 stage.mkdir(parents=True, exist_ok=False)
 if args.platform.startswith('macos'):
@@ -33,7 +33,23 @@ if args.platform.startswith('macos'):
         'CFBundleShortVersionString': version,
         'CFBundleVersion': version,
         'NSHighResolutionCapable': True,
-        'LSMinimumSystemVersion': '12.0',
+        'LSMinimumSystemVersion': '15.0',
+        'CFBundleDocumentTypes': [{
+            'CFBundleTypeName': 'Markdown document',
+            'CFBundleTypeRole': 'Viewer',
+            'LSHandlerRank': 'Alternate',
+            'LSItemContentTypes': ['net.daringfireball.markdown'],
+            'CFBundleTypeExtensions': ['md', 'markdown'],
+        }],
+        'UTImportedTypeDeclarations': [{
+            'UTTypeIdentifier': 'net.daringfireball.markdown',
+            'UTTypeDescription': 'Markdown document',
+            'UTTypeConformsTo': ['public.plain-text'],
+            'UTTypeTagSpecification': {
+                'public.filename-extension': ['md', 'markdown'],
+                'public.mime-type': 'text/markdown',
+            },
+        }],
     }
     (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
 else:
@@ -61,18 +77,19 @@ if args.platform == 'linux-x86_64':
     deb_root = args.output / (name + '-deb')
     (deb_root / 'DEBIAN').mkdir(parents=True, exist_ok=False)
     (deb_root / 'DEBIAN/control').write_text(
-        f'Package: fast-markdown-viewer\nVersion: {version}~experimental\n'
+        f'Package: fast-markdown-viewer\nVersion: {version.replace("-", "~")}\n'
         'Architecture: amd64\nMaintainer: FastMarkdownViewer contributors\n'
         'Section: text\nPriority: optional\n'
         'Depends: libc6 (>= 2.39), libgcc-s1, libx11-6, libxi6, libxcursor1, '
         'libxrandr2, libxcb1, libxkbcommon0, libxkbcommon-x11-0, libegl1, libgl1, '
         'libwayland-client0, xdg-desktop-portal\n'
         'Recommends: xdg-desktop-portal-gtk | xdg-desktop-portal-kde | xdg-desktop-portal-gnome\n'
-        'Description: Experimental native read-only Markdown viewer\n')
+        'Description: Native read-only Markdown viewer\n')
     for source, relative in [
         (executable, 'usr/bin/FastMarkdownViewer'),
         (stage / 'FastMarkdownViewer.desktop', 'usr/share/applications/FastMarkdownViewer.desktop'),
         (stage / 'README.md', 'usr/share/doc/fast-markdown-viewer/README.md'),
+        (stage / 'PRIVACY.md', 'usr/share/doc/fast-markdown-viewer/PRIVACY.md'),
         (stage / 'THIRD_PARTY_NOTICES.md', 'usr/share/doc/fast-markdown-viewer/THIRD_PARTY_NOTICES.md'),
         (stage / 'LICENSE-MIT', 'usr/share/doc/fast-markdown-viewer/LICENSE-MIT'),
         (stage / 'LICENSE-APACHE', 'usr/share/doc/fast-markdown-viewer/LICENSE-APACHE'),

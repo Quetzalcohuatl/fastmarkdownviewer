@@ -10,6 +10,7 @@ pub mod math;
 pub mod mermaid;
 mod mermaid_worker;
 pub mod network;
+mod persistence;
 pub mod platform;
 pub mod render_source;
 mod search;

@@ -1,6 +1,7 @@
-name: Experimental desktop builds
+name: Desktop builds
 
 on:
+  workflow_call:
   workflow_dispatch:
   pull_request:
   push:
@@ -10,12 +11,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: experimental-desktop-${{ github.ref }}
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
   CARGO_BUILD_JOBS: 2
+  MACOSX_DEPLOYMENT_TARGET: '15.0'
 
 jobs:
   native:
@@ -57,8 +59,11 @@ jobs:
         run: |
           mkdir -p target/evidence
           target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/macos.png
-      - name: Package experimental build
+      - name: Package desktop build
         run: python3 scripts/package-unix.py --platform '${{ matrix.platform }}' --binary target/release/FastMarkdownViewer
+      - name: Exercise Finder opening and saved sessions in the extracted Mac app
+        if: runner.os == 'macOS'
+        run: python3 scripts/test-macos-package.py dist/*.zip
       - name: Smoke-test packaged executable
         shell: bash
         run: |
@@ -77,12 +82,17 @@ jobs:
           sudo apt-get remove -y fast-markdown-viewer
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: experimental-${{ matrix.platform }}
+          name: desktop-${{ matrix.platform }}
           path: |
             dist/*.zip
             dist/*.tar.gz
             dist/*.deb
             dist/*.sha256
-            target/evidence/*.png
           if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: evidence-${{ matrix.platform }}
+          path: target/evidence/
           retention-days: 14

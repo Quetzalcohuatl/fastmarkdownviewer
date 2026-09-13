@@ -133,7 +133,7 @@ pub fn menu(ui: &mut egui::Ui) {
                 }
             }
             ui.separator();
-            ui.weak("Installed fonts · session only");
+            ui.weak("Installed fonts · remembered on exit");
             if let Some(choice) = choice {
                 let error = select(ui.ctx(), choice, code).err().unwrap_or_default();
                 ui.ctx()
@@ -153,6 +153,27 @@ pub fn menu(ui: &mut egui::Ui) {
 
 fn state_id() -> egui::Id {
     egui::Id::new("document_font_fallbacks")
+}
+
+pub(crate) fn preferences(context: &egui::Context) -> [Option<String>; 2] {
+    context
+        .data(|data| data.get_temp::<FontState>(state_id()))
+        .map_or([None, None], |state| state.preferred)
+}
+
+pub(crate) fn restore(context: &egui::Context, preferences: &[Option<String>; 2]) {
+    let Some(state) = context.data(|data| data.get_temp::<FontState>(state_id())) else {
+        return;
+    };
+    for (index, preferred) in preferences.iter().enumerate() {
+        if let Some(font) = state
+            .available
+            .iter()
+            .find(|font| Some(font.file) == preferred.as_deref() && font.code == (index == 1))
+        {
+            let _ = select(context, Some(font.file), index == 1);
+        }
+    }
 }
 
 #[cfg(all(test, target_os = "windows"))]
@@ -186,6 +207,19 @@ mod tests {
             );
         });
         select(&context, Some("consola.ttf"), true).unwrap();
+        let saved = preferences(&context);
+        let reopened = egui::Context::default();
+        install(&reopened);
+        restore(&reopened, &saved);
+        frame(&reopened);
+        assert_eq!(preferences(&reopened), saved);
+        let missing = egui::Context::default();
+        install(&missing);
+        restore(
+            &missing,
+            &[Some("font-no-longer-installed.ttf".into()), None],
+        );
+        assert_eq!(preferences(&missing), [None, None]);
         ensure_for_text(&context, "日本語 中文 한국어 हिन्दी ภาษาไทย");
         frame(&context);
         context.fonts_mut(|fonts| {

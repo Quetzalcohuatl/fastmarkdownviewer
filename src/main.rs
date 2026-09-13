@@ -15,6 +15,9 @@ fn main() -> eframe::Result {
         return Ok(());
     }
 
+    #[cfg(target_os = "macos")]
+    let (_apple_events, inbox) = fmv_macos_events::Registration::install();
+
     let initial = match command {
         Command::Open(Some(path)) => InitialState::Path(path),
         Command::Open(None) => InitialState::Empty,
@@ -54,7 +57,10 @@ fn main() -> eframe::Result {
                 style.spacing.item_spacing.y = 7.0;
                 style.visuals.selection.stroke.width = 1.0;
             });
-            Ok(Box::new(ViewerApp::new(initial)))
+            let app = ViewerApp::with_saved_state(initial, &creation_context.egui_ctx);
+            #[cfg(target_os = "macos")]
+            let app = app.with_native_events(inbox, &creation_context.egui_ctx);
+            Ok(Box::new(app))
         }),
     )
 }

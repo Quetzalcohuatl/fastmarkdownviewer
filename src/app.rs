@@ -72,6 +72,9 @@ impl AppServices for PlatformServices {
 
 /// Self-contained document state moved intact between native windows.
 struct DocumentTab {
+    pending_load: bool,
+    load_error: Option<String>,
+    restore_scroll: Option<f32>,
     id: u64,
     document: Document,
     markdown_cache: CommonMarkCache,
@@ -205,6 +208,9 @@ impl ViewerWindow {
         match Document::load(path) {
             Ok(document) => {
                 self.tabs.push(DocumentTab {
+                    pending_load: false,
+                    load_error: None,
+                    restore_scroll: None,
                     id: self.tab_ids.fetch_add(1, Ordering::Relaxed),
                     document,
                     markdown_cache: CommonMarkCache::default(),
@@ -248,6 +254,9 @@ impl ViewerWindow {
                     context.forget_image(&uri);
                 }
                 tab.document = document;
+                tab.pending_load = false;
+                tab.load_error = None;
+                tab.navigation_error = None;
                 tab.markdown_cache = CommonMarkCache::default();
                 tab.math = MathRenderer::default();
                 tab.mermaid = crate::mermaid::MermaidRenderer::default();
@@ -402,6 +411,10 @@ impl ViewerWindow {
                 }
                 if ui.button("Close window").clicked() {
                     self.close_requested = true;
+                }
+                if ui.button("Quit application").on_hover_text("Save all open windows and tabs, then exit.").clicked() {
+                    ui.ctx().data_mut(|data| data.insert_temp(egui::Id::new("quit_application"), true));
+                    ui.ctx().request_repaint_of(egui::ViewportId::ROOT);
                 }
             });
             if ui
@@ -852,7 +865,19 @@ impl ViewerWindow {
     }
 
     fn reading_ui(&mut self, ui: &mut egui::Ui) {
+        self.load_active();
+        if let Some(error) = &self.tabs[self.active].load_error {
+            ui.colored_label(ui.visuals().error_fg_color, error);
+            if ui.button("Retry loading file").clicked() {
+                self.reload(ui.ctx());
+            }
+            return;
+        }
         let tab = &mut self.tabs[self.active];
+        if !tab.fonts_checked {
+            crate::fonts::ensure_for_text(ui.ctx(), &tab.document.source);
+            tab.fonts_checked = true;
+        }
         if self.show_outline {
             egui::Panel::left("outline")
                 .resizable(true)
@@ -911,6 +936,12 @@ impl ViewerWindow {
             .inner;
         tab.scroll_offset = output.state.offset.y;
         tab.max_scroll_offset = (output.content_size.y - output.inner_rect.height()).max(0.0);
+        // Native startup can run a sizing pass before the viewport has its final
+        // dimensions. Reapply the saved position once after that initial layout.
+        if let Some(offset) = tab.restore_scroll.take() {
+            tab.scroll_offset = offset;
+            ui.ctx().request_repaint();
+        }
         if let Some(error) = tab.navigation_error.take() {
             self.error = Some(error);
         }
@@ -948,6 +979,7 @@ impl ViewerWindow {
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
         let context = ui.ctx().clone();
+        self.load_active();
         Self::apply_zoom_input(&context);
         self.handle_drops(&context);
         if self.rename_dialog.is_none() {
@@ -1011,6 +1043,74 @@ impl ViewerWindow {
         if self.native_title.as_ref() != Some(&title) {
             context.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
             self.native_title = Some(title);
+        }
+    }
+}
+
+impl ViewerWindow {
+    fn load_active(&mut self) {
+        let Some(tab) = self.tabs.get_mut(self.active) else {
+            return;
+        };
+        if !tab.pending_load {
+            return;
+        }
+        tab.pending_load = false;
+        match Document::load(&tab.document.path) {
+            Ok(document) => tab.document = document,
+            Err(error) => tab.load_error = Some(error.to_string()),
+        }
+    }
+
+    fn restore_session(&mut self, window: crate::persistence::Window) {
+        self.show_outline = window.outline;
+        self.tabs = window
+            .tabs
+            .into_iter()
+            .map(|tab| DocumentTab {
+                pending_load: true,
+                load_error: None,
+                restore_scroll: Some(tab.scroll),
+                id: self.tab_ids.fetch_add(1, Ordering::Relaxed),
+                document: Document {
+                    title: tab
+                        .path
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_string_lossy()
+                        .into_owned(),
+                    path: tab.path,
+                    source: String::new(),
+                    base_uri: String::new(),
+                },
+                markdown_cache: CommonMarkCache::default(),
+                math: MathRenderer::default(),
+                mermaid: crate::mermaid::MermaidRenderer::default(),
+                scroll_offset: tab.scroll,
+                max_scroll_offset: 0.0,
+                search: crate::search::Search::default(),
+                heading_target: None,
+                fragment_target: None,
+                navigation_error: None,
+                fonts_checked: false,
+                image_uris: Arc::default(),
+            })
+            .collect();
+        self.active = window.active.min(self.tabs.len().saturating_sub(1));
+    }
+
+    fn session(&self) -> crate::persistence::Window {
+        crate::persistence::Window {
+            tabs: self
+                .tabs
+                .iter()
+                .map(|tab| crate::persistence::Tab {
+                    path: tab.document.path.clone(),
+                    scroll: tab.scroll_offset,
+                })
+                .collect(),
+            active: self.active,
+            outline: self.show_outline,
         }
     }
 }

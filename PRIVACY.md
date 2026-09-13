@@ -1,8 +1,8 @@
 # Privacy and network behavior
 
-FastMarkdownViewer has no telemetry, analytics, crash reporting, update checks, recent-file list, settings store, or persistent cache.
+FastMarkdownViewer has no telemetry, analytics, crash reporting, update checks, browsing-history database or persistent content cache.
 
-Opening a local document reads that file and any local images it references. The portable build does not write to the registry or save settings in AppData. The installed build writes only its program files, uninstall metadata, Start Menu shortcut, and its own per-user `Open with` registration.
+Opening a local document reads that file and any local images it references. Both portable and installed builds save preferences and the last session locally on normal exit. The settings file contains file paths and reading positions, but no document contents or search queries. Locations and reset instructions are in [Saved settings and sessions](README.md#saved-settings-and-sessions). The portable build does not write to the registry. The installer additionally writes program files, uninstall metadata, a Start Menu shortcut, and per-user `Open with` registration.
 
 Mermaid rendering runs diagrams offline using a hidden child process of the same executable. Diagram source, output PNG, and any rendering error are exchanged through a temporary directory, removed when the render finishes or times out. Abrupt application termination can leave these temporary files behind. Rendering is serialized and has a 10-second timeout, a 64 KiB source limit, a 4-megapixel image limit, and a 32 MiB/32-entry image cache per tab. These are not a hard limit on child-process memory. Closing or reloading the tab releases its cached diagrams.
 
@@ -10,7 +10,7 @@ The explicit **Rename file…** tab action changes the filename on disk in the s
 
 ## Remote images
 
-A Markdown document can reference a remote image. Visible remote images load automatically by default on a background thread and therefore disclose the user's IP address and request time to that image host. **Settings → Automatically load remote images** turns automatic loading off for all windows in the session. Disabled images, including cached ones, show a **Load image** button; clicking it allows that URL for the session. Changing the toggle clears individual approvals. Requests already running may finish. These choices are not saved between launches. The request:
+A Markdown document can reference a remote image. Visible remote images load automatically by default on a background thread and therefore disclose the user's IP address and request time to that image host. **Settings → Automatically load remote images** turns automatic loading off for all windows in the session. Disabled images, including cached ones, show a **Load image** button; clicking it allows that URL for the session. Changing the toggle clears individual approvals. Requests already running may finish. The automatic-loading preference is saved between launches; individual URL approvals are not. Restoring a session can load remote images in visible documents when automatic loading is enabled. The request:
 
 - allows only HTTP and HTTPS;
 - contains a minimal product user agent and image `Accept` header;

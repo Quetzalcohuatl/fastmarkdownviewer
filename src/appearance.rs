@@ -1,7 +1,7 @@
 //! Small built-in palettes inspired by familiar editor themes.
 use eframe::egui::{self, Color32};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum ThemeChoice {
     System,
     Light,

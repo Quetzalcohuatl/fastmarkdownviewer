@@ -1,5 +1,158 @@
 use super::*;
 
+#[test]
+fn external_open_reuses_tabs_and_revives_a_hidden_root() {
+    let directory = tempfile::tempdir().unwrap();
+    let first = directory.path().join("First 日本語.md");
+    let second = directory.path().join("Second.markdown");
+    std::fs::write(&first, "# First").unwrap();
+    std::fs::write(&second, "# Second").unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Empty);
+    app.open_external_files(&[first.clone(), second.clone(), first.clone()], &context);
+    assert_eq!(app.tab_count(), 2);
+    assert_eq!(
+        app.document_path(),
+        Some(first.canonicalize().unwrap().as_path())
+    );
+    app.open_external_files(&[directory.path().join("missing.md")], &context);
+    assert_eq!(app.tab_count(), 2);
+    assert!(app.error_message().is_some());
+    app.root_closed = true;
+    app.root.close_requested = true;
+    app.root.tabs.clear();
+    app.open_external_files(&[second], &context);
+    assert!(!app.root_closed);
+    assert!(!app.root.close_requested);
+    assert_eq!(app.tab_count(), 1);
+}
+
+#[test]
+fn saved_session_restores_lazily_and_keeps_reading_position() {
+    let directory = tempfile::tempdir().unwrap();
+    let first = directory.path().join("first.md");
+    let second = directory.path().join("second.md");
+    std::fs::write(&first, "# First\n\nparagraph\n\n".repeat(200)).unwrap();
+    std::fs::write(&second, "# Second").unwrap();
+    let path = directory.path().join("state.json");
+    let context = egui::Context::default();
+    {
+        let mut app =
+            ViewerApp::restore_from(InitialState::Path(first.clone()), &context, path.clone());
+        app.root.load(&second);
+        app.root.active = 0;
+        app.root.tabs[0].scroll_offset = 500.0;
+        app.root.show_outline = false;
+        *app.root.theme.lock().unwrap() = crate::appearance::ThemeChoice::Light;
+        context.set_zoom_factor(1.25);
+        frame(&context, &mut app, input(Vec::new()));
+        app.root.tabs[0].scroll_offset = 500.0;
+        crate::network::set_automatic_images(&context, false);
+        context.data_mut(|data| data.insert_temp(egui::Id::new("word_wrap"), false));
+    }
+    let context = egui::Context::default();
+    let mut restored = ViewerApp::restore_from(InitialState::Empty, &context, path.clone());
+    assert_eq!(restored.tab_count(), 2);
+    assert!(
+        restored
+            .root
+            .tabs
+            .iter()
+            .all(|tab| tab.pending_load && tab.document.source.is_empty())
+    );
+    assert_eq!(
+        *restored.root.theme.lock().unwrap(),
+        crate::appearance::ThemeChoice::Light
+    );
+    assert!(!crate::network::automatic_images(&context));
+    assert!(!restored.root.show_outline);
+    let mut sizing = input(Vec::new());
+    sizing.screen_rect = Some(egui::Rect::from_min_size(
+        egui::Pos2::ZERO,
+        egui::vec2(30_000.0, 30_000.0),
+    ));
+    frame(&context, &mut restored, sizing);
+    for _ in 0..12 {
+        frame(&context, &mut restored, input(Vec::new()));
+    }
+    assert!((context.zoom_factor() - 1.25).abs() < 0.001);
+    assert!((restored.document_scroll_offset() - 500.0).abs() < 1.0);
+    assert!(restored.root.tabs[1].pending_load);
+    // A file changed while its restored tab was inactive: opening it reads current content.
+    std::fs::write(&second, "# Updated").unwrap();
+    restored.root.active = 1;
+    frame(&context, &mut restored, input(Vec::new()));
+    assert_eq!(restored.root.tabs[1].document.source, "# Updated");
+    for tick in 0..12 {
+        let mut raw = input(Vec::new());
+        raw.time = Some(f64::from(tick + 1));
+        let output = frame(&context, &mut restored, raw);
+        if tick == 11 {
+            assert!(
+                output.viewport_output[&egui::ViewportId::ROOT].repaint_delay
+                    > std::time::Duration::from_secs(1)
+            );
+        }
+    }
+    let explicit =
+        ViewerApp::restore_from(InitialState::Path(first), &egui::Context::default(), path);
+    assert_eq!(explicit.tab_count(), 1);
+}
+
+#[test]
+fn missing_restored_file_can_be_reloaded_and_closed_tabs_stay_closed() {
+    let directory = tempfile::tempdir().unwrap();
+    let file = directory.path().join("missing.md");
+    let path = directory.path().join("state.json");
+    std::fs::write(&file, "# Document").unwrap();
+    let context = egui::Context::default();
+    drop(ViewerApp::restore_from(
+        InitialState::Path(file.clone()),
+        &context,
+        path.clone(),
+    ));
+    std::fs::remove_file(&file).unwrap();
+    let mut app = ViewerApp::restore_from(InitialState::Empty, &context, path.clone());
+    frame(&context, &mut app, input(Vec::new()));
+    assert!(app.root.tabs[0].load_error.is_some());
+    std::fs::write(&file, "# Back again").unwrap();
+    app.root.reload(&context);
+    assert!(app.root.tabs[0].load_error.is_none());
+    assert_eq!(app.root.tabs[0].document.source, "# Back again");
+    app.root.close_tab(0, &context);
+    app.root.close_requested = true;
+    app.handle_root_close(&context);
+    drop(app);
+    assert_eq!(
+        ViewerApp::restore_from(InitialState::Empty, &context, path).tab_count(),
+        0
+    );
+}
+
+#[test]
+fn quit_restores_all_windows_and_last_detached_close_preserves_its_tabs() {
+    let (directory, context, mut app, start) = fixture();
+    let path = directory.path().join("state.json");
+    app.persistence = Some((path.clone(), context.clone()));
+    drag(&context, &mut app, start, egui::pos2(900.0, 150.0));
+    context.data_mut(|data| data.insert_temp(egui::Id::new("quit_application"), true));
+    app.handle_root_close(&context);
+    drop(app);
+    let mut app = ViewerApp::restore_from(InitialState::Empty, &context, path.clone());
+    assert_eq!(app.detached.len(), 1);
+    assert_eq!(app.root.tabs.len(), 0);
+    app.root.close_requested = true;
+    app.handle_root_close(&context);
+    let id = *app.detached.keys().next().unwrap();
+    app.pending.lock().unwrap().push(WindowEvent::Close(id));
+    app.process_events();
+    app.handle_root_close(&context);
+    drop(app);
+    let app = ViewerApp::restore_from(InitialState::Empty, &context, path);
+    assert_eq!(app.root.tabs.len(), 1);
+    assert_eq!(app.detached.len(), 0);
+}
+
 fn input(events: Vec<egui::Event>) -> egui::RawInput {
     let mut input = egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(

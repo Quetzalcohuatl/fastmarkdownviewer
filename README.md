@@ -22,13 +22,13 @@ for builds, platform requirements, and current desktop integration limits.
 - File/Settings menus, session-wide themes, Ctrl+mouse-wheel zoom, and keyboard scrolling
 - A portable executable and a per-user installer for Windows 10 22H2 and Windows 11 x64
 
-There is no editor, file watcher, search index, history database, updater, telemetry, or settings file.
+There is no editor, file watcher, search index, history database, updater, or telemetry.
 
 ### Appearance
 
 Settings → Color theme offers System, Light, Dark, Solarized Light, Solarized Dark, Quiet Light, Monokai, and Tomorrow Night Blue. These are lightweight built-in interpretations of familiar editor palettes, not imported VS Code themes or extension support. Code highlighting follows the chosen palette, including changes between two light or two dark themes.
 
-Settings → Text font changes proportional text (including menus and headings); Code font independently changes code and inline code. Choices include Segoe UI, Arial, Calibri, Georgia, Times New Roman, Consolas, Courier New, Cascadia Code/Mono, JetBrains Mono, and Fira Code when their supported font filenames are installed in Windows or the user's Windows Fonts folder. Only available choices appear. Default restores the bundled family. Fonts load on selection, retain emoji/script fallbacks, and are never downloaded or redistributed. This is a curated font list, not an arbitrary installed-font browser; custom font files and editor ligature settings are not supported. Theme, font, and zoom changes apply to all windows in the current process and reset on restart. These appearance options were added in v0.1.4.
+Settings → Text font changes proportional text (including menus and headings); Code font independently changes code and inline code. Choices include Segoe UI, Arial, Calibri, Georgia, Times New Roman, Consolas, Courier New, Cascadia Code/Mono, JetBrains Mono, and Fira Code when their supported font filenames are installed in Windows or the user's Windows Fonts folder. Only available choices appear. Default restores the bundled family. Fonts load on selection, retain emoji/script fallbacks, and are never downloaded or redistributed. This is a curated font list, not an arbitrary installed-font browser; custom font files and editor ligature settings are not supported. Theme, font, and zoom changes apply to all windows in the current process and are saved on normal exit. These appearance options were added in v0.1.4.
 
 ## Usage
 
@@ -67,7 +67,7 @@ Right-click a tab for **Rename file…** or **Show in Explorer**. Rename changes
 
 Mermaid support in v0.1.5 renders supported Mermaid fences using patched Rusty, with the source retained underneath. Rendering runs offline in a separate process with a 10-second timeout; unsupported or oversized diagrams show an error and their source. This is not full Mermaid.js compatibility. See [the Rusty fixes](docs/RUSTY_FIXES.md) for details.
 
-**Settings → Automatically load remote images** defaults to on. Turn it off to hide remote images and show individual **Load image** buttons. This setting applies to every window in the current session and resets on the next launch. Requests already running may finish. Ordinary links still open only when clicked.
+**Settings → Automatically load remote images** defaults to on. Turn it off to hide remote images and show individual **Load image** buttons. This setting applies to every window in the current session and is remembered between launches. Requests already running may finish. Ordinary links still open only when clicked.
 
 The current eframe backend does not initialize native accessibility for dynamically created child windows. For screen-reader access, open the file through a separate application launch instead of detaching its tab.
 
@@ -97,3 +97,31 @@ Local Markdown is rendered without a browser engine; raw HTML is inert text. Rem
 ## License
 
 Licensed under either [Apache License 2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT), at your option.
+
+## Saved settings and sessions
+
+On normal exit, the viewer saves appearance preferences (theme, text/code fonts,
+zoom, and word wrap), the automatic remote-image preference, and the open file
+paths, tab order, active tab, outline visibility, and vertical reading positions.
+Unavailable fonts fall back to the bundled default.
+
+Starting without a file restores the saved session. Opening a specific file uses
+saved preferences but starts with that file alone. Inactive restored tabs load
+from disk only when selected; they do not preload document contents or images.
+A missing or unreadable file stays as a tab with an error and a retry button.
+Reading positions are approximate if the document or layout has changed.
+
+**File → Quit application** saves all open windows together and exits. Closing
+individual windows removes them from the session; closing the last window saves
+its tabs. Explicitly closed tabs stay closed. Restored windows use the default
+size and OS placement, avoiding stale positions on disconnected monitors.
+
+State is a small local `FastMarkdownViewer/state.json` file under `%APPDATA%`
+on Windows, `~/Library/Application Support` on macOS, and `$XDG_CONFIG_HOME`
+(or `~/.config`) on Linux. This also applies to the portable executable. Delete
+that file while the app is closed to reset preferences and forget the session.
+Document contents, image caches, and search queries are not saved. There is no
+periodic saving or polling; forced termination can lose changes since the last
+normal exit. Independent processes share the file: the last process to exit wins.
+Restoration is limited to 32 windows and 256 tabs per window, with a 1 MiB state-file
+limit. Invalid or unsupported state files fall back to default settings.

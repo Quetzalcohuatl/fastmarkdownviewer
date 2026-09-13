@@ -3,7 +3,7 @@
 Version 0.1.4 adds five palettes to the existing System/Light/Dark choices:
 Solarized Light, Solarized Dark, Quiet Light, Monokai, and Tomorrow Night Blue.
 Settings has separate text and code font submenus. See the appearance section
-of [README](../README.md) for available families and session scope.
+of [README](../README.md) for available families. Since v0.2.0, appearance is saved on normal exit.
 
 Palette references: VS Code's [Solarized Light](https://github.com/microsoft/vscode/blob/main/extensions/theme-solarized-light/themes/solarized-light-color-theme.json),
 [Solarized Dark](https://github.com/microsoft/vscode/blob/main/extensions/theme-solarized-dark/themes/solarized-dark-color-theme.json),

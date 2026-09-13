@@ -24,7 +24,7 @@ second.write_text('# Second\n\nOpened through the native portal.')
 env = dict(os.environ, XDG_CONFIG_HOME=str(profile))
 
 def command(*args):
-    return subprocess.check_output(args, text=True).strip()
+    return subprocess.check_output(args, text=True, timeout=20).strip()
 
 def wait_for(predicate, label):
     deadline = time.monotonic() + 20
@@ -75,10 +75,17 @@ try:
     capture('restored')
     key('ctrl+o')
     time.sleep(2)
+    dialog = command('xdotool', 'getactivewindow')
+    command('xdotool', 'windowsize', dialog, '900', '650')
     capture('portal-dialog')
     key('ctrl+l')
     command('xdotool', 'type', '--clearmodifiers', str(second))
     key('Return')
+    time.sleep(1)
+    # GTK first resolves the location entry, then activates the selected file.
+    if command('xdotool', 'getactivewindow') == dialog:
+        key('Return')
+    capture('portal-selection')
     wait_for(lambda: 'Second.markdown' in command('xdotool', 'getwindowname', root), 'portal selected file')
     capture('second-tab')
     close(root)

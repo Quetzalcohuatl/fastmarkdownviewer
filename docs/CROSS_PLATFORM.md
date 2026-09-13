@@ -1,54 +1,93 @@
-# Experimental macOS and Linux builds
+# Desktop installation and support
 
-These builds extend v0.1.5 and are preview artifacts, not a new stable release.
-Windows remains the established supported platform. The native CI matrix builds,
-lints and tests Linux x86_64, macOS Apple Silicon and macOS Intel separately.
+v0.2.0 packages Windows x64, macOS Apple Silicon/Intel, and Ubuntu x64 together.
+Download packages and SHA256SUMS.txt from the same [GitHub release](https://github.com/Quetzalcohuatl/fastmarkdownviewer/releases).
+All platform builds and package checks must succeed before publication.
 
-## Linux
+| Platform | Supported baseline | Package |
+|:--|:--|:--|
+| Windows x64 | Windows 10 22H2 or Windows 11 | Portable EXE/ZIP or per-user installer |
+| Apple Silicon Mac | macOS 15 or later | macos-aarch64.zip app bundle |
+| Intel Mac | macOS 15 or later | macos-x86_64.zip app bundle |
+| Linux x64 | Ubuntu 24.04, X11 or Wayland | .deb or linux-x86_64.tar.gz |
 
-Initial baseline: Ubuntu 24.04 x86_64, glibc 2.39 or newer. The archive is not a
-universal static Linux binary. X11 and Wayland are enabled; OpenGL/EGL and a
-working desktop session are required. File dialogs use XDG Desktop Portal;
-install the portal backend for your desktop (for example xdg-desktop-portal-gtk).
+The test baseline is macOS 15 and Ubuntu 24.04. Later compatible OS versions are
+expected to work; every OS, desktop, and graphics driver combination is not tested.
+Other Linux distributions, older macOS versions, Linux ARM64, and Windows ARM64
+are outside the supported release matrix.
 
-On Ubuntu 24.04, prefer the .deb: `sudo apt install ./FastMarkdownViewer-*.deb`.
-It installs the executable and desktop entry and declares the runtime libraries,
-including libxkbcommon-x11-0 (which is not present on every fresh desktop).
-Remove it with `sudo apt remove fast-markdown-viewer`.
-For the tar.gz, install libxkbcommon-x11-0, libegl1, libgl1 and your desktop portal
-backend yourself if your distribution does not already include them.
+## Windows
 
-Extract the tar.gz and run `./FastMarkdownViewer path/to/document.md` or open the
-application and use Ctrl+O. To use the included desktop entry, put the executable
-on your PATH (for example in ~/.local/bin) and copy the .desktop file into
-~/.local/share/applications. It offers Markdown opening without changing your default.
+Run the portable EXE, or install the per-user setup. The installer registers .md
+and .markdown under Open with without changing your default application.
+Windows builds are unsigned. Checksums and GitHub provenance establish origin
+and unchanged bytes, but do not remove SmartScreen prompts.
 
 ## macOS
 
-Choose aarch64 for Apple Silicon or x86_64 for Intel. Extract the ZIP and open
-FastMarkdownViewer.app, then use Cmd+O or drag a file into the viewer.
-The bundle is ad-hoc signed for integrity, not Developer ID signed or notarized.
-Normal downloaded-app security checks therefore still apply.
+Extract the ZIP, move FastMarkdownViewer.app to Applications, and open it.
+Use Finder's Open With → FastMarkdownViewer for .md and .markdown files;
+choosing it as the default remains your decision. Finder can send additional
+files to the running app, reusing a tab when its canonical path is already open.
+In-app Cmd+O and drag-and-drop also open documents.
 
-Finder document associations and opening documents into an already-running app
-are not advertised by this preview. Use the in-app file dialog or drag-and-drop.
-The command-line executable lives in FastMarkdownViewer.app/Contents/MacOS.
+The bundle is ad-hoc signed for integrity. It is not Developer ID signed or
+notarized, so downloaded-app security checks can require approval in macOS
+Privacy & Security. No signing credentials are included in the repository.
 
-Primary shortcuts use Cmd on macOS; tab cycling remains Ctrl+Tab.
-Use Cmd+Shift+O for the outline on macOS; Cmd+H is the system Hide shortcut.
-Installed font choices and script coverage depend on local fonts. The bundled
-default text and emoji fonts remain available on every platform; Mermaid uses
-bundled Latin fonts when system fonts are unavailable. Font collection fallback
-selection is heuristic and is not a promise of full multilingual typography.
+Primary shortcuts use Cmd on macOS; tab cycling uses Ctrl+Tab.
+Cmd+Shift+O toggles the outline; Cmd+H retains the system Hide behavior.
+The CLI executable is FastMarkdownViewer.app/Contents/MacOS/FastMarkdownViewer.
 
-## Build and verify
+## Ubuntu
 
-Install Rust 1.95.0. On Ubuntu install build-essential, pkg-config, libx11-dev,
-libxi-dev, libxcursor-dev, libxrandr-dev, libxinerama-dev, libxkbcommon-dev,
-libwayland-dev, libgl1-mesa-dev, libegl1-mesa-dev and libdbus-1-dev.
-On macOS install the Xcode command line tools.
+Prefer the Debian package, which installs the executable and desktop entry and
+declares the runtime libraries:
 
+```sh
+sudo apt install ./FastMarkdownViewer-0.2.0-linux-x86_64.deb
+sudo apt remove fast-markdown-viewer
 ```
+
+The package offers Markdown opening without changing your default application.
+For the tar archive, install libxkbcommon-x11-0, libegl1, libgl1, and your
+desktop's XDG portal backend if missing. Extract and run
+`./FastMarkdownViewer path/to/document.md`. The executable requires glibc 2.39 or
+newer, working OpenGL/EGL, and a desktop session; it is not a static universal
+Linux binary. Dialogs use XDG Desktop Portal (for example its GTK or KDE backend).
+
+To integrate the tar archive with the desktop, put its executable on PATH (for
+example ~/.local/bin) and its .desktop file in ~/.local/share/applications.
+
+## Preferences, sessions, and limits
+
+All packages save appearance and session state on normal exit; see
+[saved settings and sessions](../README.md#saved-settings-and-sessions).
+Independent processes share that state file: the last normal exit wins.
+Forced termination can lose changes since the last exit.
+
+Installed fonts and script coverage depend on local fonts. Bundled default text
+and emoji remain available; Mermaid uses bundled Latin fonts when system fonts
+are unavailable. Full mixed-direction paragraph layout and native accessibility
+in detached child windows retain the documented renderer limitations.
+
+## Verification and development
+
+The [desktop workflow](../.github/workflows/experimental-desktop.yml) runs native
+builds, formatting, Clippy, application tests, graphics captures, and packaging
+on Ubuntu and both Mac architectures. Package checks exercise Finder document
+events and session restoration on Mac, and install/uninstall plus the native
+portal/clipboard/session workflow on Linux. Linux graphics captures cover X11
+and a Weston Wayland compositor. Exact validation results and coverage limits
+are recorded in [desktop acceptance](DESKTOP_ACCEPTANCE.md).
+
+For development, install Rust 1.95.0. Ubuntu requires build-essential, pkg-config,
+libx11-dev, libxi-dev, libxcursor-dev, libxrandr-dev, libxinerama-dev,
+libxkbcommon-dev, libwayland-dev, libgl1-mesa-dev, libegl1-mesa-dev, and
+libdbus-1-dev. Mac builds require the Xcode command line tools and
+MACOSX_DEPLOYMENT_TARGET=15.0.
+
+```sh
 cargo fmt --all -- --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked --all-targets
@@ -56,20 +95,6 @@ cargo build --locked --release
 python3 scripts/package-unix.py --platform linux-x86_64 --binary target/release/FastMarkdownViewer
 ```
 
-For a Mac, substitute macos-aarch64 or macos-x86_64 in the packaging command.
-Packages and checksums are uploaded by the Experimental desktop builds workflow.
-
-When building from WSL with the source on a Windows drive, pass `--output` with
-a directory on the Linux filesystem (for example /home/your-user/fmv-packages)
-so executable and Debian package permissions are preserved correctly.
-
-## Desktop acceptance checklist
-
-Before promoting a platform to supported, check the actual desktop: opening via
-dialog and drag/drop, search, reload, local links, remote-image controls, math,
-Mermaid success and error fallback, fonts, zoom, clipboard, tab detachment and
-closing the original window. Check both X11 and Wayland on Linux. Check installing
-and launching the extracted package rather than only the build directory.
-
-WSL2/WSLg exercises a Linux executable and real graphics, but does not replace a
-full desktop VM check of portals, desktop entries and file-manager integration.
+On a Mac, substitute macos-aarch64 or macos-x86_64 in the packaging command.
+When building from WSL with the source on a Windows drive, set --output to a
+Linux-filesystem directory so executable and Debian package permissions survive.

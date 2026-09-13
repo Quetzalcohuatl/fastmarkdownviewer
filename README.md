@@ -1,14 +1,14 @@
 # FastMarkdownViewer
 
-FastMarkdownViewer is a Windows-first, read-only Markdown viewer. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
+FastMarkdownViewer is a native, read-only Markdown viewer for Windows, macOS, and Linux. Its job is deliberately narrow: double-click a Markdown file and see a rendered document quickly.
 
-Experimental macOS (Apple Silicon and Intel) and Linux x86_64 builds are being
-validated separately. See [cross-platform preview instructions](docs/CROSS_PLATFORM.md)
-for builds, platform requirements, and current desktop integration limits.
+See [desktop installation instructions](docs/CROSS_PLATFORM.md) for Windows x64,
+macOS 15 or later (Apple Silicon and Intel), and Ubuntu 24.04 x64 packages,
+platform requirements, and tested configurations.
 
-> **Stable:** v0.1.5 keeps the product deliberately small while hardening the core Windows workflow. Performance claims will be published only when they are backed by repeatable measurements.
+> **v0.2.0:** Desktop packages, saved settings and sessions, and a fix for unnecessary idle CPU usage. Performance claims are limited to repeatable measurements.
 
-## What v0.1 includes
+## What is included
 
 - CommonMark and GitHub-style tables, task lists, strikethrough, autolinks, footnotes, definition lists, and alerts
 - Inline, display, and fenced math rendered with RaTeX
@@ -20,7 +20,7 @@ for builds, platform requirements, and current desktop integration limits.
 - Multiple document tabs, per-tab scroll/search state, Ctrl+O, and multi-file drag-and-drop
 - Drag tabs outside a window to move them into independent native windows
 - File/Settings menus, session-wide themes, Ctrl+mouse-wheel zoom, and keyboard scrolling
-- A portable executable and a per-user installer for Windows 10 22H2 and Windows 11 x64
+- A portable executable and a per-user installer for Windows 10 22H2 and Windows 11 x64; Mac app bundles and Ubuntu packages
 
 There is no editor, file watcher, search index, history database, updater, or telemetry.
 
@@ -55,7 +55,7 @@ The installer registers `.md` and `.markdown` under **Open with**. It does not a
 
 Search operates on rendered text, including code and link captions, and can span inline formatting. `*` matches zero or more characters on the same line (for example, `hello*world`); `\*` finds a literal asterisk. Other punctuation is literal. Wildcards match as much of the line as possible. Image contents and rendered math are not searchable. The outline supports ATX and Setext headings, including duplicate titles. A failed open leaves existing tabs intact. The empty-window page lists reading shortcuts.
 
-Drag a tab onto another tab to reorder it, or outside the window to move it into a new native window, keeping its document, scroll position, search, and caches. Escape cancels a drag. The tab's right-click menu also offers **Move to new window**. Closing the original window keeps detached windows alive; closing the last window exits. Theme and text size are shared within a process; each window has its own outline toggle. Moving tabs into an existing window is not supported yet. Separate command-line launches still start separate processes. Local Markdown links open or activate a tab in the current window.
+Drag a tab onto another tab to reorder it, or outside the window to move it into a new native window, keeping its document, scroll position, search, and caches. Escape cancels a drag. The tab's right-click menu also offers **Move to new window**. Closing the original window keeps detached windows alive; closing the last window exits. Theme and text size are shared within a process; each window has its own outline toggle. Moving tabs into an existing window is not supported yet. Separate command-line launches still start separate processes. On macOS, Finder opens files in the running app and activates an existing tab when possible. Local Markdown links open or activate a tab in the current window.
 
 Reload reads the file again and refreshes its image and rendering caches. If the file has become unreadable, the current document stays open with an error message.
 
@@ -63,7 +63,7 @@ Markdown links such as `[Chapter](docs/chapter.md)` open in this window and reus
 
 Right-click a tab for **Rename file…** or **Show in Explorer**. Rename changes the actual filename in its current folder; omitting the extension preserves `.md`/`.markdown`, and other extensions, invalid names, and collisions are rejected. Tab order, active selection, and reading/search state are retained; internal path, title, and resource base are reloaded. It does not rewrite links in other documents. To prevent overwriting even a concurrently created destination, rename uses exclusive hard-link creation followed by removing the original name; this requires a filesystem with hard-link support (such as NTFS). Unsupported filesystems fail with an error, leaving the original in place. A process interruption between those operations can leave both names. Case-only renames on case-insensitive filesystems are rejected as collisions.
 
-**Show in Explorer** opens the parent folder and selects the file. A portable platform abstraction also provides Finder selection on macOS and parent-folder opening elsewhere; Windows is the supported and tested target. Reading never edits document contents; filename changes happen only through the explicit rename action.
+**Show in Explorer** opens the parent folder and selects the file. A portable platform abstraction also provides Finder selection on macOS and parent-folder opening elsewhere; The supported desktop baselines are listed in docs/CROSS_PLATFORM.md. Reading never edits document contents; filename changes happen only through the explicit rename action.
 
 Mermaid support in v0.1.5 renders supported Mermaid fences using patched Rusty, with the source retained underneath. Rendering runs offline in a separate process with a 10-second timeout; unsupported or oversized diagrams show an error and their source. This is not full Mermaid.js compatibility. See [the Rusty fixes](docs/RUSTY_FIXES.md) for details.
 
@@ -88,7 +88,7 @@ rustup show
 cargo build --locked --release --target x86_64-pc-windows-msvc
 ```
 
-Release artifacts are built by GitHub Actions from annotated `vX.Y.Z` tags. See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks, [docs/TESTING.md](docs/TESTING.md) for the permanent interaction gates, [docs/BENCHMARKING.md](docs/BENCHMARKING.md) for the performance protocol, and [docs/RELEASE-CHECKLIST.md](docs/RELEASE-CHECKLIST.md) for the current v0.1 ship decision.
+Release artifacts are built by GitHub Actions from annotated `vX.Y.Z` tags. See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks, [docs/TESTING.md](docs/TESTING.md) for the permanent interaction gates, [docs/BENCHMARKING.md](docs/BENCHMARKING.md) for the performance protocol, and [docs/RELEASE-CHECKLIST.md](docs/RELEASE-CHECKLIST.md) for release decisions and validation evidence.
 
 ## Privacy and security
 

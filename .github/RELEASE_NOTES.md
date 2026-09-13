@@ -1,12 +1,13 @@
-FastMarkdownViewer v0.1.5 adds offline Mermaid diagrams without a browser engine or an external diagram service.
+FastMarkdownViewer v0.2.0 brings the native reader to macOS and Ubuntu, remembers your reading session, and fixes unnecessary idle CPU usage.
 
-- Mermaid fences render above their original searchable, selectable, copyable source.
-- Rendering uses patched Rusty in a hidden child process. Unsupported syntax, rendering failures, and oversized diagrams show an error with the source retained.
-- Fixes include malformed flowchart labels, nested-subgraph membership, and shaped mindmap root labels. The previously crashing 2,000-edge chain is rejected before layout.
-- All three Mermaid examples in torturetest3.md render. PlantUML, Graphviz, and active HTML/CSS rendering are not added.
+- Windows 10 22H2/11 x64: portable EXE, ZIP, and per-user installer.
+- macOS 15+: separate Apple Silicon and Intel app ZIPs, with Finder Markdown associations and opening into the running app.
+- Ubuntu 24.04 x64: Debian package with runtime dependencies, plus a tar archive; X11 and Wayland rendering.
+- Themes, text/code fonts, zoom, wrapping, remote-image preference, tabs, windows, and reading positions are saved on normal exit. Bare launches restore the session; inactive tabs load lazily.
+- Unchanged window titles no longer trigger continuous repainting.
 
-This is a supported subset, not full Mermaid.js compatibility. Diagrams currently use a white canvas and Rusty's default palette. Limits include 64 KiB source, 512 flowchart vertices, 1,024 edges, 32 subgraphs, 4-megapixel images, and a 10-second timeout. Diagram caches are limited to 32 entries and 32 MiB per tab. Temporary rendering files are cleaned up after completion; abrupt application termination can leave them behind.
+All platforms retain tabs, Find, outline navigation, math, offline Mermaid with source fallback, and bounded asynchronous images. There is no editor, file watcher, updater, or telemetry.
 
-Validation: 78 automated tests passed locally, including executable rendering and error handling, plus actual-window visual checks. The preview EXE was about 19 MB, approximately 2.1 MB larger than v0.1.4.
+Windows builds remain unsigned. Mac apps are ad-hoc signed, but are not Developer ID signed or notarized; downloaded-app approval may be required. Other Linux distributions and older macOS versions are outside the supported matrix. Mermaid is a supported subset, not full Mermaid.js compatibility; mixed-direction text and detached-window accessibility retain documented limits.
 
-Download the Windows x64 portable EXE, portable ZIP, or per-user installer below. Builds remain unsigned; verify SHA256SUMS.txt and GitHub provenance attestations. See PRIVACY.md for network and temporary-file behavior.
+See docs/CROSS_PLATFORM.md for installation and docs/DESKTOP_ACCEPTANCE.md for exact test coverage. Download SHA256SUMS.txt with your package and verify the checksum and GitHub build-provenance attestation.

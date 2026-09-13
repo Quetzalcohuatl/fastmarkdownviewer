@@ -2,7 +2,7 @@
 """Exercise LaunchServices open events and persistence in the extracted shipping app.
 
 Run only on an isolated macOS test account/CI worker: its FMV profile must not exist.
-No accessibility permission is needed for open/quit Apple events.
+Native keyboard acceptance additionally requires accessibility permission for osascript.
 """
 import json
 from pathlib import Path
@@ -26,7 +26,7 @@ def wait_for(predicate, description):
     raise RuntimeError(f'Timed out: {description}')
 
 with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
-    work = Path(work)
+    work = Path(work).resolve()
     subprocess.run(['ditto', '-x', '-k', str(archive), str(work)], check=True)
     bundle = next(work.glob('*/FastMarkdownViewer.app'))
     info = plistlib.loads((bundle / 'Contents/Info.plist').read_bytes())
@@ -37,8 +37,16 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
     subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister', '-f', str(bundle)], check=True)
     first = work / 'First 日本語 with spaces.md'
     second = work / 'Second.markdown'
+    third = work / 'Dialog document.md'
     first.write_text('# First\n\nHello from Finder.\n' * 80)
     second.write_text('# Second\n\nA second document.')
+    third.write_text('# Dialog document\n\nOpened using Cmd+O.')
+
+    def keys(script):
+        subprocess.run(['osascript', '-e', 'tell application "System Events"\n'
+                        'tell process "FastMarkdownViewer"\nset frontmost to true\n' + script +
+                        '\nend tell\nend tell'], check=True, timeout=20)
+        time.sleep(0.5)
 
     def running():
         return subprocess.run(['pgrep', '-f', str(binary)], stdout=subprocess.DEVNULL).returncode == 0
@@ -68,12 +76,23 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         subprocess.run(['open', '-a', str(bundle)], check=True)
         wait_for(running, 'bare launch')
         time.sleep(3)
+        keys('keystroke "f" using command down\nkeystroke "Finder"\nkeystroke "a" using command down\nkeystroke "c" using command down')
+        assert subprocess.check_output(['pbpaste'], text=True) == 'Finder'
+        keys('key code 53')  # Escape returns focus to the document.
+        keys('keystroke "o" using command down')
+        time.sleep(2)
+        keys('keystroke "g" using {command down, shift down}')
+        subprocess.run(['pbcopy'], input=str(third), text=True, check=True)
+        keys('keystroke "v" using command down\nkey code 36')
+        time.sleep(1)
+        keys('key code 36')
+        time.sleep(2)
         restored = quit_and_read()
         for key in ['theme', 'zoom', 'automatic_images', 'word_wrap']:
             assert restored[key] == state[key], (key, restored)
-        assert [tab['path'] for tab in restored['windows'][0]['tabs']] == [str(first), str(second)]
+        assert [tab['path'] for tab in restored['windows'][0]['tabs']] == [str(first), str(second), str(third)]
         assert not restored['windows'][0]['outline']
-        print('PASS: extracted app signature, Finder launch, running-app opens, Unicode paths, tab deduplication, normal quit, session and preference restoration')
+        print('PASS: extracted app signature, Finder launch, running-app opens, Unicode paths, tab deduplication, normal quit, session and preference restoration, native Find/clipboard and Cmd+O file dialog')
     finally:
         if running():
             subprocess.run(['osascript', '-e', f'tell application "{bundle}" to quit'], timeout=30)

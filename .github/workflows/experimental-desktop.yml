@@ -35,11 +35,21 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Restore Rust build cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/debug
+            target/release
+          key: desktop-${{ matrix.platform }}-rust195-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}
+          restore-keys: desktop-${{ matrix.platform }}-rust195-${{ hashFiles('Cargo.lock') }}-
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libxkbcommon-x11-0 libwayland-dev libgl1-mesa-dev libegl1-mesa-dev libdbus-1-dev xvfb fonts-dejavu-core fonts-noto-core fonts-noto-cjk
+          sudo apt-get install -y build-essential pkg-config libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libxkbcommon-x11-0 libwayland-dev libgl1-mesa-dev libegl1-mesa-dev libdbus-1-dev xvfb fonts-dejavu-core fonts-noto-core fonts-noto-cjk weston openbox xdotool xclip scrot xdg-desktop-portal-gtk
       - name: Install Rust
         run: rustup toolchain install 1.95.0 --profile minimal --component clippy,rustfmt
       - name: Check source
@@ -59,6 +69,15 @@ jobs:
         run: |
           mkdir -p target/evidence
           target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/macos.png
+      - name: Exercise native Wayland graphics
+        if: runner.os == 'Linux'
+        run: |
+          export XDG_RUNTIME_DIR="$(mktemp -d)"
+          weston --backend=headless-backend.so --socket=fmv-test --idle-time=0 --width=1280 --height=900 > target/evidence/weston.log 2>&1 &
+          compositor=$!
+          trap 'kill "$compositor"' EXIT
+          for attempt in $(seq 1 50); do test ! -S "$XDG_RUNTIME_DIR/fmv-test" || break; sleep 0.1; done
+          env -u DISPLAY WAYLAND_DISPLAY=fmv-test LIBGL_ALWAYS_SOFTWARE=1 target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/wayland.png
       - name: Package desktop build
         run: python3 scripts/package-unix.py --platform '${{ matrix.platform }}' --binary target/release/FastMarkdownViewer
       - name: Exercise Finder opening and saved sessions in the extracted Mac app
@@ -79,6 +98,7 @@ jobs:
           cmp target/release/FastMarkdownViewer /usr/bin/FastMarkdownViewer
           /usr/bin/FastMarkdownViewer --internal-mermaid target/evidence/packaged.mmd target/evidence/installed.png
           test -s target/evidence/installed.png
+          xvfb-run -a -s '-screen 0 1280x900x24' dbus-run-session -- bash scripts/test-linux-session.sh
           sudo apt-get remove -y fast-markdown-viewer
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

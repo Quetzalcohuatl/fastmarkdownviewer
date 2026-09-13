@@ -1,5 +1,14 @@
 # Testing and release gates
 
+## Desktop release matrix (v0.2.0 onward)
+
+The tagged release waits for Windows, Ubuntu 24.04, and macOS 15 Apple Silicon
+and Intel jobs, plus dependency and site checks, before publishing any assets.
+See [desktop acceptance](DESKTOP_ACCEPTANCE.md) for native package checks and
+their coverage limits. The application crate forbids unsafe code; the small
+[Mac event adapter](../crates/macos-events/README.md) isolates the Objective-C
+interop needed for Finder's native open/quit events.
+
 FastMarkdownViewer treats regressions in opening, rendering, scrolling, and
 basic interaction as release blockers. Pull requests and tagged releases run
 the same locked Rust suite with `cargo test --locked --all-targets`.

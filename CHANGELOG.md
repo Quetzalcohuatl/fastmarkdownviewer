@@ -4,6 +4,15 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-13
+
+- Add official macOS 15+ app bundles for Apple Silicon and Intel, and Ubuntu 24.04 x64 Debian and tar packages, with platform checks gating publication alongside Windows.
+- Register Markdown documents with Finder and handle opening files into the running Mac app, including Unicode paths and duplicate-tab activation.
+- Save themes, fonts, zoom, wrapping, remote-image preferences, open tabs/windows, and reading positions on normal exit. Bare launches restore the session; inactive tabs load lazily.
+- Stop continuously repainting unchanged native window titles, fixing sustained idle CPU usage.
+- Add native packaged-app acceptance for Finder opening, Linux portals, clipboard, saved sessions, and X11/Wayland rendering. Set the Mac minimum to the tested macOS 15 baseline.
+- Retain unsigned Windows and ad-hoc-signed, unnotarized Mac distribution; no automatic updater is added.
+
 ## [0.1.5] - 2026-09-10
 
 - Render Mermaid fences offline using patched Rusty, retaining searchable and copyable source below each diagram.

@@ -1,10 +1,18 @@
 # Code-signing policy
 
-## v0.1.0
+## Current releases
 
-The first release is intentionally unsigned. Windows SmartScreen may warn because reputation and Authenticode signing are separate from source availability. Users should download from the canonical GitHub Release, compare the SHA-256 checksum, and verify the GitHub build-provenance attestation.
+Windows releases are intentionally unsigned. Windows SmartScreen may warn because reputation and Authenticode signing are separate from source availability. Users should download from the canonical GitHub Release, compare the SHA-256 checksum, and verify the GitHub build-provenance attestation.
 
 Checksums detect changed bytes and attestations tie an artifact to this repository's GitHub Actions workflow. Neither suppresses SmartScreen.
+
+macOS bundles are ad-hoc signed and verified during packaging. They are not
+Developer ID signed or notarized. Downloaded-app approval may therefore be
+required in macOS Privacy & Security. Supported status describes the tested
+application and OS baseline, not an Apple notarization claim.
+
+Linux packages carry checksums and GitHub provenance, without a project APT
+repository or automatic update service.
 
 ## Later releases
 

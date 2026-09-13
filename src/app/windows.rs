@@ -140,8 +140,10 @@ impl ViewerApp {
         for event in events {
             match event {
                 fmv_macos_events::Event::Open(paths) => self.open_external_files(&paths, context),
-                fmv_macos_events::Event::Quit => context
-                    .data_mut(|data| data.insert_temp(egui::Id::new("quit_application"), true)),
+                fmv_macos_events::Event::Quit => {
+                    context
+                        .data_mut(|data| data.insert_temp(egui::Id::new("quit_application"), true));
+                }
             }
         }
     }

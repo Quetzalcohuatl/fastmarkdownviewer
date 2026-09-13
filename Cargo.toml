@@ -45,7 +45,7 @@ eframe = { version = "0.36.0", default-features = false, features = ["x11", "way
 rfd = { version = "0.15.4", default-features = false, features = ["xdg-portal", "async-std"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-fmv-macos-events = { path = "crates/macos-events" }
+fmv-macos-events = { version = "0.1.0", path = "crates/macos-events" }
 
 [build-dependencies]
 winresource = "0.1.23"

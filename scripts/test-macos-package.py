@@ -11,7 +11,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import zipfile
 
 archive = Path(sys.argv[1]).resolve()
 profile = Path.home() / 'Library/Application Support/FastMarkdownViewer/state.json'

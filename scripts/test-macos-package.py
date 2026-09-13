@@ -101,7 +101,15 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
             assert restored[key] == state[key], (key, restored)
         assert [tab['path'] for tab in restored['windows'][0]['tabs']] == [str(first), str(second), str(third)]
         assert not restored['windows'][0]['outline']
-        print('PASS: extracted app signature, Finder launch, running-app opens, Unicode paths, tab deduplication, normal quit, session and preference restoration, native Find/clipboard and Cmd+O file dialog')
+        # An OS quit request must also leave a native modal file chooser cleanly.
+        subprocess.run(['open', '-a', str(bundle)], check=True)
+        wait_for(running, 'modal-exit launch')
+        time.sleep(3)
+        keys('keystroke "o" using command down')
+        time.sleep(2)
+        modal_exit = quit_and_read()
+        assert [tab['path'] for tab in modal_exit['windows'][0]['tabs']] == [str(first), str(second), str(third)]
+        print('PASS: extracted app signature, Finder launch, running-app opens, Unicode paths, tab deduplication, normal/modal quit, session and preference restoration, native Find/clipboard and Cmd+O file dialog')
     finally:
         if running():
             # Preserve the actual desktop on failure as well as the renderer fixture.

@@ -123,6 +123,7 @@ impl ViewerApp {
         inbox: fmv_macos_events::Inbox,
         context: &egui::Context,
     ) -> Self {
+        fmv_macos_events::install_edit_menu();
         let wake_context = context.clone();
         inbox.set_wake(move || wake_context.request_repaint_of(egui::ViewportId::ROOT));
         self.native_events = Some(inbox);

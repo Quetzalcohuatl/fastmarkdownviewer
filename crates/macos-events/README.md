@@ -6,6 +6,10 @@ before the event loop and again at will-finish-launching so Finder's cold launch
 event reaches the queue. Later events wake the root egui viewport; the viewer
 uses its existing loading, deduplication, and normal-exit paths.
 
+The adapter also adds standard responder-chain Edit shortcuts for native file
+dialog text fields. An Apple-event quit aborts an active modal panel before
+queuing the viewer's normal exit, so the nested dialog loop cannot strand it.
+
 Objective-C interoperation requires unsafe declarations and message sends. They
 are isolated here behind a safe main-thread-only API, with safety comments at
 each boundary. The application crate still forbids unsafe Rust. Retained handlers

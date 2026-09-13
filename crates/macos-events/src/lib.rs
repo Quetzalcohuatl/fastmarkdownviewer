@@ -3,6 +3,7 @@
 
 use objc2::rc::Retained;
 use objc2::{DefinedClass, MainThreadOnly, define_class, msg_send, sel};
+use objc2_app_kit::{NSApplication, NSMenu, NSMenuItem};
 use objc2_foundation::{
     MainThreadMarker, NSAppleEventDescriptor, NSAppleEventManager, NSNotification,
     NSNotificationCenter, NSObject, NSObjectProtocol, ns_string,
@@ -68,10 +69,47 @@ define_class!(
 
         #[unsafe(method(quitApplication:withReplyEvent:))]
         fn quit(&self, _event: &NSAppleEventDescriptor, _reply: &NSAppleEventDescriptor) {
+            // A synchronous file chooser runs a nested AppKit loop. End it so the
+            // queued normal-exit request can reach the viewer's main UI loop.
+            let app = NSApplication::sharedApplication(self.mtm());
+            if app.modalWindow().is_some() { app.abortModal(); }
             self.ivars().push(Event::Quit);
         }
     }
 );
+
+/// Add responder-chain shortcuts required by native text fields in file dialogs.
+/// Disabled native items leave the viewer's own egui keyboard handling intact.
+pub fn install_edit_menu() {
+    let mtm = MainThreadMarker::new().expect("Menus require the main thread");
+    let app = NSApplication::sharedApplication(mtm);
+    let Some(main_menu) = app.mainMenu() else {
+        return;
+    };
+    let item = NSMenuItem::new(mtm);
+    item.setTitle(ns_string!("Edit"));
+    let menu = NSMenu::new(mtm);
+    for (title, action, key) in [
+        (ns_string!("Cut"), sel!(cut:), ns_string!("x")),
+        (ns_string!("Copy"), sel!(copy:), ns_string!("c")),
+        (ns_string!("Paste"), sel!(paste:), ns_string!("v")),
+        (ns_string!("Select All"), sel!(selectAll:), ns_string!("a")),
+    ] {
+        // SAFETY: These are standard AppKit responder actions taking a nullable sender.
+        // A nil target lets AppKit validate and dispatch to the active native text field.
+        let command = unsafe {
+            NSMenuItem::initWithTitle_action_keyEquivalent(
+                NSMenuItem::alloc(mtm),
+                title,
+                Some(action),
+                key,
+            )
+        };
+        menu.addItem(&command);
+    }
+    item.setSubmenu(Some(&menu));
+    main_menu.addItem(&item);
+}
 
 impl Handler {
     fn register(&self) {

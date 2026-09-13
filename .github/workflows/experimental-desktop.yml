@@ -44,7 +44,9 @@ jobs:
             target/debug
             target/release
           key: desktop-${{ matrix.platform }}-rust195-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}
-          restore-keys: desktop-${{ matrix.platform }}-rust195-${{ hashFiles('Cargo.lock') }}-
+          restore-keys: |
+            desktop-${{ matrix.platform }}-rust195-${{ hashFiles('Cargo.lock') }}-
+            desktop-${{ matrix.platform }}-rust195-
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |

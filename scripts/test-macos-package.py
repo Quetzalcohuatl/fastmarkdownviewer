@@ -43,15 +43,23 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
     third.write_text('# Dialog document\n\nOpened using Cmd+O.')
 
     def keys(script):
+        script = script.replace('\n', '\ndelay 0.4\n')
         subprocess.run(['osascript', '-e', 'tell application "System Events"\n'
-                        'tell process "FastMarkdownViewer"\nset frontmost to true\n' + script +
+                        'tell process "FastMarkdownViewer"\nset frontmost to true\ndelay 0.5\n' + script +
                         '\nend tell\nend tell'], check=True, timeout=20)
         time.sleep(0.5)
 
     def running():
         return subprocess.run(['pgrep', '-f', str(binary)], stdout=subprocess.DEVNULL).returncode == 0
 
+    def capture():
+        try:
+            subprocess.run(['screencapture', '-x', 'target/evidence/macos-package.png'], timeout=5)
+        except subprocess.TimeoutExpired:
+            print('Desktop screenshot unavailable; behavioral assertions still apply.')
+
     def quit_and_read():
+        capture()
         subprocess.run(['osascript', '-e', f'tell application "{bundle}" to quit'], check=True, timeout=30)
         wait_for(lambda: not running(), 'normal application exit')
         wait_for(profile.exists, 'saved session')
@@ -77,7 +85,8 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         wait_for(running, 'bare launch')
         time.sleep(3)
         keys('keystroke "f" using command down\nkeystroke "Finder"\nkeystroke "a" using command down\nkeystroke "c" using command down')
-        assert subprocess.check_output(['pbpaste'], text=True) == 'Finder'
+        copied = subprocess.check_output(['pbpaste'], text=True)
+        assert copied == 'Finder', f'Native Find clipboard contained {copied!r}'
         keys('key code 53')  # Escape returns focus to the document.
         keys('keystroke "o" using command down')
         time.sleep(2)
@@ -95,6 +104,8 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         print('PASS: extracted app signature, Finder launch, running-app opens, Unicode paths, tab deduplication, normal quit, session and preference restoration, native Find/clipboard and Cmd+O file dialog')
     finally:
         if running():
+            # Preserve the actual desktop on failure as well as the renderer fixture.
+            capture()
             subprocess.run(['osascript', '-e', f'tell application "{bundle}" to quit'], timeout=30)
             wait_for(lambda: not running(), 'test process cleanup')
         profile.unlink(missing_ok=True)

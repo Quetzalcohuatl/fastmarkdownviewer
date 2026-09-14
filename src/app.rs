@@ -694,10 +694,14 @@ impl ViewerWindow {
         };
         let mut submit = false;
         let mut cancel = false;
+        crate::fonts::ensure_for_text(context, &dialog.name);
         egui::Modal::new(egui::Id::new("rename file")).show(context, |ui| {
             ui.heading("Rename file");
             ui.label("Filename only. The file stays in its current folder.");
             let response = ui.text_edit_singleline(&mut dialog.name);
+            if response.changed() {
+                crate::fonts::ensure_for_text(context, &dialog.name);
+            }
             if dialog.focus {
                 response.request_focus();
                 dialog.focus = false;
@@ -826,6 +830,7 @@ impl ViewerWindow {
         if !tab.search.open {
             return;
         }
+        crate::fonts::ensure_for_text(ui.ctx(), &tab.search.query);
         ui.horizontal_wrapped(|ui| {
             ui.label("Find:");
             let response = ui
@@ -838,6 +843,9 @@ impl ViewerWindow {
                 .on_hover_text(
                     r"* matches any text on the same line. Use \* for a literal asterisk.",
                 );
+            if response.changed() {
+                crate::fonts::ensure_for_text(ui.ctx(), &tab.search.query);
+            }
             if self.focus_search {
                 response.request_focus();
                 self.focus_search = false;

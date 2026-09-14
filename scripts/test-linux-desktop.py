@@ -17,7 +17,7 @@ work.mkdir(parents=True, exist_ok=False)
 profile = work / 'profile'
 profile.mkdir()
 state_path = profile / 'FastMarkdownViewer/state.json'
-first = work / 'First 日本語.md'
+first = work / 'First 日本語 中文 한국어.md'
 second = work / 'Second.markdown'
 first.write_text('# Native acceptance\n\n' + 'Read and find needle in this paragraph.\n\n' * 200)
 second.write_text('# Second\n\nOpened through the native portal.')
@@ -60,6 +60,12 @@ try:
     key('ctrl+a', 'ctrl+c')
     assert command('xclip', '-selection', 'clipboard', '-o') == 'needle'
     capture('find-and-clipboard')
+    query = '中文 日本語 한국어 हिन्दी ภาษาไทย'
+    subprocess.run(['xclip', '-selection', 'clipboard'], input=query, text=True, check=True)
+    key('ctrl+v')
+    capture('multilingual-find')
+    key('ctrl+a', 'ctrl+c')
+    assert command('xclip', '-selection', 'clipboard', '-o') == query
     key('Escape', 'Next', 'Next')
     close(root)
     process.wait(timeout=20)

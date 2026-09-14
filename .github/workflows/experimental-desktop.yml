@@ -89,11 +89,15 @@ jobs:
         run: |
           mkdir -p target/evidence
           LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/linux.png
+          LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-light.png '中文'
+          FMV_VISUAL_THEME=Dark LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-dark.png '中文'
       - name: Exercise macOS graphics
         if: runner.os == 'macOS'
         run: |
           mkdir -p target/evidence
           target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/macos.png
+          target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-light.png '中文'
+          FMV_VISUAL_THEME=Dark target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-dark.png '中文'
       - name: Exercise native Wayland graphics
         if: runner.os == 'Linux'
         run: |

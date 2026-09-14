@@ -43,11 +43,11 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
     third.write_text('# Dialog document\n\nOpened using Cmd+O.')
 
     def keys(script):
-        script = script.replace('\n', '\ndelay 0.4\n')
+        script = script.replace('\n', '\ndelay 1\n')
         subprocess.run(['osascript', '-e', 'tell application "System Events"\n'
-                        'tell process "FastMarkdownViewer"\nset frontmost to true\ndelay 0.5\n' + script +
+                        'tell process "FastMarkdownViewer"\nset frontmost to true\ndelay 1\n' + script +
                         '\nend tell\nend tell'], check=True, timeout=20)
-        time.sleep(0.5)
+        time.sleep(2)
 
     def running():
         return subprocess.run(['pgrep', '-f', str(binary)], stdout=subprocess.DEVNULL).returncode == 0
@@ -64,9 +64,9 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         time.sleep(1)
         print(f'Ready: {document.name}', flush=True)
 
-    def capture():
+    def capture(name='macos-package'):
         try:
-            subprocess.run(['screencapture', '-x', 'target/evidence/macos-package.png'], timeout=5)
+            subprocess.run(['screencapture', '-x', f'target/evidence/{name}.png'], timeout=5)
         except subprocess.TimeoutExpired:
             print('Desktop screenshot unavailable; behavioral assertions still apply.')
 
@@ -96,7 +96,11 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         subprocess.run(['open', '-a', str(bundle)], check=True)
         wait_for(running, 'bare launch')
         ready(first)
-        keys('keystroke "f" using command down\nkeystroke "Finder"\nkeystroke "a" using command down\nkeystroke "c" using command down')
+        keys('keystroke "f" using command down')
+        capture('macos-find-open')
+        keys('keystroke "Finder"')
+        capture('macos-find-typed')
+        keys('keystroke "a" using command down\nkeystroke "c" using command down')
         copied = subprocess.check_output(['pbpaste'], text=True)
         assert copied == 'Finder', f'Native Find clipboard contained {copied!r}'
         keys('key code 53')  # Escape returns focus to the document.

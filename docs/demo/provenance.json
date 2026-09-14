@@ -33,12 +33,12 @@
       "sha256": "f579c2480072da2be3f8e0ff02501fcf29aba668b3f9944c5de7907800af5514"
     },
     "project-notes.md": {
-      "bytes": 449,
-      "sha256": "299bfe95ba2426f2ce158cd5da92920bdff66682e123034e05b89781ed9f4dec"
+      "bytes": 424,
+      "sha256": "506a34d573208f47e7adf0849314650210fd4b68caab5eb771cdc48614ff47ac"
     },
     "technical-guide.md": {
-      "bytes": 290,
-      "sha256": "5e9004695f5d25a04b4fd4f3fffb931d70da972ebedf90824acb6b4b7ec7d472"
+      "bytes": 266,
+      "sha256": "b673ff8ef7c201a81e1faa83746e38d7829fd1a5d785807ac6c7a08d16fe8aad"
     }
   }
 }

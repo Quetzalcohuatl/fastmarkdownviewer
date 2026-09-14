@@ -12,11 +12,16 @@ Run `experiments/architecture/fixtures/generate.ps1` to generate deterministic d
 
 ## Machine record
 
+The [September 14 expanded Windows comparison](../experiments/competitors/google-results.md)
+provides the main README's current resource table: published FMV 0.2.1 and eleven
+competitors, five fresh launches per app/document, and all 120 attempts in one
+randomized batch. [Google discovery](../experiments/competitors/google-discovery.md)
+and [current features](../experiments/competitors/google-features.md) account for
+the first three result pages, including unmeasured products. Resource checkpoints
+and window detection do not certify first-content latency.
+
 The [September 13 Windows rerun](../experiments/competitors/maintenance-results.md)
-provides the main README's current memory table: five fresh launches per app and
-fixture, all competitors randomized in one batch, published FMV 0.2.1 plus the
-dependency-update candidate, and all 100 raw attempts. It retains the resource
-checkpoint protocol and does not certify first-content latency.
+retains the published-versus-dependency-update comparison and its 100 raw attempts.
 
 The [September 11 competitor study](../experiments/competitors/README.md) compares
 Windows and Linux VM process resources across open-source viewers/editors, with

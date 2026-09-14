@@ -35,35 +35,87 @@ Native platform builds displaying the same Markdown and offline Mermaid diagram.
 
 </details>
 
-## Performance: measured memory use
+## Performance: measured against other viewers
 
-In this Windows 11 sample, **FMV 0.2.1 used 72% less resident process memory than
-Obsidian and 93% less than VS Code's Markdown preview** on the small document.
-The table includes every successfully measured Windows competitor from this study.
+In this Windows 11 test, **FMV used 70% less resident process memory than
+Markpad, 69% less than Moji, 71% less than Obsidian, and 93% less than
+VS Code's Markdown preview** on the ~5 KiB document. It pairs low measured
+memory use with tables, math, code highlighting, tabs, and a heading outline.
 
-| App/version | ~5 KiB document: memory (MiB) | ~100 KiB document: memory (MiB) |
-| :--- | ---: | ---: |
-| **FastMarkdownViewer 0.2.1** | **127.6** | **138.5** |
-| aydiler/md-viewer 0.2.0 | 227.8 | 257.7 |
-| MarkMello 0.4.0 | 137.5 | 287.4 |
-| MD Preview 1.4.1 | 403.7 | 560.3 |
-| MarkText 0.19.1 | 496.9 | 695.2 |
-| mdview-zig 0.2.0 | 44.5 | 45.6 |
-| Obsidian 1.13.7 | 462.0 | 813.7 |
-| Typora 1.14.10 | 597.2 | 685.8 |
-| VS Code 1.130.0, Markdown preview | 1944.7 | 2230.8 |
+We searched Google's first three pages for **fast lightweight markdown viewer**,
+then expanded the comparison. [Every search result and its disposition](experiments/competitors/google-discovery.md)
+is recorded, including products we could not measure. The table below includes
+all ten competitors with an established document-reading setup in this Windows
+cohort; editors also provide capabilities beyond FMV's read-only scope.
 
-Measured September 13, 2026 on a Ryzen 9 9950X Windows 11 desktop. Values are
-median process-tree working sets across **five fresh launches per app/document**,
-at a fixed checkpoint about four seconds after window creation. The same
-synthetic documents and pinned app versions were used in a randomized batch.
-These are resident-memory measurements, not peak memory or completed-render times.
+| App/version | ~5 KiB: memory MiB | ~100 KiB: memory MiB | ~5 KiB: CPU ms/s | ~100 KiB: CPU ms/s |
+| :--- | ---: | ---: | ---: | ---: |
+| **FastMarkdownViewer 0.2.1** | 132.3 | 138.7 | 0.0 | 0.0 |
+| aydiler/md-viewer 0.2.0 | 232.0 | 256.3 | 0.0 | 0.0 |
+| MarkMello 0.4.0 | 135.0 | 285.6 | 0.0 | 0.0 |
+| Markpad 2.7.6 | 438.6 | 615.7 | 107.9 | 123.2 |
+| MarkText 0.19.1 | 471.1 | 628.2 | 0.0 | 0.0 |
+| MD Preview 1.4.1 | 401.8 | 540.5 | 0.0 | 92.8 |
+| mdview-zig 0.2.0 | 42.3 | 43.4 | 0.0 | 0.0 |
+| Moji 1.0.7 | 432.0 | 606.6 | 30.9 | 46.4 |
+| Obsidian 1.13.7 | 458.1 | 800.1 | 0.0 | 0.0 |
+| Typora 1.14.10 | 594.7 | 679.4 | 15.4 | 0.0 |
+| VS Code 1.130.0, Markdown preview | 1972.6 | 2271.8 | 694.5 | 1295.0 |
 
-Apps provide different features: the editors do more than FMV, while mdview-zig
-uses less memory but leaves several tested Markdown constructs as source.
-This is not an overall speed ranking or a macOS/Linux comparison.
-[Raw samples, ranges, CPU measurements, versions, and reproduction](experiments/competitors/maintenance-results.md)
-include the updated development build alongside the published FMV binary.
+Measured September 14, 2026 on a Ryzen 9 9950X Windows 11 desktop. Medians of
+**five fresh launches per app/document**, randomized together; process-tree
+memory and CPU sampled about four seconds after window creation. WebView2 and
+Electron descendants are included. **1000 ms CPU/s = one occupied core; 0.0 is
+below sampling resolution.** This is a startup resource checkpoint, not settled
+idle CPU, battery life, peak memory, or completed-render timing.
+
+MarkLite 1.1.1 was also sampled, but its pilot did not establish rendered content;
+its ten window-only samples are retained outside the ranking. No failed or
+unverified setup is counted as an FMV win. [All 120 raw attempts, ranges, private memory,
+window proxies, download sizes, hashes, and reproduction](experiments/competitors/google-results.md).
+
+### Where FMV does—and does not—win
+
+- **Memory:** lower median resident memory than nine of the ten ranked
+  competitors on both inputs. **mdview-zig uses less memory than FMV**, while
+  leaving tables, tasks, math, and alerts as source in our rendering check.
+- **CPU:** FMV measured below resolution in every sample; several competitors
+  tie it. These short checkpoints do not establish an energy-efficiency winner.
+- **Download:** the Windows portable FMV is **18.2 MiB**, with no browser runtime
+  required. Markpad's executable is smaller at **13.4 MiB** and uses WebView2
+  separately. Moji's extracted application files occupy **447.5 MiB**; these
+  file-byte counts are not a complete installed-footprint comparison.
+- **Speed:** some competitors have lower median window-detection times on an
+  input. This proxy does not measure when a reader can see the content, so we
+  do not claim the fastest rendering or rank Mac/Linux apps using Windows data.
+
+### Features compared
+
+**Yes** = supported/documented, **Partial** = narrower support, **?** = not
+established. Unknown does not mean absent. These are product capabilities,
+not proof that every dialect/version passes the same rendering tests.
+
+| App | Math | Mermaid | Edit contents | Export / print | External file reload |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **FastMarkdownViewer** | Yes | Partial: native subset | No | No | Manual |
+| Markpad | Yes | Yes | Yes | Yes | Automatic |
+| Moji | Yes | Yes | Yes | Yes | ? |
+| MarkLite | ? | ? | Yes | ? | ? |
+| aydiler/md-viewer | Yes | Yes: native renderer | No | ? | Automatic |
+| MarkText | Partial in our fixture | Yes | Yes | Yes | ? |
+| Typora | Yes | Yes | Yes | Yes | ? |
+| Marky (Mac/Linux) | Documented; earlier fixture differed | Yes | No | ? | Automatic |
+| Simple Markdown Viewer (Windows Store) | Yes | Yes | Yes | Yes | Automatic |
+| MacMD Viewer (Mac) | ? | Yes | No | Yes | Automatic |
+
+FMV offers saved sessions, rendered-text Find, an outline, detachable tabs,
+themes and font choices in a focused native reader. Competitors offer capabilities
+it lacks: **automatic reload, export, folder browsing, translated UI labels,
+Finder Quick Look, and broader Mermaid support**. Multilingual font coverage
+does not mean translated menus or complete bidirectional text layout.
+[Full sourced feature comparison](experiments/competitors/google-features.md)
+also covers iA Writer, MD-Viewer, Markoff, Nimbalyst, both Store viewers,
+browser extensions, web editors, mobile alternatives, and the other measured apps.
 
 ## What is included
 

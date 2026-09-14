@@ -1,0 +1,137 @@
+{
+  "fixtures": "C:/benchmark/fixtures",
+  "files": [
+    "ordinary-5k.md",
+    "gfm-math-images-100k.md"
+  ],
+  "apps": [
+    {
+      "id": "aydiler",
+      "command": [
+        "C:/benchmark/apps/aydiler/md-viewer.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/profiles/aydiler/APPDATA",
+        "LOCALAPPDATA": "C:/benchmark/profiles/aydiler/LOCALAPPDATA",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/profiles/aydiler/WEBVIEW2_USER_DATA_FOLDER"
+      }
+    },
+    {
+      "id": "markmello",
+      "command": [
+        "C:/benchmark/apps/markmello/MarkMello.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/profiles/markmello/APPDATA",
+        "LOCALAPPDATA": "C:/benchmark/profiles/markmello/LOCALAPPDATA",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/profiles/markmello/WEBVIEW2_USER_DATA_FOLDER"
+      }
+    },
+    {
+      "id": "md-preview",
+      "command": [
+        "C:/benchmark/apps/md-preview/MD-Preview-windows-x64.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/profiles/md-preview/APPDATA",
+        "LOCALAPPDATA": "C:/benchmark/profiles/md-preview/LOCALAPPDATA",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/profiles/md-preview/WEBVIEW2_USER_DATA_FOLDER"
+      }
+    },
+    {
+      "id": "marktext",
+      "command": [
+        "C:/benchmark/apps/marktext/marktext.exe",
+        "--user-data-dir=C:/benchmark/profiles/marktext",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "mdview-zig",
+      "command": [
+        "C:/benchmark/apps/mdview-zig/mdview.exe",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "vscode-preview",
+      "prepare": "vscode",
+      "command": [
+        "C:/benchmark/apps/vscode-preview/Code.exe",
+        "--user-data-dir=C:/benchmark/profiles/vscode-preview",
+        "--extensions-dir=C:/benchmark/profiles/vscode-extensions",
+        "--new-window",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "obsidian",
+      "prepare": "obsidian",
+      "command": [
+        "C:/benchmark/apps/obsidian/Obsidian.exe",
+        "--user-data-dir=C:/benchmark/profiles/obsidian",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "typora",
+      "preserve_profile": true,
+      "command": [
+        "C:/benchmark/apps/typora/Typora.exe",
+        "--user-data-dir=C:/benchmark/profiles/typora",
+        "{fixture}"
+      ]
+    },
+    {
+      "id": "fmv-0.2.1",
+      "command": [
+        "C:/benchmark/apps/fmv-0.2.1/FastMarkdownViewer-0.2.1-windows-x86_64.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/profiles/fmv-0.2.1/APPDATA",
+        "LOCALAPPDATA": "C:/benchmark/profiles/fmv-0.2.1/LOCALAPPDATA",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/profiles/fmv-0.2.1/WEBVIEW2_USER_DATA_FOLDER"
+      }
+    },
+    {
+      "id": "moji",
+      "command": [
+        "C:/benchmark/apps/moji/Moji.exe",
+        "--user-data-dir=C:/benchmark/profiles/moji",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/profiles/moji/APPDATA",
+        "LOCALAPPDATA": "C:/benchmark/profiles/moji/LOCALAPPDATA",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/profiles/moji/WEBVIEW2_USER_DATA_FOLDER"
+      }
+    },
+    {
+      "id": "markpad",
+      "command": [
+        "C:/benchmark/apps/markpad/Markpad_2.7.6_x64.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/profiles/markpad/APPDATA",
+        "LOCALAPPDATA": "C:/benchmark/profiles/markpad/LOCALAPPDATA",
+        "WEBVIEW2_USER_DATA_FOLDER": "C:/benchmark/profiles/markpad/WEBVIEW2_USER_DATA_FOLDER"
+      }
+    },
+    {
+      "id": "marklite",
+      "command": [
+        "C:/benchmark/apps/marklite/marklite.exe",
+        "{fixture}"
+      ],
+      "env": {
+        "APPDATA": "C:/benchmark/profiles/marklite/APPDATA",
+        "LOCALAPPDATA": "C:/benchmark/profiles/marklite/LOCALAPPDATA"
+      }
+    }
+  ]
+}

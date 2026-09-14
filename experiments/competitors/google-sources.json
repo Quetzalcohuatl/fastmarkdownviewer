@@ -1,0 +1,51 @@
+[
+  {
+    "product": "sftwrdotdev/Markpad",
+    "retrieved": "2026-09-14",
+    "readme_blob_sha": "b063f1bda72cbd2e325d6ac9b5a764a6d0251801",
+    "url": "https://github.com/sftwrdotdev/Markpad/blob/c59e3f5a88372abeed6b6c7f296cfed69a1dbb0c/README.md",
+    "scope": "Upstream documentation at retrieval, not proof of every feature in the measured release"
+  },
+  {
+    "product": "alexishida/Moji",
+    "retrieved": "2026-09-14",
+    "readme_blob_sha": "921f71c363d9517f61b757a97802c966d3085e62",
+    "url": "https://github.com/alexishida/Moji/blob/26e0e924c85d765a9db4a0aed4949bf91be7bfcc/README.md",
+    "scope": "Upstream documentation at retrieval, not proof of every feature in the measured release"
+  },
+  {
+    "product": "aydiler/md-viewer",
+    "retrieved": "2026-09-14",
+    "readme_blob_sha": "eb5ac82b4132a93a5f1ace9a30a67c7d19878eff",
+    "url": "https://github.com/aydiler/md-viewer/blob/3f911b1e521d3a5c186dd8507bd9c2fb3730e80d/README.md",
+    "scope": "Upstream documentation at retrieval, not proof of every feature in the measured release"
+  },
+  {
+    "product": "marktext/marktext",
+    "retrieved": "2026-09-14",
+    "readme_blob_sha": "7cdbc71b6d627882b91efb00496fefa1ed83d12c",
+    "url": "https://github.com/marktext/marktext/blob/20c93cc78b29d7a4986baef2cfdf9cc60d47d9c4/README.md",
+    "scope": "Upstream documentation at retrieval, not proof of every feature in the measured release"
+  },
+  {
+    "product": "GRVYDEV/marky",
+    "retrieved": "2026-09-14",
+    "readme_blob_sha": "24829fd10d6de1b65f1e972845253bdba95d2202",
+    "url": "https://github.com/GRVYDEV/marky/blob/9a0a2f2bf160cffc2f2df9e1ffd4d82165390c42/README.md",
+    "scope": "Upstream documentation at retrieval, not proof of every feature in the measured release"
+  },
+  {
+    "product": "nimbalyst/nimbalyst",
+    "retrieved": "2026-09-14",
+    "readme_blob_sha": "b6920acef0ea943e42e44aeef0c46cf57cf4f4e1",
+    "url": "https://github.com/nimbalyst/nimbalyst/blob/6ae43a594d162096fa6bf2e67fd7fbbb51793b52/README.md",
+    "scope": "Upstream documentation at retrieval, not proof of every feature in the measured release"
+  },
+  {
+    "product": "simov/markdown-viewer",
+    "retrieved": "2026-09-14",
+    "readme_blob_sha": "9d0be28cf7cdad8e1e57ffbd82f33c97e2b22bae",
+    "url": "https://github.com/simov/markdown-viewer/blob/527e8c1b7801b0c83e678fb78cbce838dce1b20e/README.md",
+    "scope": "Upstream documentation at retrieval, not proof of every feature in the measured release"
+  }
+]

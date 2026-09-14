@@ -1,4 +1,4 @@
-# Desktop acceptance — v0.2.0
+# Desktop acceptance
 
 ## Release gates
 
@@ -6,6 +6,25 @@ Publication waits for Windows, macOS Apple Silicon, macOS Intel, Ubuntu, and
 policy checks. All packages come from the same annotated tag. Checksums and
 provenance cover every platform. The desktop workflow name is now Desktop builds;
 its existing filename is retained so links and workflow history remain useful.
+
+## v0.2.1 tab-label regression
+
+The regression test first failed on an inactive Chinese tab whose document
+contents were English. It now verifies actual font glyph coverage for that tab
+and for a renamed Korean tab, while asserting that the inactive document stays
+unloaded. All 88 Windows tests and 85 tests on each Mac architecture and Ubuntu
+pass with the correction.
+
+Windows and both Mac architectures' framebuffer captures show Japanese and Chinese tab
+names without replacement squares. The Mac candidate uses an English document
+named `First 日本語 中文 with spaces.md`, exercising filename-only fallback.
+The [candidate checks and screenshots](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34795939241)
+also repeat the native package acceptance described below.
+
+The Mac font inventory confirms that built-in Heiti is available when optional
+PingFang is absent. Font discovery also includes system font asset folders for
+Macs where PingFang is installed there. The tagged release repeats the platform
+gates before publishing the final packages.
 
 ## Windows
 

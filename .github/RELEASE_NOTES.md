@@ -4,7 +4,7 @@ Script fallback fonts now load from every tab title, including inactive restored
 
 A regression test checks actual glyph coverage for Chinese and Korean tab labels while preserving lazy loading of inactive documents. Native macOS acceptance also captures a filename containing Japanese and Chinese characters.
 
-Font discovery also includes macOS system font asset folders, where macOS 15 stores PingFang outside the traditional Fonts directory.
+Font discovery also includes macOS system font asset folders, where macOS 15 stores PingFang outside the traditional Fonts directory. Built-in Heiti provides Chinese and Japanese fallback when optional PingFang is absent.
 
 Packages are available for Windows x64, macOS 15+ Apple Silicon/Intel, and Ubuntu 24.04 x64. Windows builds remain unsigned; Mac apps are ad-hoc signed and unnotarized, so downloaded-app approval may be required.
 

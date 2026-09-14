@@ -1,5 +1,17 @@
 # Release checklist
 
+## v0.2.1 tab-font correction — 2026-09-13
+
+- Reproduced the missing Chinese tab glyph with English document contents and
+  added a regression for inactive restored tabs and renamed Korean filenames.
+- All 88 Windows tests and 85 tests on each Mac architecture and Ubuntu pass.
+  Windows and both Mac architectures' screenshots show corrected Japanese/Chinese labels.
+- Mac fallback includes built-in Heiti when optional PingFang is absent, and
+  font discovery also indexes macOS system font asset folders.
+- [Candidate native checks](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34795939241)
+  and the tagged release repeat platform acceptance. Publication remains gated
+  on every platform, package check, and policy job.
+
 ## v0.2.0 candidate validation — 2026-09-13
 
 - Windows passes all 87 locked tests, formatting, Clippy, optimized native

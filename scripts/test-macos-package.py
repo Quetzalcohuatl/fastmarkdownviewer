@@ -36,7 +36,7 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
     subprocess.run(['codesign', '--verify', '--strict', str(bundle)], check=True)
     subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister', '-f', str(bundle)], check=True)
     first = work / 'First 日本語 中文 with spaces.md'
-    second = work / 'Second.markdown'
+    second = work / 'Second 한국어.markdown'
     third = work / 'Dialog document.md'
     first.write_text('# First\n\nHello from Finder.\n' * 80)
     second.write_text('# Second\n\nA second document.')
@@ -103,6 +103,12 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         keys('keystroke "a" using command down\nkeystroke "c" using command down')
         copied = subprocess.check_output(['pbpaste'], text=True)
         assert copied == 'Finder', f'Native Find clipboard contained {copied!r}'
+        query = '中文 日本語 한국어 हिन्दी ภาษาไทย'
+        subprocess.run(['pbcopy'], input=query, text=True, check=True)
+        keys('keystroke "v" using command down')
+        capture('macos-multilingual-find')
+        keys('keystroke "a" using command down\nkeystroke "c" using command down')
+        assert subprocess.check_output(['pbpaste'], text=True) == query
         keys('key code 53')  # Escape returns focus to the document.
         keys('keystroke "o" using command down')
         time.sleep(2)

@@ -2,9 +2,26 @@ use super::*;
 
 #[test]
 fn tab_titles_load_glyphs_without_loading_inactive_documents() {
+    // Use a fresh font context for each script: one language must not accidentally
+    // load a broad fallback that hides a missing fallback for another language.
+    for title in [
+        "日本語",
+        "中文",
+        "한국어",
+        "العربية",
+        "עברית",
+        "हिन्दी",
+        "ภาษาไทย",
+        "Café Ελληνικά Українська 🙂",
+    ] {
+        check_tab_title(title);
+    }
+}
+
+fn check_tab_title(title: &str) {
     let directory = tempfile::tempdir().unwrap();
     let first = directory.path().join("English.md");
-    let second = directory.path().join("中文.md");
+    let second = directory.path().join(format!("{title}.md"));
     std::fs::write(&first, "# English text only").unwrap();
     std::fs::write(&second, "# Another English document").unwrap();
     let context = egui::Context::default();
@@ -13,7 +30,7 @@ fn tab_titles_load_glyphs_without_loading_inactive_documents() {
     app.root.restore_session(crate::persistence::Window {
         tabs: vec![
             crate::persistence::Tab {
-                path: first,
+                path: first.clone(),
                 scroll: 0.0,
             },
             crate::persistence::Tab {
@@ -29,19 +46,104 @@ fn tab_titles_load_glyphs_without_loading_inactive_documents() {
     }
     assert!(app.root.tabs[1].pending_load);
     assert!(app.root.tabs[1].document.source.is_empty());
-    assert_label_glyphs(&context, "中文");
-    let tab_id = app.root.tabs[0].id;
-    app.root.rename_tab(&context, tab_id, "한국어.md").unwrap();
+    assert_label_glyphs(&context, title);
+    // Renaming must also discover the script in a context that has only ever
+    // rendered English, independently of the restored-title case above.
+    let context = egui::Context::default();
+    crate::fonts::install(&context);
+    let mut app = ViewerApp::new(InitialState::Path(first));
     for _ in 0..4 {
         frame(&context, &mut app, input(Vec::new()));
     }
-    assert_label_glyphs(&context, "한국어");
+    let tab_id = app.root.tabs[0].id;
+    app.root
+        .rename_tab(&context, tab_id, &format!("renamed {title}.md"))
+        .unwrap();
+    for _ in 0..4 {
+        frame(&context, &mut app, input(Vec::new()));
+    }
+    assert_label_glyphs(&context, title);
+}
+
+#[test]
+fn find_and_rename_inputs_load_scripts_absent_from_the_document() {
+    for rename in [false, true] {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("English.md");
+        std::fs::write(&path, "# English document").unwrap();
+        let context = egui::Context::default();
+        crate::fonts::install(&context);
+        let mut app = ViewerApp::new(InitialState::Path(path));
+        let query = "中文 日本語 한국어 हिन्दी ภาษาไทย";
+        if rename {
+            app.root.rename_dialog = Some(super::super::RenameDialog {
+                tab_id: app.root.tabs[0].id,
+                name: String::new(),
+                focus: true,
+                error: None,
+            });
+        } else {
+            app.root.tabs[0].search.open = true;
+            app.root.focus_search = true;
+        }
+        for _ in 0..4 {
+            frame(&context, &mut app, input(Vec::new()));
+        }
+        frame(
+            &context,
+            &mut app,
+            input(vec![egui::Event::Paste(query.into())]),
+        );
+        for _ in 0..4 {
+            frame(&context, &mut app, input(Vec::new()));
+        }
+        let value = if rename {
+            &app.root.rename_dialog.as_ref().unwrap().name
+        } else {
+            &app.root.tabs[0].search.query
+        };
+        assert_eq!(value, query);
+        assert_label_glyphs(&context, query);
+        assert_eq!(app.root.tabs[0].document.source, "# English document");
+    }
+}
+
+#[test]
+fn multilingual_heading_code_and_find_survive_theme_changes() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("English.md");
+    let query = "日本語 中文 한국어 हिन्दी ภาษาไทย Café Ελληνικά Українська 🙂";
+    std::fs::write(&path, format!("# {query}\n\n`{query}`\n\n{query}\n")).unwrap();
+    let context = egui::Context::default();
+    crate::fonts::install(&context);
+    let mut app = ViewerApp::new(InitialState::Path(path));
+    app.root.tabs[0].search.open = true;
+    app.root.tabs[0].search.query = query.into();
+    for theme in [
+        crate::appearance::ThemeChoice::Light,
+        crate::appearance::ThemeChoice::Dark,
+    ] {
+        theme.apply(&context);
+        for _ in 0..6 {
+            frame(&context, &mut app, input(Vec::new()));
+        }
+        assert_eq!(app.root.search_status(), Some((1, 3)));
+        assert_label_glyphs(&context, query);
+        assert!(
+            app.root.tabs[0]
+                .markdown_cache
+                .navigation
+                .headings
+                .iter()
+                .any(|heading| heading.text == query)
+        );
+    }
 }
 
 fn assert_label_glyphs(context: &egui::Context, text: &str) {
     context.fonts_mut(|fonts| {
         let definitions = fonts.definitions();
-        for character in text.chars() {
+        for character in text.chars().filter(|character| !character.is_whitespace()) {
             assert!(
                 definitions.families[&egui::FontFamily::Proportional]
                     .iter()
@@ -304,6 +406,7 @@ fn native_title_tracks_open_switch_rename_and_last_tab_close() {
 #[test]
 fn detached_window_title_updates_then_allows_sleep() {
     let (_directory, context, mut app, start) = fixture();
+    crate::fonts::install(&context);
     let output = drag(&context, &mut app, start, egui::pos2(900.0, 150.0));
     let id = *app.detached.first_key_value().unwrap().0;
     let callback = output.viewport_output[&id].viewport_ui_cb.clone().unwrap();
@@ -311,17 +414,20 @@ fn detached_window_title_updates_then_allows_sleep() {
     {
         let mut window = app.detached[&id].state.lock().unwrap();
         let tab_id = window.tabs[0].id;
-        window.rename_tab(&context, tab_id, "detached.md").unwrap();
+        window
+            .rename_tab(&context, tab_id, "日本語 中文 한국어.md")
+            .unwrap();
     }
     assert_native_title(
         &child_frame(&context, id, &*callback, Vec::new(), false),
         id,
-        "detached.md — FastMarkdownViewer",
+        "日本語 中文 한국어.md — FastMarkdownViewer",
     );
     for _ in 0..30 {
         child_frame(&context, id, &*callback, Vec::new(), false);
     }
     let output = child_frame(&context, id, &*callback, Vec::new(), false);
+    assert_label_glyphs(&context, "日本語 中文 한국어");
     assert!(output.viewport_output[&id].repaint_delay > std::time::Duration::from_secs(1));
 }
 

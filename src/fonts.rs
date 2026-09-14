@@ -176,97 +176,6 @@ pub(crate) fn restore(context: &egui::Context, preferences: &[Option<String>; 2]
     }
 }
 
-#[cfg(all(test, target_os = "windows"))]
-mod tests {
-    use super::*;
-
-    fn frame(context: &egui::Context) {
-        let mut output = context.run_ui(egui::RawInput::default(), |ui| {
-            ui.label("Reading 日本語 中文 한국어 العربية עברית 🙂 हिन्दी ภาษาไทย");
-            ui.monospace("let answer = 42;");
-        });
-        output.textures_delta.clear();
-    }
-
-    #[test]
-    fn font_changes_preserve_independent_families_and_late_fallbacks() {
-        let context = egui::Context::default();
-        install(&context);
-        frame(&context);
-        let original = context.fonts_mut(|fonts| fonts.definitions().families.clone());
-        select(&context, Some("georgia.ttf"), false).unwrap();
-        frame(&context);
-        context.fonts_mut(|fonts| {
-            assert_eq!(
-                fonts.definitions().families[&egui::FontFamily::Proportional][0],
-                "georgia.ttf"
-            );
-            assert_eq!(
-                fonts.definitions().families[&egui::FontFamily::Monospace][0],
-                original[&egui::FontFamily::Monospace][0]
-            );
-        });
-        select(&context, Some("consola.ttf"), true).unwrap();
-        let saved = preferences(&context);
-        let reopened = egui::Context::default();
-        install(&reopened);
-        restore(&reopened, &saved);
-        frame(&reopened);
-        assert_eq!(preferences(&reopened), saved);
-        let missing = egui::Context::default();
-        install(&missing);
-        restore(
-            &missing,
-            &[Some("font-no-longer-installed.ttf".into()), None],
-        );
-        assert_eq!(preferences(&missing), [None, None]);
-        ensure_for_text(&context, "日本語 中文 한국어 हिन्दी ภาษาไทย");
-        frame(&context);
-        context.fonts_mut(|fonts| {
-            let definitions = fonts.definitions();
-            assert_eq!(
-                definitions.families[&egui::FontFamily::Proportional][0],
-                "georgia.ttf"
-            );
-            assert_eq!(
-                definitions.families[&egui::FontFamily::Monospace][0],
-                "consola.ttf"
-            );
-            for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
-                for character in "日中한عא🙂हภ".chars() {
-                    assert!(
-                        definitions.families[&family].iter().any(|name| {
-                            let data = &definitions.font_data[name];
-                            ttf_parser::Face::parse(&data.font, data.index)
-                                .is_ok_and(|face| face.glyph_index(character).is_some())
-                        }),
-                        "lost fallback for {character}"
-                    );
-                }
-            }
-        });
-        assert!(select(&context, Some("fmv-intentionally-missing.ttf"), false).is_err());
-        frame(&context);
-        context.fonts_mut(|fonts| {
-            assert_eq!(
-                fonts.definitions().families[&egui::FontFamily::Proportional][0],
-                "georgia.ttf"
-            );
-        });
-        select(&context, None, false).unwrap();
-        select(&context, None, true).unwrap();
-        frame(&context);
-        context.fonts_mut(|fonts| {
-            for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
-                assert_eq!(
-                    fonts.definitions().families[&family][0],
-                    original[&family][0]
-                );
-            }
-        });
-    }
-}
-
 /// Install emoji and small system fallbacks. Large East Asian fonts load only when needed.
 pub fn install(context: &egui::Context) {
     let mut state = FontState {
@@ -417,4 +326,101 @@ pub fn ensure_for_text(context: &egui::Context, text: &str) {
         apply_definitions(context, &state);
     }
     context.data_mut(|data| data.insert_temp(state_id(), state));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn frame(context: &egui::Context) {
+        let mut output = context.run_ui(egui::RawInput::default(), |ui| {
+            ui.label("Reading 日本語 中文 한국어 العربية עברית 🙂 हिन्दी ภาษาไทย");
+            ui.monospace("let answer = 42;");
+        });
+        output.textures_delta.clear();
+    }
+
+    #[test]
+    fn font_changes_preserve_independent_families_and_late_fallbacks() {
+        #[cfg(target_os = "windows")]
+        let (text_font, code_font) = ("georgia.ttf", "consola.ttf");
+        #[cfg(target_os = "macos")]
+        let (text_font, code_font) = ("Helvetica.ttc", "Menlo.ttc");
+        #[cfg(target_os = "linux")]
+        let (text_font, code_font) = ("DejaVuSans.ttf", "DejaVuSansMono.ttf");
+        let context = egui::Context::default();
+        install(&context);
+        frame(&context);
+        let original = context.fonts_mut(|fonts| fonts.definitions().families.clone());
+        select(&context, Some(text_font), false).unwrap();
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            assert_eq!(
+                fonts.definitions().families[&egui::FontFamily::Proportional][0],
+                text_font
+            );
+            assert_eq!(
+                fonts.definitions().families[&egui::FontFamily::Monospace][0],
+                original[&egui::FontFamily::Monospace][0]
+            );
+        });
+        select(&context, Some(code_font), true).unwrap();
+        let saved = preferences(&context);
+        let reopened = egui::Context::default();
+        install(&reopened);
+        restore(&reopened, &saved);
+        frame(&reopened);
+        assert_eq!(preferences(&reopened), saved);
+        let missing = egui::Context::default();
+        install(&missing);
+        restore(
+            &missing,
+            &[Some("font-no-longer-installed.ttf".into()), None],
+        );
+        assert_eq!(preferences(&missing), [None, None]);
+        ensure_for_text(&context, "日本語 中文 한국어 हिन्दी ภาษาไทย");
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            let definitions = fonts.definitions();
+            assert_eq!(
+                definitions.families[&egui::FontFamily::Proportional][0],
+                text_font
+            );
+            assert_eq!(
+                definitions.families[&egui::FontFamily::Monospace][0],
+                code_font
+            );
+            for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+                for character in "日中한عא🙂हภ".chars() {
+                    assert!(
+                        definitions.families[&family].iter().any(|name| {
+                            let data = &definitions.font_data[name];
+                            ttf_parser::Face::parse(&data.font, data.index)
+                                .is_ok_and(|face| face.glyph_index(character).is_some())
+                        }),
+                        "lost fallback for {character}"
+                    );
+                }
+            }
+        });
+        assert!(select(&context, Some("fmv-intentionally-missing.ttf"), false).is_err());
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            assert_eq!(
+                fonts.definitions().families[&egui::FontFamily::Proportional][0],
+                text_font
+            );
+        });
+        select(&context, None, false).unwrap();
+        select(&context, None, true).unwrap();
+        frame(&context);
+        context.fonts_mut(|fonts| {
+            for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+                assert_eq!(
+                    fonts.definitions().families[&family][0],
+                    original[&family][0]
+                );
+            }
+        });
+    }
 }

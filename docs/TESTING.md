@@ -109,3 +109,32 @@ cargo run --locked --example visual_check -- tests/fixtures/navigation.md target
 ```
 
 The example opens the production UI, optionally searches for the final argument, captures egui's actual framebuffer, and closes itself. Inspect the generated PNG for heading layout, script glyphs, syntax colors, and match placement. This is a visual regression aid, not a startup benchmark. Full mixed-direction text layout still requires a separate renderer improvement; glyph coverage tests do not claim bidi conformance.
+
+## Multilingual UI regression coverage
+
+`src/app/windows/tests.rs` runs on all desktop platforms despite its module name.
+Each script starts with a fresh font context and English document bodies, then
+checks actual font glyph indices for inactive restored titles and renamed files.
+Samples cover Japanese, Chinese, Korean, Arabic, Hebrew, Hindi, Thai, accented
+Latin, Greek, Ukrainian, and emoji. Additional cases exercise detached titles,
+Find and rename inputs containing scripts absent from the document, and
+multilingual headings, inline code, search counts, and light/dark themes.
+`src/fonts.rs` verifies independent text/code font choices, saved preferences,
+missing-font recovery, and fallback retention on Windows, both Macs, and Ubuntu.
+
+Desktop CI saves light/dark captures of `tests/fixtures/multilingual-ui.md` with
+Chinese search highlights. The native Mac and Linux acceptance scripts also
+paste and copy a multilingual Find query and retain screenshots. Inspect these
+artifacts for squares, clipping, and highlight placement; a clipboard round trip
+alone does not establish correct rendering. Local Windows captures use:
+
+```powershell
+$env:FMV_VISUAL_THEME = 'Light'
+target/release/examples/visual_check.exe tests/fixtures/multilingual-ui.md target/multilingual-light.png 中文
+$env:FMV_VISUAL_THEME = 'Dark'
+target/release/examples/visual_check.exe tests/fixtures/multilingual-ui.md target/multilingual-dark.png 中文
+Remove-Item Env:FMV_VISUAL_THEME
+```
+
+Glyph tests intentionally fail when a required baseline font is absent. Passing
+samples are not a claim of complete Unicode shaping, bidi, IME, or language support.

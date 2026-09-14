@@ -4,6 +4,14 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- Load script fallback fonts for Find and rename text, even when the open
+  document and existing filenames contain only English.
+- Expand multilingual regression coverage across Windows, macOS, and Ubuntu,
+  including separate script contexts, restored/renamed/detached tabs, text/code
+  font changes, headings, search, native clipboard input, and visual captures.
+- Update the egui stack, file-opening helper, SVG renderer, and pinned GitHub
+  Actions; remove the obsolete rustybuzz advisory exception after its removal.
+
 ## [0.2.1] - 2026-09-13
 
 - Load script fallback fonts for every tab title, including inactive restored

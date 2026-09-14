@@ -103,7 +103,8 @@ try {
     $primary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -PassThru
     Wait-ForViewerWindow -Process $primary
     $primary.Refresh()
-    if ($primary.MainWindowTitle -notlike '*feature-matrix.md*FastMarkdownViewer*') {
+    $expectedTitle = [System.IO.Path]::GetFileName($fixturePath) + ' — FastMarkdownViewer'
+    if ($primary.MainWindowTitle -ne $expectedTitle) {
         throw "Unexpected primary window title: $($primary.MainWindowTitle)"
     }
 

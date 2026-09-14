@@ -4,6 +4,11 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-13
+
+- Load script fallback fonts for every tab title, including inactive restored
+  tabs and renamed files whose document text is English.
+
 ## [0.2.0] - 2026-09-13
 
 - Add official macOS 15+ app bundles for Apple Silicon and Intel, and Ubuntu 24.04 x64 Debian and tar packages, with platform checks gating publication alongside Windows.

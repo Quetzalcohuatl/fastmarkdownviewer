@@ -35,7 +35,7 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
     binary = bundle / 'Contents/MacOS/FastMarkdownViewer'
     subprocess.run(['codesign', '--verify', '--strict', str(bundle)], check=True)
     subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister', '-f', str(bundle)], check=True)
-    first = work / 'First 日本語 with spaces.md'
+    first = work / 'First 日本語 中文 with spaces.md'
     second = work / 'Second.markdown'
     third = work / 'Dialog document.md'
     first.write_text('# First\n\nHello from Finder.\n' * 80)

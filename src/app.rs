@@ -87,6 +87,7 @@ struct DocumentTab {
     fragment_target: Option<String>,
     navigation_error: Option<String>,
     fonts_checked: bool,
+    title_fonts_checked: bool,
     image_uris: Arc<Mutex<HashSet<String>>>,
 }
 
@@ -223,6 +224,7 @@ impl ViewerWindow {
                     fragment_target: None,
                     navigation_error: None,
                     fonts_checked: false,
+                    title_fonts_checked: false,
                     image_uris: Arc::default(),
                 });
                 self.active = self.tabs.len() - 1;
@@ -263,6 +265,7 @@ impl ViewerWindow {
                 tab.heading_target = None;
                 tab.fragment_target = None;
                 tab.fonts_checked = false;
+                tab.title_fonts_checked = false;
                 tab.search.invalidate();
                 self.error = None;
                 context.request_repaint();
@@ -557,6 +560,13 @@ impl ViewerWindow {
         if self.tabs.is_empty() {
             return;
         }
+        // Labels are visible even when their restored documents remain unloaded.
+        for tab in &mut self.tabs {
+            if !tab.title_fonts_checked {
+                crate::fonts::ensure_for_text(ui.ctx(), &tab.document.title);
+                tab.title_fonts_checked = true;
+            }
+        }
         let mut close = None;
         let mut detach = None;
         let mut rename = None;
@@ -673,6 +683,7 @@ impl ViewerWindow {
         tab.fragment_target = None;
         tab.search.invalidate();
         tab.fonts_checked = false;
+        tab.title_fonts_checked = false;
         context.request_repaint();
         Ok(())
     }
@@ -1093,6 +1104,7 @@ impl ViewerWindow {
                 fragment_target: None,
                 navigation_error: None,
                 fonts_checked: false,
+                title_fonts_checked: false,
                 image_uris: Arc::default(),
             })
             .collect();

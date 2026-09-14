@@ -1,6 +1,6 @@
 # Desktop installation and support
 
-v0.2.0 packages Windows x64, macOS Apple Silicon/Intel, and Ubuntu x64 together.
+v0.2.1 packages Windows x64, macOS Apple Silicon/Intel, and Ubuntu x64 together.
 Download packages and SHA256SUMS.txt from the same [GitHub release](https://github.com/Quetzalcohuatl/fastmarkdownviewer/releases).
 All platform builds and package checks must succeed before publication.
 
@@ -45,7 +45,7 @@ Prefer the Debian package, which installs the executable and desktop entry and
 declares the runtime libraries:
 
 ```sh
-sudo apt install ./FastMarkdownViewer-0.2.0-linux-x86_64.deb
+sudo apt install ./FastMarkdownViewer-0.2.1-linux-x86_64.deb
 sudo apt remove fast-markdown-viewer
 ```
 

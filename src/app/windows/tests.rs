@@ -1,6 +1,62 @@
 use super::*;
 
 #[test]
+fn tab_titles_load_glyphs_without_loading_inactive_documents() {
+    let directory = tempfile::tempdir().unwrap();
+    let first = directory.path().join("English.md");
+    let second = directory.path().join("中文.md");
+    std::fs::write(&first, "# English text only").unwrap();
+    std::fs::write(&second, "# Another English document").unwrap();
+    let context = egui::Context::default();
+    crate::fonts::install(&context);
+    let mut app = ViewerApp::new(InitialState::Empty);
+    app.root.restore_session(crate::persistence::Window {
+        tabs: vec![
+            crate::persistence::Tab {
+                path: first,
+                scroll: 0.0,
+            },
+            crate::persistence::Tab {
+                path: second,
+                scroll: 0.0,
+            },
+        ],
+        active: 0,
+        outline: true,
+    });
+    for _ in 0..4 {
+        frame(&context, &mut app, input(Vec::new()));
+    }
+    assert!(app.root.tabs[1].pending_load);
+    assert!(app.root.tabs[1].document.source.is_empty());
+    assert_label_glyphs(&context, "中文");
+    let tab_id = app.root.tabs[0].id;
+    app.root.rename_tab(&context, tab_id, "한국어.md").unwrap();
+    for _ in 0..4 {
+        frame(&context, &mut app, input(Vec::new()));
+    }
+    assert_label_glyphs(&context, "한국어");
+}
+
+fn assert_label_glyphs(context: &egui::Context, text: &str) {
+    context.fonts_mut(|fonts| {
+        let definitions = fonts.definitions();
+        for character in text.chars() {
+            assert!(
+                definitions.families[&egui::FontFamily::Proportional]
+                    .iter()
+                    .any(|name| {
+                        let data = &definitions.font_data[name];
+                        ttf_parser::Face::parse(&data.font, data.index)
+                            .is_ok_and(|face| face.glyph_index(character).is_some())
+                    }),
+                "no tab-label glyph for {character}"
+            );
+        }
+    });
+}
+
+#[test]
 fn external_open_reuses_tabs_and_revives_a_hidden_root() {
     let directory = tempfile::tempdir().unwrap();
     let first = directory.path().join("First 日本語.md");

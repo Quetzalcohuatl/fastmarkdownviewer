@@ -6,7 +6,7 @@ See [desktop installation instructions](docs/CROSS_PLATFORM.md) for Windows x64,
 macOS 15 or later (Apple Silicon and Intel), and Ubuntu 24.04 x64 packages,
 platform requirements, and tested configurations.
 
-> **v0.2.0:** Desktop packages, saved settings and sessions, and a fix for unnecessary idle CPU usage. Performance claims are limited to repeatable measurements.
+> **v0.2.1:** Fixes missing script fonts in tab names, including inactive restored tabs and renamed files. Desktop packages include saved settings and sessions. Performance claims are limited to repeatable measurements.
 
 ## What is included
 

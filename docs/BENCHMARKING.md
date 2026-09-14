@@ -12,6 +12,12 @@ Run `experiments/architecture/fixtures/generate.ps1` to generate deterministic d
 
 ## Machine record
 
+The [September 13 Windows rerun](../experiments/competitors/maintenance-results.md)
+provides the main README's current memory table: five fresh launches per app and
+fixture, all competitors randomized in one batch, published FMV 0.2.1 plus the
+dependency-update candidate, and all 100 raw attempts. It retains the resource
+checkpoint protocol and does not certify first-content latency.
+
 The [September 11 competitor study](../experiments/competitors/README.md) compares
 Windows and Linux VM process resources across open-source viewers/editors, with
 raw samples, pinned downloads, rendering observations, and a sourced feature

@@ -4,6 +4,11 @@ This study combines measured process resources with a sourced feature comparison
 Read the limitations with the numbers; smaller memory use can come from rendering
 less of the document.
 
+**Newer Windows measurements:** the [September 13 rerun](maintenance-results.md)
+compares published FMV 0.2.1, the dependency-update candidate, and the same pinned
+competitors in one randomized batch. The main README uses this newer dataset.
+The original Windows/Linux study below is retained as historical evidence.
+
 **Follow-up:** the [sustained CPU investigation](idle-fix.md) identifies and fixes
 a title-update repaint loop. The competitor numbers below intentionally retain
 the original pre-fix binaries; follow-up CPU measurements are stored separately.

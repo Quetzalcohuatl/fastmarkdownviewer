@@ -129,6 +129,7 @@ artifacts for squares, clipping, and highlight placement; a clipboard round trip
 alone does not establish correct rendering. Local Windows captures use:
 
 ```powershell
+$env:FMV_VISUAL_THEME = 'Light'
 target/release/examples/visual_check.exe tests/fixtures/multilingual-ui.md target/multilingual-light.png 中文
 $env:FMV_VISUAL_THEME = 'Dark'
 target/release/examples/visual_check.exe tests/fixtures/multilingual-ui.md target/multilingual-dark.png 中文

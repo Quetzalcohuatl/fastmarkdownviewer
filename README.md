@@ -8,12 +8,69 @@ platform requirements, and tested configurations.
 
 > **v0.2.1:** Fixes missing script fonts in tab names, including inactive restored tabs and renamed files. Desktop packages include saved settings and sessions. Performance claims are limited to repeatable measurements.
 
+## Screenshots
+
+The production renderer on Windows 11: light theme, outline, tables, syntax
+highlighting, equations, and multilingual text.
+
+![FastMarkdownViewer displaying a document with an outline, table, Rust code, and an equation](docs/screenshots/windows-reading.png)
+
+<details>
+<summary>Dark theme and multilingual Find</summary>
+
+![Dark theme showing multilingual headings and Chinese search highlights](docs/screenshots/multilingual-dark.png)
+
+</details>
+
+<details>
+<summary>macOS and Ubuntu</summary>
+
+Native platform builds displaying the same Markdown and offline Mermaid diagram.
+
+| macOS 15, Apple Silicon | Ubuntu 24.04, X11 |
+| :---: | :---: |
+| ![Mac build rendering a Mermaid diagram and multilingual text](docs/screenshots/macos-reading.png) | ![Ubuntu build rendering the same diagram and multilingual text](docs/screenshots/ubuntu-reading.png) |
+
+[Screenshot sources and reproduction](docs/screenshots/README.md).
+
+</details>
+
+## Performance: measured memory use
+
+In this Windows 11 sample, **FMV 0.2.1 used 72% less resident process memory than
+Obsidian and 93% less than VS Code's Markdown preview** on the small document.
+The table includes every successfully measured Windows competitor from this study.
+
+| App/version | ~5 KiB document: memory (MiB) | ~100 KiB document: memory (MiB) |
+| :--- | ---: | ---: |
+| **FastMarkdownViewer 0.2.1** | **127.6** | **138.5** |
+| aydiler/md-viewer 0.2.0 | 227.8 | 257.7 |
+| MarkMello 0.4.0 | 137.5 | 287.4 |
+| MD Preview 1.4.1 | 403.7 | 560.3 |
+| MarkText 0.19.1 | 496.9 | 695.2 |
+| mdview-zig 0.2.0 | 44.5 | 45.6 |
+| Obsidian 1.13.7 | 462.0 | 813.7 |
+| Typora 1.14.10 | 597.2 | 685.8 |
+| VS Code 1.130.0, Markdown preview | 1944.7 | 2230.8 |
+
+Measured September 13, 2026 on a Ryzen 9 9950X Windows 11 desktop. Values are
+median process-tree working sets across **five fresh launches per app/document**,
+at a fixed checkpoint about four seconds after window creation. The same
+synthetic documents and pinned app versions were used in a randomized batch.
+These are resident-memory measurements, not peak memory or completed-render times.
+
+Apps provide different features: the editors do more than FMV, while mdview-zig
+uses less memory but leaves several tested Markdown constructs as source.
+This is not an overall speed ranking or a macOS/Linux comparison.
+[Raw samples, ranges, CPU measurements, versions, and reproduction](experiments/competitors/maintenance-results.md)
+include the updated development build alongside the published FMV binary.
+
 ## What is included
 
 - CommonMark and GitHub-style tables, task lists, strikethrough, autolinks, footnotes, definition lists, and alerts
 - Inline, display, and fenced math rendered with RaTeX
 - Selectable code blocks with lazy, background syntect highlighting
-- Bundled monochrome emoji plus Windows font fallbacks for Japanese, Chinese, Korean, Arabic, Hebrew, Hindi/Devanagari, and Thai
+- Bundled monochrome emoji and system font fallbacks for Japanese, Chinese, Korean, Arabic, Hebrew, Hindi/Devanagari, and Thai on the tested desktop baselines
 - Local and remote PNG, JPEG, WebP, first-frame GIF, and SVG images
 - Ctrl+F search with highlights, match counts, next/previous navigation, and optional case matching
 - A resizable outline sidebar with a Settings toggle
@@ -28,7 +85,7 @@ There is no editor, file watcher, search index, history database, updater, or te
 
 Settings → Color theme offers System, Light, Dark, Solarized Light, Solarized Dark, Quiet Light, Monokai, and Tomorrow Night Blue. These are lightweight built-in interpretations of familiar editor palettes, not imported VS Code themes or extension support. Code highlighting follows the chosen palette, including changes between two light or two dark themes.
 
-Settings → Text font changes proportional text (including menus and headings); Code font independently changes code and inline code. Choices include Segoe UI, Arial, Calibri, Georgia, Times New Roman, Consolas, Courier New, Cascadia Code/Mono, JetBrains Mono, and Fira Code when their supported font filenames are installed in Windows or the user's Windows Fonts folder. Only available choices appear. Default restores the bundled family. Fonts load on selection, retain emoji/script fallbacks, and are never downloaded or redistributed. This is a curated font list, not an arbitrary installed-font browser; custom font files and editor ligature settings are not supported. Theme, font, and zoom changes apply to all windows in the current process and are saved on normal exit. These appearance options were added in v0.1.4.
+Settings → Text font changes proportional text (including menus and headings); Code font independently changes code and inline code. Choices include familiar Windows families, Helvetica and Menlo on macOS, and DejaVu, Liberation, and Noto families on Linux, when installed. Only available choices appear. Default restores the bundled family. Fonts load on selection, retain emoji/script fallbacks, and are never downloaded or redistributed. This is a curated font list, not an arbitrary installed-font browser; custom font files and editor ligature settings are not supported. Theme, font, and zoom changes apply to all windows in the current process and are saved on normal exit.
 
 ## Usage
 
@@ -73,7 +130,7 @@ The current eframe backend does not initialize native accessibility for dynamica
 
 Syntax definitions initialize on a worker only when a language-tagged code block becomes visible. Results are cached by content, language, theme, and font size. Unknown languages remain plain text; blocks over 256 KiB skip highlighting. Highlight caches are bounded to 128 entries and approximately 8 MiB per tab.
 
-East Asian, Indic (Nirmala UI), and Thai/Lao (Leelawadee UI) system fonts load on demand. Glyph coverage depends on installed Windows fonts; no system fonts are redistributed or downloaded. Hindi/Devanagari and Thai samples are covered on the tested Windows installation. The renderer already uses HarfRust shaping, but full Unicode bidirectional paragraph layout remains limited, so mixed Arabic/Hebrew and left-to-right text needs further renderer work. Coverage is not a guarantee of correct layout for every language. Myanmar, Khmer, Tibetan, Ethiopic, and historic scripts have no dedicated fallback configured and remain unverified. Emoji are monochrome.
+East Asian, Indic, and Thai/Lao system fonts load on demand. Glyph coverage depends on installed fonts; no system fonts are redistributed or downloaded. Regression tests cover multilingual filenames, headings, code, Find/rename input, and font changes on the tested Windows, macOS, and Ubuntu baselines. The renderer already uses HarfRust shaping, but full Unicode bidirectional paragraph layout remains limited, so mixed Arabic/Hebrew and left-to-right text needs further renderer work. Coverage is not a guarantee of correct layout for every language. Myanmar, Khmer, Tibetan, Ethiopic, and historic scripts have no dedicated fallback configured and remain unverified. Emoji are monochrome.
 
 Ordinary prose, including long unbroken words, wraps within a reading column capped at 960 logical pixels. Tables give longer columns more room, wrap text and long tokens, and scroll horizontally when their minimum widths exceed the available space. **Settings → Word wrap** is enabled by default for prose, table cells, and code, and is shared across windows in the current session. Disable it to retain long lines and scroll horizontally. Code blocks retain their own horizontal scroll area when needed. Scrollbars stay visible while content overflows and reserve space beside it. The document also has a horizontal scrollbar as a fallback for objects that cannot fit. Nested blockquotes and inline styles preserve their surrounding structure and formatting.
 
@@ -81,7 +138,9 @@ Definition lists are an extension, not part of core CommonMark. Write a term on 
 
 ## Build from source
 
-Prerequisites are Rust 1.95.0 and the Visual Studio 2022 C++ Build Tools with a Windows 10/11 SDK.
+Use Rust 1.95.0. Windows additionally needs the Visual Studio 2022 C++ Build Tools
+with a Windows 10/11 SDK; see [the desktop guide](docs/CROSS_PLATFORM.md) for
+macOS and Ubuntu prerequisites and build commands.
 
 ```powershell
 rustup show

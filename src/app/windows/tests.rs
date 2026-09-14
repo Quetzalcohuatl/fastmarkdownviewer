@@ -78,17 +78,31 @@ fn find_and_rename_inputs_load_scripts_absent_from_the_document() {
         if rename {
             app.root.rename_dialog = Some(super::super::RenameDialog {
                 tab_id: app.root.tabs[0].id,
-                name: query.into(),
+                name: String::new(),
                 focus: true,
                 error: None,
             });
         } else {
             app.root.tabs[0].search.open = true;
-            app.root.tabs[0].search.query = query.into();
+            app.root.focus_search = true;
         }
         for _ in 0..4 {
             frame(&context, &mut app, input(Vec::new()));
         }
+        frame(
+            &context,
+            &mut app,
+            input(vec![egui::Event::Paste(query.into())]),
+        );
+        for _ in 0..4 {
+            frame(&context, &mut app, input(Vec::new()));
+        }
+        let value = if rename {
+            &app.root.rename_dialog.as_ref().unwrap().name
+        } else {
+            &app.root.tabs[0].search.query
+        };
+        assert_eq!(value, query);
         assert_label_glyphs(&context, query);
         assert_eq!(app.root.tabs[0].document.source, "# English document");
     }

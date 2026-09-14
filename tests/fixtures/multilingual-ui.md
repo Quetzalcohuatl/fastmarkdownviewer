@@ -7,7 +7,7 @@ Compare the document text with the labels below; look for missing-glyph squares.
 
 日本語を読む。 阅读中文。 한국어를 읽습니다.
 
-`日本語 中文 한국어` — search for **中文** to highlight both occurrences.
+`日本語 中文 한국어` — Find should highlight every occurrence of the query.
 
 ## हिन्दी · ภาษาไทย
 

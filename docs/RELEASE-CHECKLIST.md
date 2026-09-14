@@ -1,4 +1,27 @@
-# v0.1 release checklist
+# Release checklist
+
+## v0.2.0 candidate validation — 2026-09-13
+
+- Windows passes all 87 locked tests, formatting, Clippy, optimized native
+  open/scroll/two-window checks, packaging verification, and a fresh per-user
+  install/open/scroll/uninstall pass. Dependency policy and advisory checks pass
+  with the existing documented maintenance exceptions.
+- [Desktop candidate CI](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34792457119)
+  passes all 84 Rust tests on Ubuntu 24.04, macOS 15 Apple Silicon, and macOS 15
+  Intel. Native package acceptance covers graphics, dialogs, clipboard, normal
+  exit, and restored preferences/sessions. Mac acceptance also covers Finder
+  delivery, duplicate activation, and quitting with a modal file picker open.
+- The CI-built Ubuntu Debian package additionally passed native desktop
+  acceptance in an Ubuntu 24.04 Xfce VM. CI captures X11 and Wayland rendering.
+- Mac and Linux archives and the Debian installation include the bundled
+  Noto Emoji font license. Platform baselines and signing limits are documented
+  in [desktop installation](CROSS_PLATFORM.md); exact coverage is recorded in
+  [desktop acceptance](DESKTOP_ACCEPTANCE.md).
+- The annotated v0.2.0 release rebuilds and checks all platforms from the same
+  commit. Publication is gated on every platform and policy job, and includes
+  seven downloadable packages, combined checksums, and GitHub provenance.
+
+## Historical v0.1 validation
 
 ## v0.1.4 candidate validation — 2026-09-09
 

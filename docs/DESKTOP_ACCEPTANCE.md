@@ -40,9 +40,10 @@ native Cmd+F/clipboard, pasting a path in the Cmd+O file picker, and quitting
 while the native picker is still open. Native validation is
 performed on macOS 15 CI desktops, not every Mac model or display arrangement.
 
-Initial integration testing confirmed Finder delivery and persistence; the test
-was corrected to compare canonical paths because macOS resolves /var to
-/private/var. Final v0.2.0 workflow results are recorded before publication.
+The [completed candidate run](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34792457119)
+passed all three desktop jobs, including the native checks above and 84 Rust
+tests on each Mac architecture and Ubuntu. Window readiness and separate input
+steps allow the same native test to run on the slower Intel CI desktop.
 
 ## Coverage limits
 

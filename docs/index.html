@@ -25,16 +25,33 @@
       <p class="lede">No editor chrome. No project index. No WebView. FastMarkdownViewer opens Markdown files as clean rendered documents.</p>
       <div class="actions">
         <a class="button primary" href="{{REPOSITORY_URL}}/releases/tag/v0.2.2">Download v0.2.2</a>
+        <a class="button secondary" href="#demo">Watch the 20-second demo</a>
         <a class="button secondary" href="{{REPOSITORY_URL}}/blob/main/docs/CROSS_PLATFORM.md">Installation instructions</a>
       </div>
       <p class="release-note">New in v0.2.2: multilingual Find and rename fixes, updated dependencies, and an HTTPS security update.</p>
       <p class="release-note">Windows builds are unsigned; Mac apps are ad-hoc signed and unnotarized. See the installation and verification instructions.</p>
     </section>
 
-    <section class="preview" aria-labelledby="preview-title">
-      <h2 id="preview-title" class="visually-hidden">Application preview</h2>
-      <img class="app-screenshot" src="fastmarkdownviewer-beta.jpg" alt="FastMarkdownViewer rendering its README in a native Windows window">
-      <p class="caption">The real beta application rendering the repository's README.</p>
+    <section class="preview" id="demo" aria-labelledby="demo-title">
+      <div class="eyebrow">See it in 20 seconds</div>
+      <h2 id="demo-title">Open. Find. Read.</h2>
+      <p>Open a Markdown file, find the line you need, and read code, math, and diagrams.</p>
+      <video class="demo-video" controls playsinline preload="none" width="1600" height="1000" poster="demo/poster.png" aria-label="FastMarkdownViewer 20-second walkthrough" aria-describedby="demo-caption">
+        <source src="demo/fastmarkdownviewer-20s.mp4" type="video/mp4">
+        <track kind="captions" src="demo/captions.vtt" srclang="en" label="English">
+        <p><a href="demo/fastmarkdownviewer-20s.mp4">Download the 20-second demo</a> or read the transcript below.</p>
+      </video>
+      <p class="caption" id="demo-caption">Edited captures of the real v0.2.2 renderer. Large captions; no audio needed.</p>
+      <p><a href="demo/fastmarkdownviewer-20s.mp4" download>Download MP4</a> · <a href="{{REPOSITORY_URL}}/releases/latest">Get FastMarkdownViewer</a></p>
+      <details class="demo-transcript">
+        <summary>Read the 20-second transcript</summary>
+        <ol>
+          <li><strong>0–5 seconds — Open a file. Start reading.</strong> A Markdown document appears with headings, an outline, a table, code, and a checklist.</li>
+          <li><strong>5–10 seconds — Find the line you need.</strong> Searching for “release” highlights three matches in the document.</li>
+          <li><strong>10–16 seconds — Code. Math. Diagrams.</strong> A technical guide shows highlighted Rust code, a rendered equation, and a Mermaid flowchart.</li>
+          <li><strong>16–20 seconds — Try FastMarkdownViewer.</strong> Free, open source, and no account required. Available for Windows, macOS, and Ubuntu; see installation instructions for requirements.</li>
+        </ol>
+      </details>
     </section>
 
     <section class="principles" aria-label="Project principles">

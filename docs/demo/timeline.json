@@ -1,0 +1,39 @@
+{
+  "duration_seconds": 20,
+  "fps": 24,
+  "size": [
+    1600,
+    1000
+  ],
+  "scenes": [
+    {
+      "start": 0,
+      "duration": 5,
+      "image": "reading.png",
+      "title": "Open a file.\nStart reading.",
+      "body": "Clean Markdown.\nNo editor to set up.",
+      "label": "01 / READ"
+    },
+    {
+      "start": 5,
+      "duration": 5,
+      "image": "find.png",
+      "title": "Find the line\nyou need.",
+      "body": "Search the document.\nSee matches in context.",
+      "label": "02 / FIND"
+    },
+    {
+      "start": 10,
+      "duration": 6,
+      "image": "technical.png",
+      "title": "Code. Math.\nDiagrams.",
+      "body": "Read technical details\nin one clear view.",
+      "label": "03 / UNDERSTAND"
+    },
+    {
+      "start": 16,
+      "duration": 4,
+      "title": "Try FastMarkdownViewer"
+    }
+  ]
+}

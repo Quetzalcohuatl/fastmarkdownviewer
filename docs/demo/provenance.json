@@ -1,0 +1,44 @@
+{
+  "application_version": "0.2.2",
+  "application_source": "b5c4ed01badb0c5c461142109d5e0958a6906a1a",
+  "capture_tool": "examples/visual_check.rs",
+  "capture_executable_sha256": "a1efa677519b22049efb841f7249520d20bf92b64ff0d651d1780cf5c95691b2",
+  "platform": "Windows 11",
+  "theme": "Light",
+  "display_scale": 1.5,
+  "capture_pixels": [
+    1350,
+    1050
+  ],
+  "kind": "edited walkthrough from production renderer framebuffer captures; not a continuous screen recording or startup benchmark",
+  "media": {
+    "reading.png": {
+      "bytes": 177633,
+      "sha256": "e14f08e8729392bbe5c79eb7516771b70835fff6e55610b2f56ad696a34c2d3c"
+    },
+    "find.png": {
+      "bytes": 192436,
+      "sha256": "433022d34bab5212f8b8742dce78831137ba2ad6cfdad176cd6b96ca0e4e6a4b"
+    },
+    "technical.png": {
+      "bytes": 158533,
+      "sha256": "d94fd7e9dd42c824b6f1602b11932f35e1b75d61fe25f9564367db10f78192ee"
+    },
+    "poster.png": {
+      "bytes": 148750,
+      "sha256": "86f7f0c31a97ccc8d7c827e1017e2a104928d79f273b2b717e7f95262bcc417a"
+    },
+    "fastmarkdownviewer-20s.mp4": {
+      "bytes": 226506,
+      "sha256": "f579c2480072da2be3f8e0ff02501fcf29aba668b3f9944c5de7907800af5514"
+    },
+    "project-notes.md": {
+      "bytes": 449,
+      "sha256": "299bfe95ba2426f2ce158cd5da92920bdff66682e123034e05b89781ed9f4dec"
+    },
+    "technical-guide.md": {
+      "bytes": 290,
+      "sha256": "5e9004695f5d25a04b4fd4f3fffb931d70da972ebedf90824acb6b4b7ec7d472"
+    }
+  }
+}

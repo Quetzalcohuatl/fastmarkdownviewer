@@ -80,3 +80,11 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px
   html { scroll-behavior: auto; }
   .button:hover { transform: none; }
 }
+
+/* Native controls keep the walkthrough usable without JavaScript or autoplay. */
+#demo { scroll-margin-top: 24px; }
+#demo h2 { margin: 14px 0 8px; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.04em; }
+.demo-video { display: block; width: 100%; height: auto; background: #f4f1ea; border: 1px solid var(--line); border-radius: 12px; }
+.demo-transcript { margin: 24px 0; padding: 18px 22px; border: 1px solid var(--line); border-radius: 10px; }
+.demo-transcript summary { cursor: pointer; font-weight: 650; }
+.demo-transcript li { margin-block: 12px; }

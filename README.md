@@ -8,6 +8,14 @@ platform requirements, and tested configurations.
 
 > **v0.2.2:** Fixes multilingual Find and rename text, updates dependencies, and patches the HTTPS transport. Desktop packages include saved settings and sessions. Performance comparisons below retain their measured v0.2.1 baseline.
 
+## See it in 20 seconds
+
+[![Watch the 20-second demo: open Markdown, find a line, and read code, math, and diagrams](docs/demo/poster.png)](https://quetzalcohuatl.github.io/fastmarkdownviewer/#demo)
+
+**Open a file. Find what matters. Read the details.**
+An edited walkthrough of the real v0.2.2 renderer, with large captions and no audio required.
+[Watch](https://quetzalcohuatl.github.io/fastmarkdownviewer/#demo) · [Download MP4](https://quetzalcohuatl.github.io/fastmarkdownviewer/demo/fastmarkdownviewer-20s.mp4) · [Read the transcript](docs/demo/README.md#transcript)
+
 ## Screenshots
 
 The production renderer on Windows 11: light theme, outline, tables, syntax

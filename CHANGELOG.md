@@ -2,7 +2,7 @@
 
 All notable changes are documented here. This project follows Semantic Versioning.
 
-## [Unreleased]
+## [0.2.2] - 2026-09-14
 
 - Update rustls to 0.23.45 to address RUSTSEC-2026-0285 in the HTTPS image
   transport dependency. Published 0.2.1 benchmark measurements remain unchanged.

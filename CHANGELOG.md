@@ -4,6 +4,11 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- Update rustls to 0.23.45 to address RUSTSEC-2026-0285 in the HTTPS image
+  transport dependency. Published 0.2.1 benchmark measurements remain unchanged.
+- Expand the README's competitor comparison with Google discovery, current
+  feature coverage and gaps, and 120 Windows resource samples including Markpad,
+  Moji, and MarkLite; preserve raw data, acquisition limits, and reproducible methods.
 - Load script fallback fonts for Find and rename text, even when the open
   document and existing filenames contain only English.
 - Expand multilingual regression coverage across Windows, macOS, and Ubuntu,

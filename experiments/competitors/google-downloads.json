@@ -1,0 +1,35 @@
+[
+  {
+    "app": "Markpad",
+    "version": "2.7.6",
+    "retrieved": "2026-09-14",
+    "url": "https://github.com/sftwrdotdev/Markpad/releases/download/v2.7.6/Markpad_2.7.6_x64.exe",
+    "bytes": 14067200,
+    "sha256": "8cbde9e19bc01fad952f7f3b3276ebc003ac963483334f64f9f1c95be4b146b7",
+    "distributed_app_bytes": 14067200,
+    "distributed_app_files": 1,
+    "external_runtime_note": "WebView2 is not included in this portable exe"
+  },
+  {
+    "app": "Moji",
+    "version": "1.0.7",
+    "retrieved": "2026-09-14",
+    "url": "https://github.com/alexishida/Moji/releases/download/v1.0.7/Moji.Setup.1.0.7.exe",
+    "bytes": 131243736,
+    "sha256": "621d692099813ff559a339b3435d52e0ac748098e539be8a07186f983be32503",
+    "distributed_app_bytes": 469284759,
+    "distributed_app_files": 77,
+    "external_runtime_note": "OS and shared system libraries excluded"
+  },
+  {
+    "app": "MarkLite",
+    "version": "1.1.1",
+    "retrieved": "2026-09-14",
+    "url": "https://marklite-distro.s3.us-east-1.amazonaws.com/marklite-1.1.1-setup.exe",
+    "bytes": 14238967,
+    "sha256": "da3777b5134619b2ddb4f40da9f88b51336ab79605445feb004d0a062194273d",
+    "distributed_app_bytes": 39630793,
+    "distributed_app_files": 24,
+    "external_runtime_note": "OS and shared system libraries excluded"
+  }
+]

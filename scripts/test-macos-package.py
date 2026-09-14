@@ -52,6 +52,18 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
     def running():
         return subprocess.run(['pgrep', '-f', str(binary)], stdout=subprocess.DEVNULL).returncode == 0
 
+    def ready(document):
+        # A process can exist while fonts and the first UI frame are still loading.
+        # This title is set by the viewer after restoration/opening reaches its UI.
+        def has_document_window():
+            result = subprocess.run(['osascript', '-e',
+                'tell application "System Events" to tell process "FastMarkdownViewer" '
+                'to get name of every window'], capture_output=True, text=True, timeout=5)
+            return result.returncode == 0 and document.name + ' — FastMarkdownViewer' in result.stdout
+        wait_for(has_document_window, f'rendered document window: {document.name}')
+        time.sleep(1)
+        print(f'Ready: {document.name}', flush=True)
+
     def capture():
         try:
             subprocess.run(['screencapture', '-x', 'target/evidence/macos-package.png'], timeout=5)
@@ -69,7 +81,7 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         # LaunchServices sends an open-documents event, not command-line arguments.
         subprocess.run(['open', '-a', str(bundle), str(first)], check=True)
         wait_for(running, 'Finder launch')
-        time.sleep(3)
+        ready(first)
         subprocess.run(['open', '-a', str(bundle), str(second), str(first)], check=True)
         time.sleep(3)
         state = quit_and_read()
@@ -83,7 +95,7 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         profile.write_text(json.dumps(state))
         subprocess.run(['open', '-a', str(bundle)], check=True)
         wait_for(running, 'bare launch')
-        time.sleep(3)
+        ready(first)
         keys('keystroke "f" using command down\nkeystroke "Finder"\nkeystroke "a" using command down\nkeystroke "c" using command down')
         copied = subprocess.check_output(['pbpaste'], text=True)
         assert copied == 'Finder', f'Native Find clipboard contained {copied!r}'
@@ -104,7 +116,7 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         # An OS quit request must also leave a native modal file chooser cleanly.
         subprocess.run(['open', '-a', str(bundle)], check=True)
         wait_for(running, 'modal-exit launch')
-        time.sleep(3)
+        ready(third)
         keys('keystroke "o" using command down')
         time.sleep(2)
         modal_exit = quit_and_read()

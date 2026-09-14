@@ -62,6 +62,7 @@ shutil.copy2(args.binary, executable)
 executable.chmod(0o755)
 for filename in ['LICENSE-MIT', 'LICENSE-APACHE', 'THIRD_PARTY_NOTICES.md', 'PRIVACY.md']:
     shutil.copy2(root / filename, stage / filename)
+shutil.copy2(root / 'assets/fonts/OFL-NotoEmoji.txt', stage / 'LICENSE-NOTO-EMOJI.txt')
 shutil.copy2(root / 'docs/CROSS_PLATFORM.md', stage / 'README.md')
 if args.platform.startswith('macos'):
     subprocess.run(['codesign', '--force', '--sign', '-', str(bundle)], check=True)
@@ -93,6 +94,7 @@ if args.platform == 'linux-x86_64':
         (stage / 'THIRD_PARTY_NOTICES.md', 'usr/share/doc/fast-markdown-viewer/THIRD_PARTY_NOTICES.md'),
         (stage / 'LICENSE-MIT', 'usr/share/doc/fast-markdown-viewer/LICENSE-MIT'),
         (stage / 'LICENSE-APACHE', 'usr/share/doc/fast-markdown-viewer/LICENSE-APACHE'),
+        (stage / 'LICENSE-NOTO-EMOJI.txt', 'usr/share/doc/fast-markdown-viewer/LICENSE-NOTO-EMOJI.txt'),
     ]:
         destination = deb_root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)

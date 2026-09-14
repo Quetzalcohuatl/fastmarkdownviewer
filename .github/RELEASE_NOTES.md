@@ -10,4 +10,4 @@ All platforms retain tabs, Find, outline navigation, math, offline Mermaid with 
 
 Windows builds remain unsigned. Mac apps are ad-hoc signed, but are not Developer ID signed or notarized; downloaded-app approval may be required. Other Linux distributions and older macOS versions are outside the supported matrix. Mermaid is a supported subset, not full Mermaid.js compatibility; mixed-direction text and detached-window accessibility retain documented limits.
 
-See docs/CROSS_PLATFORM.md for installation and docs/DESKTOP_ACCEPTANCE.md for exact test coverage. Download SHA256SUMS.txt with your package and verify the checksum and GitHub build-provenance attestation.
+See [desktop installation](https://github.com/Quetzalcohuatl/fastmarkdownviewer/blob/v0.2.0/docs/CROSS_PLATFORM.md) and [acceptance coverage](https://github.com/Quetzalcohuatl/fastmarkdownviewer/blob/v0.2.0/docs/DESKTOP_ACCEPTANCE.md). Download SHA256SUMS.txt with your package and verify the checksum and GitHub build-provenance attestation.

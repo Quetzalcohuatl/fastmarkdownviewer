@@ -36,7 +36,8 @@ Both architectures run the Rust interaction suite and real framebuffer capture.
 The extracted-package test uses LaunchServices (open -a), rather than CLI
 arguments, for cold and running-app document opening. It verifies Unicode paths,
 duplicate activation, normal Apple-event quit, saved-session/preferences, and
-native Cmd+F/clipboard and Cmd+O file-picker interactions. Native validation is
+native Cmd+F/clipboard, pasting a path in the Cmd+O file picker, and quitting
+while the native picker is still open. Native validation is
 performed on macOS 15 CI desktops, not every Mac model or display arrangement.
 
 Initial integration testing confirmed Finder delivery and persistence; the test

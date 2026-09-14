@@ -8,6 +8,7 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 - Load script fallback fonts for every tab title, including inactive restored
   tabs and renamed files whose document text is English.
+- Find macOS fonts stored in system asset folders, including PingFang on macOS 15.
 
 ## [0.2.0] - 2026-09-13
 

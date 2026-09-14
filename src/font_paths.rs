@@ -60,10 +60,29 @@ fn index() -> std::collections::BTreeMap<String, PathBuf> {
         }
     }
     #[cfg(target_os = "macos")]
-    roots.extend([
-        PathBuf::from("/Library/Fonts"),
-        PathBuf::from("/System/Library/Fonts"),
-    ]);
+    {
+        roots.extend([
+            PathBuf::from("/Library/Fonts"),
+            PathBuf::from("/System/Library/Fonts"),
+        ]);
+        // macOS 15 stores fonts such as PingFang in versioned asset folders.
+        // Index only font assets, retaining user/system font precedence above.
+        if let Ok(assets) = std::fs::read_dir("/System/Library/AssetsV2") {
+            let mut font_assets: Vec<_> = assets
+                .filter_map(Result::ok)
+                .filter(|entry| {
+                    entry
+                        .file_name()
+                        .to_string_lossy()
+                        .starts_with("com_apple_MobileAsset_Font")
+                })
+                .map(|entry| entry.path())
+                .filter(|path| path.is_dir())
+                .collect();
+            font_assets.sort();
+            roots.extend(font_assets);
+        }
+    }
     #[cfg(not(target_os = "macos"))]
     roots.extend([
         PathBuf::from("/usr/local/share/fonts"),

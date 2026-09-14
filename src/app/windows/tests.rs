@@ -50,7 +50,8 @@ fn assert_label_glyphs(context: &egui::Context, text: &str) {
                         ttf_parser::Face::parse(&data.font, data.index)
                             .is_ok_and(|face| face.glyph_index(character).is_some())
                     }),
-                "no tab-label glyph for {character}"
+                "no tab-label glyph for {character}; loaded fonts: {:?}",
+                definitions.families[&egui::FontFamily::Proportional]
             );
         }
     });

@@ -363,13 +363,21 @@ pub fn ensure_for_text(context: &egui::Context, text: &str) {
                 "NotoSansCJK-Regular.ttc",
                 "Hiragino Sans GB.ttc",
                 "PingFang.ttc",
+                "STHeiti Light.ttc",
+                "STHeiti Medium.ttc",
             ],
         );
     }
     if chinese {
         changed |= load_system_family(
             &mut state,
-            &["msyh.ttc", "NotoSansCJK-Regular.ttc", "PingFang.ttc"],
+            &[
+                "msyh.ttc",
+                "NotoSansCJK-Regular.ttc",
+                "PingFang.ttc",
+                "STHeiti Light.ttc",
+                "STHeiti Medium.ttc",
+            ],
         );
     }
     if korean {

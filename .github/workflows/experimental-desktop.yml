@@ -35,6 +35,20 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Record macOS font inventory
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p target/evidence
+          python3 - <<'PY' > target/evidence/macos-fonts.txt
+          from pathlib import Path
+          roots = [Path('/Library/Fonts'), Path('/System/Library/Fonts')]
+          roots += sorted(Path('/System/Library/AssetsV2').glob('com_apple_MobileAsset_Font*'))
+          for root in roots:
+              print(f'Font root: {root}')
+              for font in sorted(root.rglob('*')):
+                  if font.suffix.lower() in {'.ttc', '.ttf', '.otf', '.otc'}:
+                      print(f'{font} (file={font.is_file()}, symlink={font.is_symlink()})')
+          PY
       - name: Restore Rust build cache
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:

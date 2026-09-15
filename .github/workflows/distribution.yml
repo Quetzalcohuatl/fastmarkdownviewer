@@ -30,7 +30,7 @@ env:
   PYTHONUTF8: '1'
 
 concurrency:
-  group: package-distribution
+  group: package-distribution-${{ inputs.tag || github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 
 jobs:

@@ -1,5 +1,26 @@
 # Release checklist
 
+## v0.2.3 size-reduction release (2026-09-15)
+
+- [x] Both size-reduction changes are merged. The final application tree passed
+  [CI](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34969271331)
+  and [native desktop acceptance](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34969271219)
+  before this version-only release preparation.
+- [x] All 93 optimized Windows tests pass. Four compiler profiles and 120 randomized
+  reading runs were compared; the selected profile retains similar Windows CPU
+  reading medians. More aggressive size settings were rejected for slower reading.
+- [x] Windows, macOS ARM/Intel, and Ubuntu rendering and package checks pass;
+  image formats, math, Mermaid, and font coverage remain intact. Measurements,
+  hashes, and visual comparisons are recorded in [PR #8](https://github.com/Quetzalcohuatl/fastmarkdownviewer/pull/8)
+  and [the size experiment](../experiments/size/compiler-profiles.md).
+- [x] Download links and package examples use v0.2.3. The v0.2.2 demo and
+  historical competitor measurements retain their actual measured version labels.
+- Publication is gated by the annotated tag's release workflow, including the
+  exact versioned builds, native acceptance, Windows installation/uninstallation,
+  seven packages, checksums, and build-provenance attestations.
+- The website download link is deployed after the release is published.
+- Signing and supported-platform requirements remain unchanged.
+
 ## v0.2.2 maintenance release (2026-09-14)
 
 - [x] Main-branch source passed [CI](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34898785161) and [desktop acceptance](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/34898785173) on Windows, both Mac architectures, and Ubuntu before the version-only release preparation.

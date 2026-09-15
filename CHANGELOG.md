@@ -4,6 +4,8 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-09-15
+
 - Use full link-time optimization while retaining speed-focused optimization.
   The Windows executable saves a further 931,328 bytes (5.1%) after the image-loader
   cleanup, with similar CPU reading medians in the recorded comparison.

@@ -6,7 +6,7 @@ See [desktop installation instructions](docs/CROSS_PLATFORM.md) for Windows x64,
 macOS 15 or later (Apple Silicon and Intel), and Ubuntu 24.04 x64 packages,
 platform requirements, and tested configurations.
 
-> **v0.2.2:** Fixes multilingual Find and rename text, updates dependencies, and patches the HTTPS transport. Desktop packages include saved settings and sessions. Performance comparisons below retain their measured v0.2.1 baseline.
+> **v0.2.3:** Smaller executables through image-loader cleanup and full link-time optimization, retaining the same features and fonts. [Size measurements](experiments/size/compiler-profiles.md) record the trade-offs. Competitor performance comparisons below retain their measured v0.2.1 baseline.
 
 ## See it in 20 seconds
 

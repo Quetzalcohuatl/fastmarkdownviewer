@@ -3,7 +3,7 @@
 ## Availability
 
 - Windows 0.2.3: [WinGet submission #435199](https://github.com/microsoft/winget-pkgs/pull/435199) is awaiting Microsoft's review and indexing. The manifest is in `packaging/winget/manifests/q/Quetzalcohuatl/FastMarkdownViewer/0.2.3`.
-- Cargo 0.2.4: packaging support is prepared here; publication to crates.io is pending. The registry install commands below become available after publication. Until then, use a source checkout or mirror the existing release installers.
+- Cargo 0.2.4: [published on crates.io](https://crates.io/crates/fast-markdown-viewer/0.2.4), together with all four supporting packages. The registry installation commands below are available now. The latest packaged desktop release remains 0.2.3.
 
 After WinGet accepts and indexes the package:
 
@@ -19,7 +19,7 @@ The Windows installer is x64 and **per-user**, without administrator privileges.
 
 Cargo compiles the viewer from source. Install Rust **1.95.0 or newer**, the platform's native compiler, and the [platform build dependencies](CROSS_PLATFORM.md#verification-and-development). On macOS, use the Xcode command line tools and set `MACOSX_DEPLOYMENT_TARGET=15.0` before building. On Windows, use the MSVC Rust toolchain and Visual Studio C++ Build Tools with the Windows SDK.
 
-Once published:
+Install from crates.io:
 
 ```sh
 cargo install fast-markdown-viewer --version 0.2.4 --locked
@@ -35,7 +35,7 @@ $env:RUSTFLAGS = '-C target-feature=+crt-static'
 cargo install fast-markdown-viewer --version 0.2.4 --locked
 ```
 
-To build before public publication, check out this source revision and run `cargo install --path . --locked`. The included versioned path dependencies retain the patched renderer. A Git install also works from a reviewed commit: `cargo install --git https://github.com/Quetzalcohuatl/fastmarkdownviewer --rev COMMIT_SHA --locked`.
+To build a source checkout, run `cargo install --path . --locked`. The included versioned path dependencies retain the patched renderer. A Git install also works from a reviewed commit: `cargo install --git https://github.com/Quetzalcohuatl/fastmarkdownviewer --rev COMMIT_SHA --locked`.
 
 ## General internal Cargo registries
 
@@ -82,6 +82,8 @@ The workspace contains these independently versioned packages, in dependency ord
 | `fast-markdown-viewer` | `0.2.4` | Desktop executable |
 
 The fork names distinguish these packages from upstream releases; original licenses and patch records are included. Cargo's published manifests use versioned registry dependencies, with no reliance on `[patch.crates-io]`. The upstream compile-time Markdown macros are outside the runtime viewer fork's scope.
+
+The published Cargo 0.2.4 workspace is recorded by [source tag `cargo-v0.2.4`](https://github.com/Quetzalcohuatl/fastmarkdownviewer/tree/cargo-v0.2.4) (commit `d60be0bd516439f1774fce99240cdadce1e4ac3b`). This tag identifies the Cargo sources separately from the packaged desktop release tags.
 
 ```sh
 cargo package --workspace --locked

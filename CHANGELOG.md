@@ -2,13 +2,14 @@
 
 All notable changes are documented here. This project follows Semantic Versioning.
 
-## [Unreleased]
+## [0.2.4] - 2026-09-15 (Cargo distribution)
 
-- Prepare Cargo distribution for 0.2.4 with versioned, attributed rendering forks
+- Publish Cargo distribution for 0.2.4 with versioned, attributed rendering forks
   and the macOS event adapter; registry builds retain the viewer's local fixes.
 - Add native Cargo package and registry-install checks plus enterprise registry
   and binary-mirroring instructions.
 - Submit the existing Windows 0.2.3 installer to WinGet and preserve its manifest.
+- Packaged desktop downloads remain at 0.2.3; the WinGet submission awaits review.
 
 ## [0.2.3] - 2026-09-15
 

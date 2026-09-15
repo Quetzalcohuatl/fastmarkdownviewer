@@ -11,7 +11,14 @@ platform requirements, and tested configurations.
 ## Package managers and enterprise deployment
 
 **WinGet:** [0.2.3 has been submitted](https://github.com/microsoft/winget-pkgs/pull/435199) and is awaiting Microsoft's review and indexing.
-**Cargo:** source packaging for 0.2.4 is prepared; crates.io publication is pending.
+
+**Cargo:** [0.2.4 is available on crates.io](https://crates.io/crates/fast-markdown-viewer/0.2.4). Install Rust 1.95+ and the [native build dependencies](docs/REGISTRY_DISTRIBUTION.md#cargo-installation), then run:
+
+```sh
+cargo install fast-markdown-viewer --version 0.2.4 --locked
+FastMarkdownViewer document.md
+```
+
 The [registry distribution guide](docs/REGISTRY_DISTRIBUTION.md) covers installation commands, general internal Cargo mirrors, and mirroring ready-to-run release packages for employee desktops. Existing [release downloads](https://github.com/Quetzalcohuatl/fastmarkdownviewer/releases/latest) are available now.
 
 ## See it in 20 seconds

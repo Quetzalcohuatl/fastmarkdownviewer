@@ -2,6 +2,13 @@
 
 All notable changes are documented here. This project follows Semantic Versioning.
 
+## [Unreleased]
+
+- Reduce executable size by removing redundant framework image loaders and their
+  older SVG rendering dependencies. Local/remote images, generated math SVGs,
+  Mermaid diagrams, and font coverage retain the existing FMV rendering path.
+  The Windows comparison saves 1,104,896 bytes (5.7%) with unchanged compiler settings.
+
 ## [0.2.2] - 2026-09-14
 
 - Update rustls to 0.23.45 to address RUSTSEC-2026-0285 in the HTTPS image

@@ -1,0 +1,56 @@
+{
+  "baseline_source": "f451f4475ec294128fb3e1e51aba30ae6398a4fc",
+  "method": "same Windows host, Rust 1.95.0, unchanged release profile; direct cargo build --locked --release without explicit target; bytes are executable file length, not filesystem allocation",
+  "builds": {
+    "baseline": {
+      "bytes": 19476480,
+      "sha256": "348ee2aa762e38dfe116f0a1dcc8457364b01dbd6bad28d5579da5f3e96e9c0b"
+    },
+    "candidate": {
+      "bytes": 18371584,
+      "sha256": "e2c94a686806b7d69247767f16223bc2ec66302a42dafa2c6f644cf4b7a60b95"
+    }
+  },
+  "removed_lockfile_packages": [
+    [
+      "imagesize",
+      "0.13.0"
+    ],
+    [
+      "kurbo",
+      "0.11.3"
+    ],
+    [
+      "mime_guess2",
+      "2.3.1"
+    ],
+    [
+      "png",
+      "0.17.16"
+    ],
+    [
+      "resvg",
+      "0.45.1"
+    ],
+    [
+      "svgtypes",
+      "0.15.3"
+    ],
+    [
+      "tiny-skia",
+      "0.11.4"
+    ],
+    [
+      "tiny-skia-path",
+      "0.11.4"
+    ],
+    [
+      "usvg",
+      "0.45.1"
+    ]
+  ],
+  "pixel_comparisons": {
+    "technical-guide": "identical",
+    "multilingual-find": "identical"
+  }
+}

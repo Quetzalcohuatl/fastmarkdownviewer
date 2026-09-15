@@ -687,7 +687,9 @@ fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 }
 
 pub fn install(context: &egui::Context) {
-    egui_extras::install_image_loaders(context);
+    // These loaders handle local, remote, and included image bytes (including
+    // generated math SVGs). Registering egui_extras' loaders as well would pull
+    // in a second SVG renderer and redundant file/raster loaders.
     if !context.is_loader_installed(SafeBytesLoader::ID) {
         context.add_bytes_loader(Arc::new(SafeBytesLoader::default()));
     }

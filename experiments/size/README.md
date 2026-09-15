@@ -86,5 +86,6 @@ experiments/architecture/fixtures/generate.ps1 -OutputDirectory target/size-stud
 python experiments/size/measure-reading.py --baseline C:/before/reading_benchmark.exe --candidate C:/after/reading_benchmark.exe --fixtures target/size-study/fixtures --output target/reading.csv --repetitions 15 --seed 20260916
 ```
 
-This is the dependency-removal step. Size-oriented compiler profiles and font
-compression are separate follow-ups, requiring their own measurements.
+This is the dependency-removal step. The subsequent
+[compiler profile comparison](compiler-profiles.md) measures full LTO and
+size-oriented optimization separately. Font compression remains a possible follow-up.

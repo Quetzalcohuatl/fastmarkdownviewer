@@ -55,7 +55,9 @@ ttf-parser = "0.25.1"
 
 [profile.release]
 opt-level = 3
-lto = "thin"
+# Full LTO shrinks the executable without the reading cost of opt-level s/z.
+# Measurements: experiments/size/compiler-profiles.md.
+lto = "fat"
 codegen-units = 1
 panic = "abort"
 strip = "symbols"

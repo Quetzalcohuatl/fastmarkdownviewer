@@ -1,0 +1,203 @@
+{
+  "source_commit": "bf8bbc15468f2b2c4a8f984fc63187cdec8739fd",
+  "toolchain": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-pc-windows-msvc\nrelease: 1.95.0\nLLVM version: 22.1.2",
+  "platform": "Windows 11 x86_64, Ryzen 9 9950X, 32 logical processors, approximately 254 GiB RAM",
+  "selected": "fat-3",
+  "builds": [
+    {
+      "variant": "baseline",
+      "opt_level": "3",
+      "lto": "thin",
+      "files": {
+        "FastMarkdownViewer.exe": {
+          "bytes": 18371584,
+          "sha256": "e2c94a686806b7d69247767f16223bc2ec66302a42dafa2c6f644cf4b7a60b95"
+        },
+        "reading_benchmark.exe": {
+          "bytes": 15828480,
+          "sha256": "be43f888c3e18adabe80eb3b2565f0b5a953ca510e17a194369d1c1b24f6e480"
+        },
+        "visual_check.exe": {
+          "bytes": 18488320,
+          "sha256": "3db8c5f8a4bbaf9fa1f956cb94e391845497e397f7d9df565c4833130919a71a"
+        }
+      }
+    },
+    {
+      "variant": "fat-3",
+      "opt_level": "3",
+      "lto": "fat",
+      "files": {
+        "FastMarkdownViewer.exe": {
+          "bytes": 17440256,
+          "sha256": "ab0b15dc7ba1550c5e1a25f2f45fd6aeff90d2bb0ebcaa1fd4b4e2e7ed39c9a9"
+        },
+        "reading_benchmark.exe": {
+          "bytes": 15254016,
+          "sha256": "1a3ee96aa78f5cad3fb3239fdf283d5c794dba0926b6cc2a5cd6048967cfc908"
+        },
+        "visual_check.exe": {
+          "bytes": 17558528,
+          "sha256": "19e17c4193257a05bf0d4434e16cca7bf3c17037c48257f684bdbc56ce2cdbf0"
+        }
+      }
+    },
+    {
+      "variant": "fat-s",
+      "opt_level": "s",
+      "lto": "fat",
+      "files": {
+        "FastMarkdownViewer.exe": {
+          "bytes": 15005696,
+          "sha256": "64d85a5813c43ed3994dbb50da9fd7d206f488f77abf19d4614429e881ae814e"
+        },
+        "reading_benchmark.exe": {
+          "bytes": 13423616,
+          "sha256": "4c6bb79d474e412bd3d1626221f09cfd8dbdb9ff7b5f03e96fce92f47935ca79"
+        },
+        "visual_check.exe": {
+          "bytes": 15058432,
+          "sha256": "d20381f44188911b7102ee4dbc14b55faa485ad204cae4198459ce5f91fa0092"
+        }
+      }
+    },
+    {
+      "variant": "fat-z",
+      "opt_level": "z",
+      "lto": "fat",
+      "files": {
+        "FastMarkdownViewer.exe": {
+          "bytes": 14757376,
+          "sha256": "39808e008ac433fecd112ecaa50ba538ef1f757ea1dd21422e0120ad1de6eb46"
+        },
+        "reading_benchmark.exe": {
+          "bytes": 13456384,
+          "sha256": "6578b8208861889d6e68abd4f2713d23ce820956485170d333a9f9f54d733bc0"
+        },
+        "visual_check.exe": {
+          "bytes": 14814208,
+          "sha256": "eedf59e9fe5958b24c570c3516b268085b0ecca8dfdd3df89efebfaa67c569fe"
+        }
+      }
+    }
+  ],
+  "visual_checks": [
+    {
+      "variant": "baseline",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-light.png",
+      "sha256": "d94fd7e9dd42c824b6f1602b11932f35e1b75d61fe25f9564367db10f78192ee",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "baseline",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-light.png",
+      "sha256": "c68b432f2c958d017b38e522fe015c906679378be6f02867eaa98835d74d87bf",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "baseline",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-dark.png",
+      "sha256": "31b5603948d7c55a881a9bb3d29f27585a67b92221591d9a717717180f2c5696",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "baseline",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-dark.png",
+      "sha256": "eacf536c07588a645629ff48224b01876e1ed759dabdfa13cb50d485c051dc85",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-3",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-light.png",
+      "sha256": "d94fd7e9dd42c824b6f1602b11932f35e1b75d61fe25f9564367db10f78192ee",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-3",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-light.png",
+      "sha256": "c68b432f2c958d017b38e522fe015c906679378be6f02867eaa98835d74d87bf",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-3",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-dark.png",
+      "sha256": "31b5603948d7c55a881a9bb3d29f27585a67b92221591d9a717717180f2c5696",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-3",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-dark.png",
+      "sha256": "eacf536c07588a645629ff48224b01876e1ed759dabdfa13cb50d485c051dc85",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-s",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-light.png",
+      "sha256": "d94fd7e9dd42c824b6f1602b11932f35e1b75d61fe25f9564367db10f78192ee",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-s",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-light.png",
+      "sha256": "c68b432f2c958d017b38e522fe015c906679378be6f02867eaa98835d74d87bf",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-s",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-dark.png",
+      "sha256": "31b5603948d7c55a881a9bb3d29f27585a67b92221591d9a717717180f2c5696",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-s",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-dark.png",
+      "sha256": "eacf536c07588a645629ff48224b01876e1ed759dabdfa13cb50d485c051dc85",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-z",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-light.png",
+      "sha256": "d94fd7e9dd42c824b6f1602b11932f35e1b75d61fe25f9564367db10f78192ee",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-z",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-light.png",
+      "sha256": "c68b432f2c958d017b38e522fe015c906679378be6f02867eaa98835d74d87bf",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-z",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "technical-dark.png",
+      "sha256": "31b5603948d7c55a881a9bb3d29f27585a67b92221591d9a717717180f2c5696",
+      "changed_pixels": 0
+    },
+    {
+      "variant": "fat-z",
+      "version": "FastMarkdownViewer 0.2.2",
+      "capture": "multilingual-dark.png",
+      "sha256": "eacf536c07588a645629ff48224b01876e1ed759dabdfa13cb50d485c051dc85",
+      "changed_pixels": 0
+    }
+  ],
+  "mermaid_check": {
+    "baseline_sha256": "8ab2e046e1eafe4b24639b5623f55e8a0923938076283a7039b33e9f64c4a674",
+    "fat-3_sha256": "8ab2e046e1eafe4b24639b5623f55e8a0923938076283a7039b33e9f64c4a674",
+    "changed_pixels": 0
+  }
+}

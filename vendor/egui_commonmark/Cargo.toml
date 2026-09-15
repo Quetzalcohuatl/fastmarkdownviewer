@@ -12,8 +12,8 @@
 [package]
 edition = "2024"
 rust-version = "1.95"
-name = "egui_commonmark"
-version = "0.25.0"
+name = "fmv-egui-commonmark"
+version = "0.25.0-fmv.1"
 authors = ["Erlend Walstad"]
 build = false
 include = [
@@ -21,28 +21,29 @@ include = [
     "LICENSE-MIT",
     "LICENSE-APACHE",
     "Cargo.toml",
+    "FASTMARKDOWNVIEWER-PATCHES.md",
+    "UPSTREAM.md",
 ]
 autolib = false
 autobins = false
 autoexamples = false
 autotests = false
 autobenches = false
-description = "Commonmark viewer for egui"
-documentation = "https://docs.rs/egui_commonmark"
-readme = "README.md"
+description = "FastMarkdownViewer maintained fork: Commonmark viewer for egui"
+documentation = "https://docs.rs/fmv-egui-commonmark"
+readme = "UPSTREAM.md"
 keywords = [
     "commonmark",
     "egui",
 ]
 categories = ["gui"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/lampsitter/egui_commonmark"
+repository = "https://github.com/Quetzalcohuatl/fastmarkdownviewer"
 
 [package.metadata.docs.rs]
 features = [
     "better_syntax_highlighting",
     "document-features",
-    "macros",
 ]
 
 [features]
@@ -51,17 +52,11 @@ default = [
     "load-images",
     "pulldown_cmark",
 ]
-dump-macro = ["egui_commonmark_macros/dump-macro"]
 embedded_image = ["egui_commonmark_backend/embedded_image"]
 fetch = ["egui_extras/http"]
 load-images = [
     "egui_extras/image",
     "egui_extras/file",
-]
-macros = ["dep:egui_commonmark_macros"]
-nightly = [
-    "macros",
-    "egui_commonmark_macros/nightly",
 ]
 pulldown_cmark = []
 svg = ["egui_extras/svg"]
@@ -79,12 +74,9 @@ version = "0.36.0"
 default-features = false
 
 [dependencies.egui_commonmark_backend]
-version = "0.25.0"
-default-features = false
-
-[dependencies.egui_commonmark_macros]
-version = "0.25.0"
-optional = true
+package = "fmv-egui-commonmark-backend"
+version = "=0.25.0-fmv.1"
+path = "../egui_commonmark_backend"
 default-features = false
 
 [dependencies.egui_extras]
@@ -93,24 +85,4 @@ default-features = false
 
 [dependencies.pulldown-cmark]
 version = "0.13"
-default-features = false
-
-[dev-dependencies.eframe]
-version = "0.36.0"
-features = [
-    "default_fonts",
-    "glow",
-    "wayland",
-    "x11",
-    "links",
-]
-default-features = false
-
-[dev-dependencies.egui_commonmark_macros]
-version = "0.25.0"
-default-features = false
-
-[dev-dependencies.image]
-version = "0.25"
-features = ["png"]
 default-features = false

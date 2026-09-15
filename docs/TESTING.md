@@ -64,8 +64,8 @@ closes the processes it creates.
 Run the local gates from a Visual Studio developer shell:
 
 ```powershell
-cargo fmt --all -- --check
-cargo clippy --locked --all-targets -- -D warnings
+cargo fmt -p fast-markdown-viewer -p fmv-macos-events -- --check
+cargo clippy --locked --all-targets --no-deps -- -D warnings
 cargo test --locked --all-targets
 cargo build --locked
 .\scripts\test-windows-ui.ps1 `

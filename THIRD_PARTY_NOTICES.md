@@ -5,7 +5,7 @@ FastMarkdownViewer is built from open-source Rust crates. Exact package names, v
 Major direct components include:
 
 - eframe, egui, and egui_extras — MIT OR Apache-2.0
-- egui_commonmark and egui_commonmark_backend — MIT OR Apache-2.0. Both 0.25.0 crates are vendored; patch records are in their `FASTMARKDOWNVIEWER-PATCHES.md` files and original licenses are preserved.
+- egui_commonmark and egui_commonmark_backend — MIT OR Apache-2.0. Maintained as `fmv-egui-commonmark` and `fmv-egui-commonmark-backend`, based on upstream 0.25.0; patch records are in their `FASTMARKDOWNVIEWER-PATCHES.md` files and original licenses are preserved.
 - pulldown-cmark — MIT
 - syntect — MIT (embedded syntax definitions and themes retain their upstream notices)
 - regex — MIT OR Apache-2.0
@@ -45,7 +45,7 @@ tracked explicitly in `deny.toml` and must be revisited when syntect changes.
 
 ## Rusty Mermaid
 
-Rusty Mermaid 0.2.0 and its component crates are MIT licensed. The diagrams component is locally patched; its provenance and changes are recorded in experiments/mermaid-spike/vendor/rusty-mermaid-diagrams/README.md.
+Rusty Mermaid 0.2.0 and its component crates are MIT licensed. The diagrams component is maintained as `fmv-rusty-mermaid-diagrams`; its provenance and changes are recorded in crates/mermaid-diagrams/README.md. Original upstream licenses are preserved.
 
 MIT License
 

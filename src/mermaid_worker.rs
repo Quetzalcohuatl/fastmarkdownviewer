@@ -5,8 +5,10 @@ pub fn render(input: &Path, output: &Path) -> Result<(), String> {
     if source.len() > 64 * 1024 {
         return Err("Diagram exceeds 64 KiB input limit".into());
     }
-    let svg = rusty_mermaid::to_svg(&source, &rusty_mermaid::Theme::default())
-        .map_err(|e| e.to_string())?;
+    let theme = rusty_mermaid_core::Theme::default();
+    let scene =
+        rusty_mermaid_diagrams::render_to_scene(&source, &theme).map_err(|e| e.to_string())?;
+    let svg = rusty_mermaid_svg::SvgRenderer::with_theme(&theme).render_themed(&scene, &theme);
     if svg.len() > 10 * 1024 * 1024 {
         return Err("SVG exceeds 10 MiB output limit".into());
     }

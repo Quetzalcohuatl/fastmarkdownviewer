@@ -88,8 +88,8 @@ libdbus-1-dev. Mac builds require the Xcode command line tools and
 MACOSX_DEPLOYMENT_TARGET=15.0.
 
 ```sh
-cargo fmt --all -- --check
-cargo clippy --locked --all-targets -- -D warnings
+cargo fmt -p fast-markdown-viewer -p fmv-macos-events -- --check
+cargo clippy --locked --all-targets --no-deps -- -D warnings
 cargo test --locked --all-targets
 cargo build --locked --release
 python3 scripts/package-unix.py --platform linux-x86_64 --binary target/release/FastMarkdownViewer

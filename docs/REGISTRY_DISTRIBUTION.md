@@ -1,0 +1,96 @@
+# WinGet, Cargo, and internal distribution
+
+## Availability
+
+- Windows 0.2.3: [WinGet submission #435199](https://github.com/microsoft/winget-pkgs/pull/435199) is awaiting Microsoft's review and indexing. The manifest is in `packaging/winget/manifests/q/Quetzalcohuatl/FastMarkdownViewer/0.2.3`.
+- Cargo 0.2.4: packaging support is prepared here; publication to crates.io is pending. The registry install commands below become available after publication. Until then, use a source checkout or mirror the existing release installers.
+
+After WinGet accepts and indexes the package:
+
+```powershell
+winget install --id Quetzalcohuatl.FastMarkdownViewer --exact --source winget
+winget upgrade --id Quetzalcohuatl.FastMarkdownViewer --exact --source winget
+winget uninstall --id Quetzalcohuatl.FastMarkdownViewer --exact
+```
+
+The Windows installer is x64 and **per-user**, without administrator privileges. It adds Start menu and Open With entries without changing default file associations. It is currently unsigned; WinGet publication does not add Authenticode signing. Machine-wide installation/MSI deployment is not provided.
+
+## Cargo installation
+
+Cargo compiles the viewer from source. Install Rust **1.95.0 or newer**, the platform's native compiler, and the [platform build dependencies](CROSS_PLATFORM.md#verification-and-development). On macOS, use the Xcode command line tools and set `MACOSX_DEPLOYMENT_TARGET=15.0` before building. On Windows, use the MSVC Rust toolchain and Visual Studio C++ Build Tools with the Windows SDK.
+
+Once published:
+
+```sh
+cargo install fast-markdown-viewer --version 0.2.4 --locked
+FastMarkdownViewer document.md
+```
+
+The installed command is case-sensitive on Linux: `FastMarkdownViewer`. Cargo puts it in `$CARGO_HOME/bin` (normally `~/.cargo/bin`); ensure that directory is on PATH. Cargo installation creates the executable. Use the release installer, `.app` bundle, or `.deb` for desktop shortcuts, file associations, Finder integration, and native uninstall support.
+
+Cargo registry installs do not read this repository's `.cargo/config.toml`. To match the Windows release's static C runtime setting, set `RUSTFLAGS=-C target-feature=+crt-static` for the build, for example in PowerShell:
+
+```powershell
+$env:RUSTFLAGS = '-C target-feature=+crt-static'
+cargo install fast-markdown-viewer --version 0.2.4 --locked
+```
+
+To build before public publication, check out this source revision and run `cargo install --path . --locked`. The included versioned path dependencies retain the patched renderer. A Git install also works from a reviewed commit: `cargo install --git https://github.com/Quetzalcohuatl/fastmarkdownviewer --rev COMMIT_SHA --locked`.
+
+## General internal Cargo registries
+
+No JFrog-specific service or configuration is required. A company can mirror crates.io into its chosen Cargo-compatible repository and approve/cache the viewer, its four supporting packages, and all locked dependencies. Configure the corporate sparse index in the user's or build agent's Cargo configuration:
+
+```toml
+# ~/.cargo/config.toml (Windows: %USERPROFILE%\.cargo\config.toml)
+[registries.company]
+index = "sparse+https://registry.example.com/cargo/index/"
+
+[source.crates-io]
+replace-with = "company"
+
+[source.company]
+registry = "sparse+https://registry.example.com/cargo/index/"
+```
+
+Replace the example URL with the endpoint supplied by IT; keep the trailing slash. This source replacement routes crates.io dependencies through the company mirror as well as the application. A mirror must serve unchanged crate archives/checksums and their index entries; configuring only `--registry company` is not a guarantee that dependencies avoid crates.io.
+
+```sh
+cargo install fast-markdown-viewer --version 0.2.4 --registry company --locked
+```
+
+For authenticated registries, follow the registry provider's instructions for a Cargo credential provider and `cargo login --registry company`. Keep credentials out of repository files, command arguments, and tickets. A fully disconnected environment must prepopulate the entire dependency graph and the Rust/native toolchains; a Cargo registry alone does not supply system libraries.
+
+IT can alternatively publish these source packages to a private Cargo registry using `cargo publish --workspace --registry company --locked` from a clean reviewed checkout. This requires that registry to support Cargo publishing and dependency resolution against crates.io or its configured mirror. Validate with `--dry-run` against the actual endpoint first; authentication and mixed private/public registry policies vary by provider. Use a new version for company-modified sources, and retain license notices.
+
+## Mirroring ready-to-run releases
+
+For employee desktop deployment, an internal binary artifact repository can store the [release assets](https://github.com/Quetzalcohuatl/fastmarkdownviewer/releases), `SHA256SUMS`, and the release's GitHub artifact attestations. Preserve the original filenames and bytes; verify checksums and attestations before promotion. This route does not require Rust on employee PCs.
+
+Windows uses a per-user Inno installer, macOS uses an application bundle, and Ubuntu uses a Debian package. Windows Authenticode signing and macOS Developer ID signing/notarization remain separate from registry availability. An internal WinGet REST source is another option for Windows; configure it according to IT policy and update installer URLs/checksums if hosting an internal copy.
+
+## Maintainer packaging and verification
+
+The workspace contains these independently versioned packages, in dependency order:
+
+| Package | Version | Purpose |
+| --- | --- | --- |
+| `fmv-egui-commonmark-backend` | `0.25.0-fmv.1` | Patched layout, selection, and highlighting backend |
+| `fmv-egui-commonmark` | `0.25.0-fmv.1` | Runtime Markdown viewer using the patched backend |
+| `fmv-macos-events` | `0.1.0` | Native Mac event adapter |
+| `fmv-rusty-mermaid-diagrams` | `0.2.0-fmv.1` | Patched, bounded diagram renderer |
+| `fast-markdown-viewer` | `0.2.4` | Desktop executable |
+
+The fork names distinguish these packages from upstream releases; original licenses and patch records are included. Cargo's published manifests use versioned registry dependencies, with no reliance on `[patch.crates-io]`. The upstream compile-time Markdown macros are outside the runtime viewer fork's scope.
+
+```sh
+cargo package --workspace --locked
+python scripts/test-cargo-registry.py
+cargo publish --workspace --locked --dry-run
+# After authenticated dry-run succeeds and the source revision is reviewed:
+cargo publish --workspace --locked
+```
+
+Use Python 3.11 or newer (`python3` on systems where appropriate). The registry test starts a temporary loopback sparse mirror, serves the newly packaged FMV archives, and proxies/caches public dependencies. It installs from outside the checkout, checks the installed version, and renders a Mermaid diagram with the installed binary. It changes no global Cargo settings. Native CI verifies packaging and this installation path on Windows, Linux, and macOS. `--release` additionally tests an optimized Cargo install. A successful Windows package check does not verify macOS event delivery; the separate native desktop checks cover it.
+
+Cargo package/publish workspace support is why the maintainer commands require Cargo 1.95 or later. See Cargo's [packaging](https://doc.rust-lang.org/cargo/commands/cargo-package.html), [registry](https://doc.rust-lang.org/cargo/reference/registries.html), and [source replacement](https://doc.rust-lang.org/cargo/reference/source-replacement.html) documentation.

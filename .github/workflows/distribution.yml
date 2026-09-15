@@ -130,6 +130,7 @@ jobs:
       - name: Validate generated WinGet manifests
         env:
           RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           $installedVersion = if (Get-Command winget -ErrorAction SilentlyContinue) { winget --version } else { '' }
           if ($installedVersion -ne 'v1.29.290') {

@@ -21,8 +21,8 @@ path = "src/main.rs"
 
 [dependencies]
 eframe = { version = "0.36.0", default-features = false, features = ["accesskit", "default_fonts"] }
-egui_extras = { version = "0.36.0", default-features = false, features = ["file", "image", "svg"] }
-egui_commonmark = { version = "0.25.0", default-features = false, features = ["load-images", "pulldown_cmark", "svg"] }
+# FMV registers its bounded loaders; commonmark's loader features are redundant.
+egui_commonmark = { version = "0.25.0", default-features = false, features = ["pulldown_cmark"] }
 image = { version = "0.25.10", default-features = false, features = ["gif", "jpeg", "png", "webp"] }
 open = "5.3.2"
 regex = "1.12"

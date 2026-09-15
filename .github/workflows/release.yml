@@ -43,12 +43,13 @@ jobs:
             throw "Checked-out commit $checkedOutCommit does not match tag commit $tagCommit."
           }
           $manifest = cargo metadata --locked --no-deps --format-version 1 | ConvertFrom-Json
+          $appPackage = $manifest.packages | Where-Object { $_.name -eq 'fast-markdown-viewer' }
           $version = $env:GITHUB_REF_NAME.TrimStart('v')
-          if ($manifest.packages[0].version -ne $version) {
-            throw "Tag $env:GITHUB_REF_NAME does not match Cargo.toml version $($manifest.packages[0].version)."
+          if ($appPackage.version -ne $version) {
+            throw "Tag $env:GITHUB_REF_NAME does not match Cargo.toml version $($appPackage.version)."
           }
           $repositoryUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY"
-          if ($manifest.packages[0].repository -ne $repositoryUrl) {
+          if ($appPackage.repository -ne $repositoryUrl) {
             throw "Cargo.toml repository must be $repositoryUrl before release."
           }
 
@@ -61,8 +62,8 @@ jobs:
 
       - name: Test locked source
         run: |
-          cargo fmt --all -- --check
-          cargo clippy --locked --all-targets -- -D warnings
+          cargo fmt -p fast-markdown-viewer -p fmv-macos-events -- --check
+          cargo clippy --locked --all-targets --no-deps -- -D warnings
           cargo test --locked --all-targets
 
       - name: Build release once

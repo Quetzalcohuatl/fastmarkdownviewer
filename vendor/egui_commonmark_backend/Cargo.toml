@@ -12,8 +12,8 @@
 [package]
 edition = "2024"
 rust-version = "1.95"
-name = "egui_commonmark_backend"
-version = "0.25.0"
+name = "fmv-egui-commonmark-backend"
+version = "0.25.0-fmv.1"
 authors = ["Erlend Walstad"]
 build = false
 include = [
@@ -21,22 +21,24 @@ include = [
     "LICENSE-MIT",
     "LICENSE-APACHE",
     "Cargo.toml",
+    "FASTMARKDOWNVIEWER-PATCHES.md",
+    "UPSTREAM.md",
 ]
 autolib = false
 autobins = false
 autoexamples = false
 autotests = false
 autobenches = false
-description = "Shared code for egui_commonmark and egui_commonmark_macros"
-documentation = "https://docs.rs/egui_commonmark_backend"
-readme = "README.md"
+description = "FastMarkdownViewer maintained fork: Shared code for egui_commonmark and egui_commonmark_macros"
+documentation = "https://docs.rs/fmv-egui-commonmark-backend"
+readme = "UPSTREAM.md"
 keywords = [
     "commonmark",
     "egui",
 ]
 categories = ["gui"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/lampsitter/egui_commonmark"
+repository = "https://github.com/Quetzalcohuatl/fastmarkdownviewer"
 
 [features]
 better_syntax_highlighting = ["syntect/default-fancy"]

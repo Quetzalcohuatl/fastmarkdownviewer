@@ -1,6 +1,6 @@
 [package]
 name = "fast-markdown-viewer"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2024"
 rust-version = "1.95"
 description = "A fast, read-only Markdown viewer"
@@ -9,6 +9,14 @@ repository = "https://github.com/Quetzalcohuatl/fastmarkdownviewer"
 homepage = "https://Quetzalcohuatl.github.io/fastmarkdownviewer/"
 readme = "README.md"
 build = "build.rs"
+keywords = ["markdown", "viewer", "desktop", "native"]
+categories = ["visualization", "gui"]
+include = ["/src/**", "/assets/**", "/build.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-*", "/THIRD_PARTY_NOTICES.md", "/docs/REGISTRY_DISTRIBUTION.md", "/tests/**", "/examples/**"]
+
+[workspace]
+resolver = "3"
+members = ["crates/macos-events", "vendor/egui_commonmark", "vendor/egui_commonmark_backend", "crates/mermaid-diagrams"]
+default-members = ["."]
 
 [features]
 default = ["renderer-glow"]
@@ -22,19 +30,21 @@ path = "src/main.rs"
 [dependencies]
 eframe = { version = "0.36.0", default-features = false, features = ["accesskit", "default_fonts"] }
 # FMV registers its bounded loaders; commonmark's loader features are redundant.
-egui_commonmark = { version = "0.25.0", default-features = false, features = ["pulldown_cmark"] }
+egui_commonmark = { package = "fmv-egui-commonmark", version = "=0.25.0-fmv.1", path = "vendor/egui_commonmark", default-features = false, features = ["pulldown_cmark"] }
 image = { version = "0.25.10", default-features = false, features = ["gif", "jpeg", "png", "webp"] }
 open = "5.3.2"
 regex = "1.12"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-egui_commonmark_backend = { version = "0.25.0", default-features = false }
+egui_commonmark_backend = { package = "fmv-egui-commonmark-backend", version = "=0.25.0-fmv.1", path = "vendor/egui_commonmark_backend", default-features = false }
 ratex-layout = "0.1.14"
 ratex-parser = "0.1.14"
 ratex-svg = { version = "0.1.14", features = ["embed-fonts"] }
 ratex-types = "0.1.14"
 resvg = { version = "0.48.1", default-features = false, features = ["text"] }
-rusty-mermaid = { version = "=0.2.0", default-features = false, features = ["svg"] }
+rusty-mermaid-core = "=0.2.0"
+rusty-mermaid-svg = "=0.2.0"
+rusty-mermaid-diagrams = { package = "fmv-rusty-mermaid-diagrams", version = "=0.2.0-fmv.1", path = "crates/mermaid-diagrams" }
 tempfile = "3.23.0"
 rfd = { version = "0.15.4", default-features = false }
 ureq = { version = "2.12.1", default-features = false, features = ["tls"] }
@@ -61,12 +71,6 @@ lto = "fat"
 codegen-units = 1
 panic = "abort"
 strip = "symbols"
-
-[patch.crates-io]
-egui_commonmark = { path = "vendor/egui_commonmark" }
-egui_commonmark_backend = { path = "vendor/egui_commonmark_backend" }
-
-rusty-mermaid-diagrams = { path = "experiments/mermaid-spike/vendor/rusty-mermaid-diagrams" }
 
 [lints.rust]
 unsafe_code = "forbid"

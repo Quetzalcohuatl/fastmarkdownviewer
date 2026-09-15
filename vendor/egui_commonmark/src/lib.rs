@@ -39,36 +39,8 @@
 //! ```
 //!
 //!
-//! # Compile time evaluation of markdown
-//!
-//! If you want to embed markdown directly the binary then you can enable the `macros` feature.
-//! This will do the parsing of the markdown at compile time and output egui widgets.
-//!
-//! ## Example
-//!
-//! ```
-//! use egui_commonmark::{CommonMarkCache, commonmark};
-//! # egui::__run_test_ui(|ui| {
-//! let mut cache = CommonMarkCache::default();
-//! let _response = commonmark!(ui, &mut cache, "# ATX Heading Level 1");
-//! # });
-//! ```
-//!
-//! Alternatively you can embed a file
-//!
-//!
-//! ## Example
-//!
-//! ```rust,ignore
-//! use egui_commonmark::{CommonMarkCache, commonmark_str};
-//! # egui::__run_test_ui(|ui| {
-//! let mut cache = CommonMarkCache::default();
-//! commonmark_str!(ui, &mut cache, "content.md");
-//! # });
-//! ```
-//!
-//! For more information check out the documentation for
-//! [egui_commonmark_macros](https://docs.rs/crate/egui_commonmark_macros/latest)
+//! This maintained fork supports runtime Markdown parsing. Upstream compile-time
+//! Markdown macros are not included.
 #![cfg_attr(feature = "document-features", doc = "# Features")]
 #![cfg_attr(feature = "document-features", doc = document_features::document_features!())]
 
@@ -83,14 +55,6 @@ pub use egui_commonmark_backend::misc::CommonMarkCache;
 
 #[cfg(feature = "better_syntax_highlighting")]
 pub use egui_commonmark_backend::syntect;
-
-#[cfg(feature = "macros")]
-pub use egui_commonmark_macros::*;
-
-#[cfg(feature = "macros")]
-// Do not rely on this directly!
-#[doc(hidden)]
-pub use egui_commonmark_backend;
 
 use egui_commonmark_backend::*;
 

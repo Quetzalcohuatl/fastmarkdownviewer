@@ -19,3 +19,5 @@ process, or persistent event queue is introduced.
 Native packaged-app checks in scripts/test-macos-package.py cover actual
 LaunchServices delivery rather than substituting CLI arguments for Finder
 events. This crate uses the existing objc2 stack and is MIT OR Apache-2.0 licensed.
+
+Published as fmv-macos-events. Requires macOS; other targets intentionally expose no API.

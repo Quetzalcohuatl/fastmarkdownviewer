@@ -1,5 +1,6 @@
 //! Main-thread Apple-event adapter. The viewer consumes only safe Rust messages.
 #![deny(unsafe_op_in_unsafe_fn)]
+#![cfg(target_os = "macos")]
 
 use objc2::rc::Retained;
 use objc2::{DefinedClass, MainThreadOnly, define_class, msg_send, sel};

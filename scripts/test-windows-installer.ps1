@@ -85,6 +85,15 @@ try {
     }
     $installed = $true
 
+    $uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{7E293586-4C95-4672-9342-671EC95E57A5}_is1'
+    $registration = Get-ItemProperty -LiteralPath $uninstallKey
+    Write-Output "INSTALLER_DISPLAY_NAME=$($registration.DisplayName)"
+    Write-Output "INSTALLER_DISPLAY_VERSION=$($registration.DisplayVersion)"
+    Write-Output "INSTALLER_PUBLISHER=$($registration.Publisher)"
+    if ($registration.Publisher -ne 'FastMarkdownViewer contributors') {
+        throw 'Unexpected installer publisher registration.'
+    }
+
     if (-not (Test-Path -LiteralPath $installedBinary -PathType Leaf)) {
         throw "Installer did not create $installedBinary"
     }

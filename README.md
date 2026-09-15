@@ -8,6 +8,12 @@ platform requirements, and tested configurations.
 
 > **v0.2.3:** Smaller executables through image-loader cleanup and full link-time optimization, retaining the same features and fonts. [Size measurements](experiments/size/compiler-profiles.md) record the trade-offs. Competitor performance comparisons below retain their measured v0.2.1 baseline.
 
+## Package managers and enterprise deployment
+
+**WinGet:** [0.2.3 has been submitted](https://github.com/microsoft/winget-pkgs/pull/435199) and is awaiting Microsoft's review and indexing.
+**Cargo:** source packaging for 0.2.4 is prepared; crates.io publication is pending.
+The [registry distribution guide](docs/REGISTRY_DISTRIBUTION.md) covers installation commands, general internal Cargo mirrors, and mirroring ready-to-run release packages for employee desktops. Existing [release downloads](https://github.com/Quetzalcohuatl/fastmarkdownviewer/releases/latest) are available now.
+
 ## See it in 20 seconds
 
 [![Watch the 20-second demo: open Markdown, find a line, and read code, math, and diagrams](docs/demo/poster.png)](https://quetzalcohuatl.github.io/fastmarkdownviewer/#demo)

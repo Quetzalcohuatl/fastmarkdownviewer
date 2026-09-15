@@ -71,6 +71,30 @@ Windows uses a per-user Inno installer, macOS uses an application bundle, and Ub
 
 ## Maintainer packaging and verification
 
+### Automated releases
+
+The [Package distribution workflow](../.github/workflows/distribution.yml) runs after the existing **Release** workflow succeeds. Stable `vMAJOR.MINOR.PATCH` releases publish missing Cargo workspace versions and submit a WinGet pull request using the released Windows installer. Prereleases are excluded. Microsoft still validates and reviews each WinGet submission before it becomes installable.
+
+The workflow verifies the annotated tag, exact source commit, successful release run, and installer checksum. Cargo publication uses crates.io trusted publishing with a temporary credential. Existing crate versions are compared against the packaged source: changed contents require a version bump. Unchanged supporting crates keep their versions. Checkout provenance and library-only lockfiles are excluded from that comparison; the application's lockfile is compared. Text line endings are normalized to match Git's checkout policy. WinGet retries reuse the existing version's PR and never force-push branches.
+
+One-time account setup:
+
+1. For each of the five crates listed below, add a **GitHub trusted publisher** in crates.io's crate settings: owner `Quetzalcohuatl`, repository `fastmarkdownviewer`, workflow filename `distribution.yml`, environment `distribution`.
+2. The GitHub environment `distribution` must allow deployment from `main` only. The distribution workflow runs its tooling from the default branch and checks out the tested release commit separately for Cargo.
+3. Save `WINGET_GITHUB_TOKEN` in the repository's Actions secrets. Use the maintainer's GitHub classic token with `public_repo`, as required to write the existing `Quetzalcohuatl/winget-pkgs` fork and open a PR against Microsoft's public repository. Set an expiry and renew the secret before it expires. Do not reuse a local Cargo token or put credentials in the repository.
+
+For the next release, bump the application version (and any changed supporting crate versions), update the lockfile and release notes, and push the annotated release tag as usual. If the installer identity, architecture, installation path, or associations change, update the checked-in WinGet templates too. Registry errors appear as a failed **Package distribution** run; they do not undo the already-published GitHub release.
+
+To retry a channel or inspect a release without writing to registries, open **Actions → Package distribution → Run workflow** on `main`, enter an existing stable release tag, select `cargo`, `winget`, or `both`, and leave **dry_run** enabled for verification only. Disable it to publish/submit. A successful official Release run for that exact tag and commit is required even for manual runs. The generated WinGet manifests are retained as workflow artifacts, and the job summaries list publications and the PR URL.
+
+The initial Cargo-only `cargo-v0.2.4` tag predates this unified process; it is not a desktop release tag and does not trigger it. The next unified release must use a new application version because crates.io versions cannot be overwritten.
+
+After setting up account credentials, run the workflow with channel `credentials` and an existing desktop release such as `v0.2.3`. This checks the crates.io OIDC exchange and WinGet token identity/scope without publishing or opening a PR. A successful OIDC exchange proves a matching trusted publisher exists; configure all five crates so future supporting-library updates are authorized too.
+
+This follows the official [crates.io trusted publishing](https://crates.io/docs/trusted-publishing) and [WinGet CI/CD distribution](https://github.com/microsoft/winget-create#using-windows-package-manager-manifest-creator-in-a-cicd-pipeline) patterns. Package publication makes an update available; it does not automatically replace an installed application on users' computers.
+
+### Workspace packages
+
 The workspace contains these independently versioned packages, in dependency order:
 
 | Package | Version | Purpose |

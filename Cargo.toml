@@ -11,7 +11,7 @@ readme = "README.md"
 build = "build.rs"
 keywords = ["markdown", "viewer", "desktop", "native"]
 categories = ["visualization", "gui"]
-include = ["src/**", "assets/**", "build.rs", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE-*", "THIRD_PARTY_NOTICES.md", "docs/REGISTRY_DISTRIBUTION.md", "tests/**", "examples/**"]
+include = ["/src/**", "/assets/**", "/build.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-*", "/THIRD_PARTY_NOTICES.md", "/docs/REGISTRY_DISTRIBUTION.md", "/tests/**", "/examples/**"]
 
 [workspace]
 resolver = "3"

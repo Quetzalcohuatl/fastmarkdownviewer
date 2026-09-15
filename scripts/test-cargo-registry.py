@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tarfile
 import tempfile
 import threading
 import tomllib
@@ -85,6 +86,23 @@ def main():
     version = tomllib.loads((ROOT / "Cargo.toml").read_text(encoding="utf-8"))["package"]["version"]
     if not (STAGING / f"fast-markdown-viewer-{version}.crate").is_file():
         raise SystemExit("Run cargo package --workspace --locked first.")
+    # Cargo include patterns are gitignore-style: unanchored README.md also
+    # matches nested experiment READMEs, including ignored/untracked files.
+    # Inspect the actual publication archive, not just Cargo's source manifest.
+    allowed_roots = {"src", "assets", "tests", "examples"}
+    allowed_files = {"Cargo.toml", "Cargo.toml.orig", "Cargo.lock", ".cargo_vcs_info.json",
+                     "README.md", "LICENSE-MIT", "LICENSE-APACHE", "build.rs",
+                     "THIRD_PARTY_NOTICES.md", "docs/REGISTRY_DISTRIBUTION.md"}
+    with tarfile.open(STAGING / f"fast-markdown-viewer-{version}.crate") as archive:
+        for member in archive.getmembers():
+            relative = member.name.split("/", 1)[1]
+            assert relative in allowed_files or relative.split("/", 1)[0] in allowed_roots, relative
+        manifest = tomllib.loads(archive.extractfile(f"fast-markdown-viewer-{version}/Cargo.toml").read().decode())
+        assert "patch" not in manifest and "workspace" not in manifest
+        dependencies = manifest["dependencies"]
+        assert dependencies["egui_commonmark"]["package"] == "fmv-egui-commonmark"
+        assert dependencies["rusty-mermaid-diagrams"]["package"] == "fmv-rusty-mermaid-diagrams"
+        assert all("path" not in value for value in dependencies.values())
     with http.server.ThreadingHTTPServer(("127.0.0.1", 0), Mirror) as server:
         server.daemon_threads = True
         thread = threading.Thread(target=server.serve_forever, daemon=True)

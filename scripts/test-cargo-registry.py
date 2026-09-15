@@ -124,7 +124,7 @@ registry = "{index}"
                 command = ["cargo", "install", "fast-markdown-viewer", "--version", version,
                            "--registry", "fmv-test", "--locked", "--config", str(config),
                            "--root", str(work / "installed"),
-                           "--target-dir", str(ROOT / "target/registry-install")]
+                           "--target-dir", str(ROOT / "target")]
                 if not args.release:
                     command.append("--debug")
                 subprocess.run(command, cwd=work, check=True)

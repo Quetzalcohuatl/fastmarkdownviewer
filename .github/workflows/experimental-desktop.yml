@@ -75,10 +75,6 @@ jobs:
           cargo test --locked --all-targets
       - name: Build optimized executable and capture tool
         run: cargo build --locked --release --bin FastMarkdownViewer --example visual_check
-      - name: Verify source packages and registry installation
-        run: |
-          cargo package --workspace --locked
-          python3 scripts/test-cargo-registry.py
       - name: Cache compiled artifacts before native acceptance
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -88,6 +84,10 @@ jobs:
             target/debug
             target/release
           key: desktop-${{ matrix.platform }}-rust195-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}
+      - name: Verify source packages and registry installation
+        run: |
+          cargo package --workspace --locked
+          python3 scripts/test-cargo-registry.py
       - name: Exercise Linux graphics
         if: runner.os == 'Linux'
         run: |

@@ -89,6 +89,8 @@ To retry a channel or inspect a release without writing to registries, open **Ac
 
 The initial Cargo-only `cargo-v0.2.4` tag predates this unified process; it is not a desktop release tag and does not trigger it. The next unified release must use a new application version because crates.io versions cannot be overwritten.
 
+After setting up account credentials, run the workflow with channel `credentials` and an existing desktop release such as `v0.2.3`. This checks the crates.io OIDC exchange and WinGet token identity/scope without publishing or opening a PR. A successful OIDC exchange proves a matching trusted publisher exists; configure all five crates so future supporting-library updates are authorized too.
+
 This follows the official [crates.io trusted publishing](https://crates.io/docs/trusted-publishing) and [WinGet CI/CD distribution](https://github.com/microsoft/winget-create#using-windows-package-manager-manifest-creator-in-a-cicd-pipeline) patterns. Package publication makes an update available; it does not automatically replace an installed application on users' computers.
 
 ### Workspace packages

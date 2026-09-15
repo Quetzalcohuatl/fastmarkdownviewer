@@ -14,4 +14,6 @@ For an installation test, use a disposable Windows environment or verify that no
 winget settings --disable LocalManifestFiles
 ```
 
-For future releases, add a new version directory with the actual published installer URL and SHA-256. Check installed Apps & Features metadata (`scripts/test-windows-installer.ps1` prints it), validate, test install/uninstall, and submit only that version's manifest files to microsoft/winget-pkgs. Keep the public availability wording in README and the registry guide synchronized with Microsoft's merge/indexing status.
+For future stable releases, the `Package distribution` workflow generates a new version's manifests from these templates, verifies the released installer checksum, validates the manifests, and opens or reuses a PR against `microsoft/winget-pkgs`. See [setup and retry instructions](../../docs/REGISTRY_DISTRIBUTION.md#automated-releases). The generated files are available as workflow artifacts; no bot commit to this repository is required.
+
+If installer metadata changes, update these templates before releasing. Check installed Apps & Features metadata (`scripts/test-windows-installer.ps1` prints it), the actual installation path, and file associations. Keep public availability wording synchronized with Microsoft's merge/indexing status.

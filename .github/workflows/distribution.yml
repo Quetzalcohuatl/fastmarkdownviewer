@@ -1,0 +1,150 @@
+name: Package distribution
+
+on:
+  # GitHub Releases created with GITHUB_TOKEN do not trigger release workflows.
+  # workflow_run runs trusted default-branch tooling after all release jobs pass.
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable release tag (e.g. v0.2.5)
+        required: true
+        type: string
+      channel:
+        description: Channels to distribute or retry
+        type: choice
+        options: [both, cargo, winget]
+        default: both
+      dry_run:
+        description: Verify and prepare without publishing or opening a PR
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: package-distribution
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: >-
+      github.repository == 'Quetzalcohuatl/fastmarkdownviewer' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       !contains(github.event.workflow_run.head_branch, '-')))
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.verify.outputs.sha }}
+      tag: ${{ steps.verify.outputs.tag }}
+      version: ${{ steps.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify release, successful run, source, and installer checksum
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.workflow_run.head_branch }}
+          RELEASE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          args=(--tag "$RELEASE_TAG" --output distribution/release.json)
+          if [[ -n "$RELEASE_RUN_ID" ]]; then args+=(--run-id "$RELEASE_RUN_ID"); fi
+          python3 scripts/prepare-distribution.py "${args[@]}"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: distribution-release
+          path: distribution/release.json
+          if-no-files-found: error
+
+  cargo:
+    needs: verify
+    if: github.event_name != 'workflow_dispatch' || inputs.channel != 'winget'
+    runs-on: windows-2022
+    environment: distribution
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+          path: release-source
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: |
+          rustup set profile minimal
+          rustup toolchain install 1.95.0
+          rustup default 1.95.0
+      - name: Package the tested release sources
+        working-directory: release-source
+        run: cargo package --workspace --locked --no-verify
+      - name: Check existing versions and plan publication
+        id: plan
+        run: python scripts/publish-cargo.py --source release-source
+      - name: Authenticate using crates.io trusted publishing
+        if: steps.plan.outputs.needed == 'true' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        id: auth
+      - name: Publish missing versions and verify registry contents
+        if: steps.plan.outputs.needed == 'true' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: python scripts/publish-cargo.py --source release-source --publish
+
+  winget:
+    needs: verify
+    if: github.event_name != 'workflow_dispatch' || inputs.channel != 'cargo'
+    runs-on: windows-2025
+    environment: distribution
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download verified release metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download $env:GITHUB_RUN_ID --name distribution-release --dir distribution
+      - name: Generate manifests and check existing submission
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python scripts/submit-winget.py --release distribution/release.json
+          --templates packaging/winget/manifests/q/Quetzalcohuatl/FastMarkdownViewer
+          --output distribution/winget
+      - name: Validate generated WinGet manifests
+        env:
+          RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+            Install-Module Microsoft.WinGet.Client -RequiredVersion 1.29.280 -Repository PSGallery -Force -Scope CurrentUser
+            Repair-WinGetPackageManager -Version 1.29.290 -Force
+            $env:PATH += ";$env:LOCALAPPDATA\Microsoft\WindowsApps"
+          }
+          winget validate --manifest "distribution/winget/manifests/q/Quetzalcohuatl/FastMarkdownViewer/$env:RELEASE_VERSION" --disable-interactivity
+          if ($LASTEXITCODE -ne 0) { throw 'WinGet manifest validation failed.' }
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: winget-manifests-${{ needs.verify.outputs.version }}
+          path: distribution/winget
+          if-no-files-found: error
+      - name: Submit or reuse WinGet pull request
+        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+        env:
+          WINGET_GITHUB_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+        run: >-
+          python scripts/submit-winget.py --release distribution/release.json
+          --templates packaging/winget/manifests/q/Quetzalcohuatl/FastMarkdownViewer
+          --output distribution/winget --submit

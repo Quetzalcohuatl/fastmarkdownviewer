@@ -2,6 +2,12 @@
 
 All notable changes are documented here. This project follows Semantic Versioning.
 
+## [Unreleased]
+
+- Automate Cargo publication and WinGet PR submission after successful stable
+  releases, with trusted publishing, verified release provenance, dry runs, and
+  duplicate-safe retries. Requires the documented one-time account configuration.
+
 ## [0.2.4] - 2026-09-15 (Cargo distribution)
 
 - Publish Cargo distribution for 0.2.4 with versioned, attributed rendering forks

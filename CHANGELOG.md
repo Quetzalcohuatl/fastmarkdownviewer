@@ -4,6 +4,9 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- Use full link-time optimization while retaining speed-focused optimization.
+  The Windows executable saves a further 931,328 bytes (5.1%) after the image-loader
+  cleanup, with similar CPU reading medians in the recorded comparison.
 - Reduce executable size by removing redundant framework image loaders and their
   older SVG rendering dependencies. Local/remote images, generated math SVGs,
   Mermaid diagrams, and font coverage retain the existing FMV rendering path.

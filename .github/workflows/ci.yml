@@ -50,11 +50,24 @@ jobs:
         run: cargo test --locked --all-targets
 
       - name: Build native UI smoke target
-        run: cargo build --locked
+        run: cargo build --locked --bin FastMarkdownViewer --example visual_check
+
+      - name: Verify real OpenGL failure recovery and software-rendered frames
+        run: .\scripts\test-windows-graphics.ps1
+
+      - name: Retain Windows graphics evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-graphics
+          path: target/windows-graphics/*
+          if-no-files-found: warn
 
       - name: Smoke-test the exact Windows executable
         shell: pwsh
-        run: .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Headless
+        run: |
+          .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md
+          .\scripts\test-windows-ui.ps1 -Binary .\target\debug\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Renderer software
 
       - name: Verify source packages and registry installation
         run: |

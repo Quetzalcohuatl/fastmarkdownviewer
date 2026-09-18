@@ -4,7 +4,7 @@
 use eframe::egui;
 use fast_markdown_viewer::{
     app::{InitialState, ViewerApp},
-    fonts, network,
+    fonts, graphics, network,
 };
 use std::{
     path::PathBuf,
@@ -90,13 +90,23 @@ fn main() -> eframe::Result {
         .next()
         .map(|value| value.to_string_lossy().into_owned());
     let no_wrap = arguments.next().is_some_and(|value| value == "--no-wrap");
-    eframe::run_native(
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default().with_inner_size([900.0, 700.0]),
+        ..Default::default()
+    };
+    // Exercise a real OpenGL startup failure without altering the system driver.
+    #[cfg(all(target_os = "windows", feature = "renderer-glow"))]
+    let options = {
+        let mut options = options;
+        if std::env::var_os("FMV_VISUAL_SOFTWARE_OPENGL").is_some() {
+            options.glow_options.hardware_acceleration =
+                eframe::egui_glow::HardwareAcceleration::Off;
+        }
+        options
+    };
+    graphics::run_native(
         "Viewer visual check",
-        eframe::NativeOptions {
-            viewport: egui::ViewportBuilder::default().with_inner_size([900.0, 700.0]),
-            renderer: selected_renderer(),
-            ..Default::default()
-        },
+        options,
         Box::new(move |creation| {
             fonts::install(&creation.egui_ctx);
             network::install(&creation.egui_ctx);
@@ -127,13 +137,4 @@ fn main() -> eframe::Result {
             }))
         }),
     )
-}
-
-#[cfg(feature = "renderer-glow")]
-const fn selected_renderer() -> eframe::Renderer {
-    eframe::Renderer::Glow
-}
-#[cfg(all(feature = "renderer-wgpu", not(feature = "renderer-glow")))]
-const fn selected_renderer() -> eframe::Renderer {
-    eframe::Renderer::Wgpu
 }

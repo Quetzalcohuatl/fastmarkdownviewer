@@ -6,16 +6,16 @@ See [desktop installation instructions](docs/CROSS_PLATFORM.md) for Windows x64,
 macOS 15 or later (Apple Silicon and Intel), and Ubuntu 24.04 x64 packages,
 platform requirements, and tested configurations.
 
-> **v0.2.3:** Smaller executables through image-loader cleanup and full link-time optimization, retaining the same features and fonts. [Size measurements](experiments/size/compiler-profiles.md) record the trade-offs. Competitor performance comparisons below retain their measured v0.2.1 baseline.
+> **v0.2.5:** Windows can fall back from OpenGL to Direct3D and CPU rendering on machines with limited graphics drivers. See [graphics compatibility](docs/CROSS_PLATFORM.md#windows). Competitor performance comparisons below retain their measured v0.2.1 baseline.
 
 ## Package managers and enterprise deployment
 
-**WinGet:** [0.2.3 has been submitted](https://github.com/microsoft/winget-pkgs/pull/435199) and is awaiting Microsoft's review and indexing.
+**WinGet:** Publication is pending Microsoft's validation, review, and indexing. Track [package submissions](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+Quetzalcohuatl.FastMarkdownViewer).
 
-**Cargo:** [0.2.4 is available on crates.io](https://crates.io/crates/fast-markdown-viewer/0.2.4). Install Rust 1.95+ and the [native build dependencies](docs/REGISTRY_DISTRIBUTION.md#cargo-installation), then run:
+**Cargo:** Install the latest version from [crates.io](https://crates.io/crates/fast-markdown-viewer). Install Rust 1.95+ and the [native build dependencies](docs/REGISTRY_DISTRIBUTION.md#cargo-installation), then run:
 
 ```sh
-cargo install fast-markdown-viewer --version 0.2.4 --locked
+cargo install fast-markdown-viewer --locked
 FastMarkdownViewer document.md
 ```
 

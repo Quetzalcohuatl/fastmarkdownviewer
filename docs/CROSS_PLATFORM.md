@@ -1,6 +1,6 @@
 # Desktop installation and support
 
-v0.2.3 packages Windows x64, macOS Apple Silicon/Intel, and Ubuntu x64 together.
+Desktop releases package Windows x64, macOS Apple Silicon/Intel, and Ubuntu x64 together.
 Download packages and SHA256SUMS.txt from the same [GitHub release](https://github.com/Quetzalcohuatl/fastmarkdownviewer/releases).
 All platform builds and package checks must succeed before publication.
 
@@ -22,6 +22,18 @@ Run the portable EXE, or install the per-user setup. The installer registers .md
 and .markdown under Open with without changing your default application.
 Windows builds are unsigned. Checksums and GitHub provenance establish origin
 and unchanged bytes, but do not remove SmartScreen prompts.
+
+Starting in v0.2.5, Windows tries OpenGL first, then Direct3D 12 if graphics
+initialization fails. If no usable hardware adapter is available, Windows' WARP
+software renderer can draw the viewer on the CPU. This supports basic display
+drivers and virtual machines without usable OpenGL; software rendering can be
+slower and use more CPU. No separate graphics runtime download is needed on the
+supported Windows baseline. macOS and Linux retain their existing renderer.
+
+For troubleshooting, set `FMV_GRAPHICS=software` before launching to force WARP,
+or `FMV_GRAPHICS=direct3d` to bypass OpenGL. Remove the variable to restore
+automatic selection. `FMV_GRAPHICS=opengl` disables fallback for diagnosis.
+Startup diagnostics identify the selected backend and, for Direct3D, the adapter.
 
 ## macOS
 

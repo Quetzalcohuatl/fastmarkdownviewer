@@ -2,8 +2,8 @@
 
 ## Availability
 
-- Windows 0.2.3: [WinGet submission #435199](https://github.com/microsoft/winget-pkgs/pull/435199) is awaiting Microsoft's review and indexing. The manifest is in `packaging/winget/manifests/q/Quetzalcohuatl/FastMarkdownViewer/0.2.3`.
-- Cargo 0.2.4: [published on crates.io](https://crates.io/crates/fast-markdown-viewer/0.2.4), together with all four supporting packages. The registry installation commands below are available now. The latest packaged desktop release remains 0.2.3.
+- WinGet: Microsoft's validation, review, and indexing are pending. Track [package submissions](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+Quetzalcohuatl.FastMarkdownViewer). The original 0.2.3 submission exposed an OpenGL startup failure; v0.2.5 adds the Windows graphics fallback. Each successful stable release submits its own versioned installer automatically.
+- Cargo: [Available on crates.io](https://crates.io/crates/fast-markdown-viewer), together with all four supporting packages. The commands below install the latest published version. Desktop installers are available from [GitHub Releases](https://github.com/Quetzalcohuatl/fastmarkdownviewer/releases/latest).
 
 After WinGet accepts and indexes the package:
 
@@ -22,7 +22,7 @@ Cargo compiles the viewer from source. Install Rust **1.95.0 or newer**, the pla
 Install from crates.io:
 
 ```sh
-cargo install fast-markdown-viewer --version 0.2.4 --locked
+cargo install fast-markdown-viewer --locked
 FastMarkdownViewer document.md
 ```
 
@@ -32,7 +32,7 @@ Cargo registry installs do not read this repository's `.cargo/config.toml`. To m
 
 ```powershell
 $env:RUSTFLAGS = '-C target-feature=+crt-static'
-cargo install fast-markdown-viewer --version 0.2.4 --locked
+cargo install fast-markdown-viewer --locked
 ```
 
 To build a source checkout, run `cargo install --path . --locked`. The included versioned path dependencies retain the patched renderer. A Git install also works from a reviewed commit: `cargo install --git https://github.com/Quetzalcohuatl/fastmarkdownviewer --rev COMMIT_SHA --locked`.
@@ -56,7 +56,7 @@ registry = "sparse+https://registry.example.com/cargo/index/"
 Replace the example URL with the endpoint supplied by IT; keep the trailing slash. This source replacement routes crates.io dependencies through the company mirror as well as the application. A mirror must serve unchanged crate archives/checksums and their index entries; configuring only `--registry company` is not a guarantee that dependencies avoid crates.io.
 
 ```sh
-cargo install fast-markdown-viewer --version 0.2.4 --registry company --locked
+cargo install fast-markdown-viewer --version 0.2.5 --registry company --locked
 ```
 
 For authenticated registries, follow the registry provider's instructions for a Cargo credential provider and `cargo login --registry company`. Keep credentials out of repository files, command arguments, and tickets. A fully disconnected environment must prepopulate the entire dependency graph and the Rust/native toolchains; a Cargo registry alone does not supply system libraries.
@@ -103,7 +103,7 @@ The workspace contains these independently versioned packages, in dependency ord
 | `fmv-egui-commonmark` | `0.25.0-fmv.1` | Runtime Markdown viewer using the patched backend |
 | `fmv-macos-events` | `0.1.0` | Native Mac event adapter |
 | `fmv-rusty-mermaid-diagrams` | `0.2.0-fmv.1` | Patched, bounded diagram renderer |
-| `fast-markdown-viewer` | `0.2.4` | Desktop executable |
+| `fast-markdown-viewer` | `0.2.5` | Desktop executable |
 
 The fork names distinguish these packages from upstream releases; original licenses and patch records are included. Cargo's published manifests use versioned registry dependencies, with no reliance on `[patch.crates-io]`. The upstream compile-time Markdown macros are outside the runtime viewer fork's scope.
 

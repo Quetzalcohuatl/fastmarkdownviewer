@@ -71,7 +71,9 @@ jobs:
 
       - name: Smoke-test the exact release executable
         shell: pwsh
-        run: .\scripts\test-windows-ui.ps1 -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Headless
+        run: |
+          .\scripts\test-windows-ui.ps1 -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md
+          .\scripts\test-windows-ui.ps1 -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -Fixture .\tests\fixtures\feature-matrix.md -Renderer software
 
       - name: Install pinned Inno Setup
         shell: pwsh
@@ -89,7 +91,7 @@ jobs:
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME.TrimStart('v')
-          .\scripts\test-windows-installer.ps1 -Installer ".\release\FastMarkdownViewer-Setup-$version.exe" -Fixture .\tests\fixtures\feature-matrix.md -Headless
+          .\scripts\test-windows-installer.ps1 -Installer ".\release\FastMarkdownViewer-Setup-$version.exe" -Fixture .\tests\fixtures\feature-matrix.md
 
       - name: Retain verified Windows assets
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -4,7 +4,7 @@ use eframe::egui;
 use fast_markdown_viewer::{
     app::{InitialState, ViewerApp},
     cli::{self, Command},
-    fonts, network, platform,
+    fonts, graphics, network, platform,
 };
 
 fn main() -> eframe::Result {
@@ -38,13 +38,12 @@ fn main() -> eframe::Result {
             .with_inner_size([900.0, 700.0])
             .with_min_inner_size([420.0, 280.0])
             .with_icon(platform::app_icon()),
-        renderer: selected_renderer(),
         persist_window: false,
         persistence_path: None,
         ..Default::default()
     };
 
-    eframe::run_native(
+    graphics::run_native(
         "FastMarkdownViewer",
         native_options,
         Box::new(move |creation_context| {
@@ -63,20 +62,4 @@ fn main() -> eframe::Result {
             Ok(Box::new(app))
         }),
     )
-}
-
-#[cfg(all(feature = "renderer-glow", feature = "renderer-wgpu"))]
-compile_error!("select only one renderer feature");
-
-#[cfg(not(any(feature = "renderer-glow", feature = "renderer-wgpu")))]
-compile_error!("enable renderer-glow or renderer-wgpu");
-
-#[cfg(feature = "renderer-glow")]
-const fn selected_renderer() -> eframe::Renderer {
-    eframe::Renderer::Glow
-}
-
-#[cfg(all(feature = "renderer-wgpu", not(feature = "renderer-glow")))]
-const fn selected_renderer() -> eframe::Renderer {
-    eframe::Renderer::Wgpu
 }

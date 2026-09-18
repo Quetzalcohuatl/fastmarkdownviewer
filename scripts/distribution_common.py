@@ -40,7 +40,12 @@ def github(path, *, token=None, data=None, method=None, missing_ok=False):
     except urllib.error.HTTPError as error:
         if missing_ok and error.code == 404:
             return None
-        raise RuntimeError(f"GitHub {method or 'GET'} {path}: HTTP {error.code}") from None
+        verb = method or ("POST" if data is not None else "GET")
+        try:
+            detail = json.loads(error.read()).get("message", "")
+        except (ValueError, UnicodeError):
+            detail = ""
+        raise RuntimeError(f"GitHub {verb} {path}: HTTP {error.code}: {detail}") from None
 
 
 def stable_version(tag):

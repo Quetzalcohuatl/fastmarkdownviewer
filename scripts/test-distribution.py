@@ -134,6 +134,22 @@ class DistributionTests(unittest.TestCase):
 
     @patch.object(winget, "existing_submission", return_value=None)
     @patch.object(winget, "github")
+    def test_new_submission_does_not_import_unrelated_upstream_workflows(self, api, _existing):
+        api.side_effect = [
+            {"login": "Quetzalcohuatl"}, {"object": {"sha": "fork-base"}}, None,
+            {"tree": {"sha": "fork-tree"}}, {"sha": "new-tree"}, {"sha": "new-commit"},
+            {}, {"html_url": "https://github.com/pr/3"},
+        ]
+        release = {"version": "1.2.3", "release_url": "https://github.com/release", "release_run": "https://github.com/run"}
+        winget.submit(release, {"manifest.yaml": "new content"}, "test-token")
+        self.assertEqual(api.call_args_list[1].args[0], f"repos/{winget.FORK}/git/ref/heads/master")
+        writes = [call.kwargs["data"] for call in api.call_args_list if "data" in call.kwargs]
+        self.assertEqual(writes[0]["base_tree"], "fork-tree")
+        self.assertEqual(writes[1]["parents"], ["fork-base"])
+        self.assertEqual(writes[2], {"ref": "refs/heads/fastmarkdownviewer-1.2.3", "sha": "new-commit"})
+
+    @patch.object(winget, "existing_submission", return_value=None)
+    @patch.object(winget, "github")
     def test_partial_branch_retry_uses_tree_sha_and_never_force_pushes(self, api, _existing):
         api.side_effect = [
             {"login": "Quetzalcohuatl"}, {"object": {"sha": "base"}}, {"object": {"sha": "partial"}},

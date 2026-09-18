@@ -2,7 +2,8 @@ name: Package distribution
 
 on:
   # GitHub Releases created with GITHUB_TOKEN do not trigger release workflows.
-  # workflow_run runs trusted default-branch tooling after all release jobs pass.
+  # workflow_run verifies the release, then dispatches this workflow on main.
+  # crates.io rejects OIDC tokens issued directly to workflow_run jobs.
   workflow_run:
     workflows: [Release]
     types: [completed]
@@ -68,9 +69,25 @@ jobs:
           path: distribution/release.json
           if-no-files-found: error
 
+  dispatch:
+    needs: verify
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Dispatch supported publishing event on the trusted default branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.verify.outputs.tag }}
+        run: >-
+          gh workflow run distribution.yml --repo "$GITHUB_REPOSITORY" --ref main
+          -f "tag=$RELEASE_TAG" -f channel=both -f dry_run=false
+
   cargo:
     needs: verify
-    if: github.event_name != 'workflow_dispatch' || inputs.channel == 'both' || inputs.channel == 'cargo'
+    if: github.event_name == 'workflow_dispatch' && (inputs.channel == 'both' || inputs.channel == 'cargo')
     runs-on: windows-2022
     environment: distribution
     permissions:
@@ -109,7 +126,7 @@ jobs:
 
   winget:
     needs: verify
-    if: github.event_name != 'workflow_dispatch' || inputs.channel == 'both' || inputs.channel == 'winget'
+    if: github.event_name == 'workflow_dispatch' && (inputs.channel == 'both' || inputs.channel == 'winget')
     runs-on: windows-2025
     environment: distribution
     steps:

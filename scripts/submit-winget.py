@@ -76,11 +76,14 @@ def submit(release, files, token):
     if identity["login"] != "Quetzalcohuatl":
         raise ValueError("The WinGet credential must belong to the package maintainer Quetzalcohuatl.")
     branch = "fastmarkdownviewer-" + version
-    base = github(f"repos/{UPSTREAM}/git/ref/heads/master", token=token)["object"]["sha"]
+    # Start from the fork's existing history. Importing upstream's latest commit
+    # can introduce unrelated workflow changes and require the broad workflow
+    # token scope. GitHub merges our manifest-only PR against current upstream.
+    base = github(f"repos/{FORK}/git/ref/heads/master", token=token)["object"]["sha"]
     ref = github(f"repos/{FORK}/git/ref/heads/{branch}", token=token, missing_ok=True)
     parent = ref["object"]["sha"] if ref else base
     # Build one atomic commit atop the existing branch (a partially completed
-    # retry), or Microsoft's current master. Never force-push another branch.
+    # retry), or the fork's master. Never force-push another branch.
     changes = []
     for path, content in files.items():
         old = github(f"repos/{FORK}/contents/{path}?ref={branch}", token=token, missing_ok=True) if ref else None

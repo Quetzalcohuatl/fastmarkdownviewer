@@ -1252,7 +1252,7 @@ dependencies = [
 
 [[package]]
 name = "fast-markdown-viewer"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "eframe",
  "fmv-egui-commonmark",
@@ -1276,6 +1276,7 @@ dependencies = [
  "ttf-parser",
  "ureq 2.12.1",
  "url",
+ "wgpu",
  "winresource",
 ]
 

@@ -9,6 +9,9 @@ param(
     [ValidateRange(2, 60)]
     [int]$TimeoutSeconds = 15,
 
+    [ValidateSet('auto', 'software')]
+    [string]$Renderer = 'auto',
+
     [switch]$Headless
 )
 
@@ -42,10 +45,6 @@ public static class FastMarkdownViewerNativeTest
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool PostMessage(IntPtr window, uint message, UIntPtr word, IntPtr data);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool ShowWindow(IntPtr window, int command);
 
     public static bool SendKey(IntPtr window, uint virtualKey)
     {
@@ -98,9 +97,32 @@ function Close-TestProcess {
 
 $primary = $null
 $secondary = $null
+$bare = $null
+$originalAppData = $env:APPDATA
+$originalRenderer = $env:FMV_GRAPHICS
+$testDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ('fmv-ui-' + [Guid]::NewGuid())
+[void](New-Item -ItemType Directory -Path $testDirectory)
+$env:APPDATA = $testDirectory
+$env:FMV_GRAPHICS = $Renderer
 try {
+    # WinGet launches with no document and requires survival beyond ten seconds.
+    $diagnostics = Join-Path $testDirectory 'startup.log'
+    $bare = Start-Process -FilePath $binaryPath -WindowStyle Hidden -RedirectStandardError $diagnostics -PassThru
+    Wait-ForViewerWindow -Process $bare
+    Start-Sleep -Seconds 11
+    $bare.Refresh()
+    if ($bare.HasExited) {
+        throw "Bare startup failed (exit code $($bare.ExitCode)): $(Get-Content $diagnostics -Raw)"
+    }
+    $startupLog = Get-Content $diagnostics -Raw
+    if ($Renderer -eq 'software' -and $startupLog -notmatch 'FMV_RENDERER=Dx12 adapter=.+ device=Cpu') {
+        throw "Software test did not select the Direct3D CPU adapter: $startupLog"
+    }
+    Write-Output $startupLog
+    Close-TestProcess -Process $bare
+
     $quotedFixture = '"' + $fixturePath + '"'
-    $primary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -PassThru
+    $primary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -WindowStyle Hidden -PassThru
     Wait-ForViewerWindow -Process $primary
     $primary.Refresh()
     $expectedTitle = [System.IO.Path]::GetFileName($fixturePath) + ' — FastMarkdownViewer'
@@ -108,7 +130,6 @@ try {
         throw "Unexpected primary window title: $($primary.MainWindowTitle)"
     }
 
-    [void][FastMarkdownViewerNativeTest]::ShowWindow($primary.MainWindowHandle, 5)
     foreach ($virtualKey in @(0x22, 0x28, 0x23, 0x24)) {
         if (-not [FastMarkdownViewerNativeTest]::SendKey($primary.MainWindowHandle, $virtualKey)) {
             throw "Could not deliver native scroll key 0x$($virtualKey.ToString('X'))."
@@ -120,7 +141,7 @@ try {
         throw "FastMarkdownViewer crashed while processing scroll keys (exit code $($primary.ExitCode))."
     }
 
-    $secondary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -PassThru
+    $secondary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -WindowStyle Hidden -PassThru
     Wait-ForViewerWindow -Process $secondary
     if ($primary.Id -eq $secondary.Id) {
         throw 'Separate launches unexpectedly reused one process.'
@@ -131,9 +152,12 @@ try {
         throw 'One of the independent viewer windows exited unexpectedly.'
     }
 
-    Write-Output "WINDOWS_UI_SMOKE=passed primary=$($primary.Id) secondary=$($secondary.Id)"
+    Write-Output "WINDOWS_UI_SMOKE=passed renderer=$Renderer bare-startup=passed primary=$($primary.Id) secondary=$($secondary.Id)"
 }
 finally {
     Close-TestProcess -Process $secondary
     Close-TestProcess -Process $primary
+    Close-TestProcess -Process $bare
+    $env:APPDATA = $originalAppData
+    $env:FMV_GRAPHICS = $originalRenderer
 }

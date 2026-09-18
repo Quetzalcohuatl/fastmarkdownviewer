@@ -5,6 +5,7 @@ pub mod document;
 pub mod file_actions;
 mod font_paths;
 pub mod fonts;
+pub mod graphics;
 pub mod links;
 pub mod math;
 pub mod mermaid;

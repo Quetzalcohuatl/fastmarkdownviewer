@@ -57,7 +57,7 @@ Prefer the Debian package, which installs the executable and desktop entry and
 declares the runtime libraries:
 
 ```sh
-sudo apt install ./FastMarkdownViewer-0.2.3-linux-x86_64.deb
+sudo apt install ./FastMarkdownViewer-0.2.5-linux-x86_64.deb
 sudo apt remove fast-markdown-viewer
 ```
 

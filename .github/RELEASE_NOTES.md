@@ -4,7 +4,7 @@ FastMarkdownViewer v0.2.5 fixes Windows startup when the display driver cannot p
 - **Real startup checks:** Windows CI now opens the application with and without a document, checks it survives beyond WinGet's ten-second launch window, exercises scrolling and independent windows, and explicitly tests the CPU renderer. The installer check also opens the installed app.
 - **Distribution:** This release triggers the configured Cargo publication and WinGet submission workflows. WinGet availability still depends on Microsoft's validation, review, and indexing.
 
-The additional Windows renderer increases executable size. macOS and Linux retain their existing graphics path. Rust 1.95+ is still required to build from source; downloaded desktop packages do not require Rust.
+In local optimized builds, the additional Windows renderer takes the executable from the published v0.2.3's 16.6 MiB to 19.8 MiB, and the installer from 8.3 MiB to 9.2 MiB. macOS and Linux retain their existing graphics path. Rust 1.95+ is still required to build from source; downloaded desktop packages do not require Rust.
 
 Packages are available for Windows x64, macOS 15+ Apple Silicon/Intel, and Ubuntu 24.04 x64. Windows builds remain unsigned; Mac apps are ad-hoc signed and unnotarized. Multilingual text rendering still depends on installed system fonts; UI labels remain English.
 

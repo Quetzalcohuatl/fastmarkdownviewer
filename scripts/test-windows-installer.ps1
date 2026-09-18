@@ -122,8 +122,9 @@ try {
         $smokeArguments.Headless = $true
     }
     & (Join-Path $PSScriptRoot 'test-windows-ui.ps1') @smokeArguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "Installed application smoke test failed with exit code $LASTEXITCODE."
+    # PowerShell smoke tests throw on failure; LASTEXITCODE only tracks native commands.
+    if (-not $Headless) {
+        & (Join-Path $PSScriptRoot 'test-windows-ui.ps1') @smokeArguments -Renderer software
     }
 
     Invoke-Uninstaller

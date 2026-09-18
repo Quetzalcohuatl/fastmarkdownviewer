@@ -46,6 +46,18 @@ def published_version(name, version):
         raise
 
 
+def published_archive(target, name, version):
+    directory = Path(target) / "package"
+    filename = f"{name}-{version}.crate"
+    # Cargo publish stages single-crate uploads in tmp-crate; workspace
+    # packaging uses tmp-registry, and cargo package -p uses package directly.
+    for parent in (directory / "tmp-crate", directory / "tmp-registry", directory):
+        candidate = parent / filename
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(f"Cargo did not retain the uploaded archive for {name} {version} in {directory}")
+
+
 def plan(source):
     metadata = json.loads(subprocess.check_output(
         ["cargo", "metadata", "--locked", "--no-deps", "--format-version", "1"], cwd=source))
@@ -111,12 +123,7 @@ def main():
             name, version = package["name"], package["version"]
             if name not in missing:
                 continue
-            directory = Path(temporary) / "package"
-            # Cargo uses tmp-registry for multiple workspace packages and the
-            # package directory directly when exactly one package is selected.
-            archive = directory / "tmp-registry" / f"{name}-{version}.crate"
-            if not archive.exists():
-                archive = directory / f"{name}-{version}.crate"
+            archive = published_archive(temporary, name, version)
             remote = published_version(name, version)
             if not remote or remote["checksum"] != hashlib.sha256(archive.read_bytes()).hexdigest():
                 raise ValueError(f"Published archive verification failed for {name} {version}.")

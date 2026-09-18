@@ -38,6 +38,17 @@ def archive(files):
 
 
 class DistributionTests(unittest.TestCase):
+    def test_uploaded_archive_layouts_and_missing_archive(self):
+        for layout in ("tmp-crate", "tmp-registry", ""):
+            with self.subTest(layout=layout), tempfile.TemporaryDirectory() as temporary:
+                parent = Path(temporary) / "package" / layout
+                parent.mkdir(parents=True)
+                archive_path = parent / "test-app-1.0.0.crate"
+                archive_path.write_bytes(b"uploaded bytes")
+                self.assertEqual(cargo.published_archive(temporary, "test-app", "1.0.0"), archive_path)
+                with self.assertRaises(FileNotFoundError):
+                    cargo.published_archive(temporary, "test-app", "2.0.0")
+
     def test_only_stable_tags(self):
         self.assertEqual(stable_version("v1.2.3"), "1.2.3")
         for tag in ("v1.2.3-rc.1", "v1.2.3+build", "main", "v01.2.3", "v1.2.3\n", "v1.2.3; echo bad"):

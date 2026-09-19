@@ -147,6 +147,8 @@ jobs:
           ref: ${{ needs.verify.outputs.sha }}
           persist-credentials: false
       - name: Verify published metadata and official binary installation without Rust
+        # Older release tags predate binstall support and its test script.
+        if: hashFiles('scripts/test-binstall.py') != ''
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}

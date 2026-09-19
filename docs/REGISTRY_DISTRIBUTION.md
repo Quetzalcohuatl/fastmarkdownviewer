@@ -17,14 +17,14 @@ The Windows installer is x64 and **per-user**, without administrator privileges.
 
 ## Binstall prebuilt installation
 
-Starting with v0.2.6, [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) installs our official GitHub release binary. Install binstall once using its [precompiled installation options](https://github.com/cargo-bins/cargo-binstall#installation); building binstall from source may itself require a newer Rust compiler.
+Starting with v0.2.7, [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) installs our official GitHub release binary. Install binstall once using its [precompiled installation options](https://github.com/cargo-bins/cargo-binstall#installation); building binstall from source may itself require a newer Rust compiler.
 
 ```sh
 cargo binstall fast-markdown-viewer
 FastMarkdownViewer document.md
 ```
 
-An existing Cargo/Rust 1.92 installation can keep its toolchain. If Cargo is absent altogether, run the precompiled tool directly as `cargo-binstall fast-markdown-viewer`. Neither route compiles the viewer. To update, rerun the same install command; to pin a version, append `--version 0.2.6`.
+An existing Cargo/Rust 1.92 installation can keep its toolchain. If Cargo is absent altogether, run the precompiled tool directly as `cargo-binstall fast-markdown-viewer`. Neither route compiles the viewer. To update, rerun the same install command; to pin a version, append `--version 0.2.7`.
 
 Supported downloads are Windows x64, macOS 15+ Apple Silicon/Intel, and Linux x64 targeting Ubuntu 24.04 (glibc 2.39). The [desktop runtime requirements](CROSS_PLATFORM.md) still apply, including Linux graphics and desktop libraries. Binstall does not make this Linux binary compatible with older glibc, musl/Alpine, or ARM Linux.
 
@@ -75,7 +75,7 @@ registry = "sparse+https://registry.example.com/cargo/index/"
 Replace the example URL with the endpoint supplied by IT; keep the trailing slash. This source replacement routes crates.io dependencies through the company mirror as well as the application. A mirror must serve unchanged crate archives/checksums and their index entries; configuring only `--registry company` is not a guarantee that dependencies avoid crates.io.
 
 ```sh
-cargo install fast-markdown-viewer --version 0.2.6 --registry company --locked
+cargo install fast-markdown-viewer --version 0.2.7 --registry company --locked
 ```
 
 For authenticated registries, follow the registry provider's instructions for a Cargo credential provider and `cargo login --registry company`. Keep credentials out of repository files, command arguments, and tickets. A fully disconnected environment must prepopulate the entire dependency graph and the Rust/native toolchains; a Cargo registry alone does not supply system libraries.
@@ -124,7 +124,7 @@ The workspace contains these independently versioned packages, in dependency ord
 | `fmv-egui-commonmark` | `0.25.0-fmv.1` | Runtime Markdown viewer using the patched backend |
 | `fmv-macos-events` | `0.1.0` | Native Mac event adapter |
 | `fmv-rusty-mermaid-diagrams` | `0.2.0-fmv.1` | Patched, bounded diagram renderer |
-| `fast-markdown-viewer` | `0.2.6` | Desktop executable |
+| `fast-markdown-viewer` | `0.2.7` | Desktop executable |
 
 The fork names distinguish these packages from upstream releases; original licenses and patch records are included. Cargo's published manifests use versioned registry dependencies, with no reliance on `[patch.crates-io]`. The upstream compile-time Markdown macros are outside the runtime viewer fork's scope.
 

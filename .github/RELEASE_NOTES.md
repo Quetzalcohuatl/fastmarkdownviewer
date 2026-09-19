@@ -1,4 +1,4 @@
-FastMarkdownViewer v0.2.6 adds cargo-binstall support, so installing the viewer no longer requires compiling it or upgrading an older Rust compiler.
+FastMarkdownViewer v0.2.7 adds cargo-binstall support, so installing the viewer no longer requires compiling it or upgrading an older Rust compiler.
 
 Install [cargo-binstall](https://github.com/cargo-bins/cargo-binstall#installation) once using its precompiled installer, then run:
 
@@ -15,4 +15,4 @@ Binstall installs the executable into the Cargo bin directory. Use the desktop i
 
 Windows retains v0.2.5's automatic Direct3D/CPU fallback when OpenGL initialization fails. Windows builds remain unsigned; Mac apps are ad-hoc signed and unnotarized. The demo retains its v0.2.2 label, and performance comparisons retain their measured v0.2.1 baseline.
 
-See the [installation guide](https://github.com/Quetzalcohuatl/fastmarkdownviewer/blob/v0.2.6/docs/REGISTRY_DISTRIBUTION.md#binstall-prebuilt-installation). Download SHA256SUMS.txt with your package and verify its checksum and GitHub build-provenance attestation.
+See the [installation guide](https://github.com/Quetzalcohuatl/fastmarkdownviewer/blob/v0.2.7/docs/REGISTRY_DISTRIBUTION.md#binstall-prebuilt-installation). Download SHA256SUMS.txt with your package and verify its checksum and GitHub build-provenance attestation.

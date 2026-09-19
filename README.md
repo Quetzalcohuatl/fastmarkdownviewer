@@ -6,7 +6,7 @@ See [desktop installation instructions](docs/CROSS_PLATFORM.md) for Windows x64,
 macOS 15 or later (Apple Silicon and Intel), and Ubuntu 24.04 x64 packages,
 platform requirements, and tested configurations.
 
-> **v0.2.6:** Install official prebuilt binaries with `cargo binstall fast-markdown-viewer`, without compiling or upgrading Rust. Windows retains its automatic Direct3D/CPU graphics fallback. Competitor performance comparisons below retain their measured v0.2.1 baseline.
+> **v0.2.7:** Install official prebuilt binaries with `cargo binstall fast-markdown-viewer`, without compiling or upgrading Rust. Windows retains its automatic Direct3D/CPU graphics fallback. Competitor performance comparisons below retain their measured v0.2.1 baseline.
 
 ## Package managers and enterprise deployment
 

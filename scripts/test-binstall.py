@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import threading
@@ -92,6 +93,9 @@ def run(command, env, cwd, timeout=120, expected_code=0):
 
 
 def main():
+    # Hosted Windows runners may use cp1252, while binstall diagnostics use Unicode.
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", choices=TARGETS, required=True)
     parser.add_argument("--manifest", type=Path, default=ROOT / "Cargo.toml")

@@ -87,6 +87,11 @@ jobs:
           .\scripts\package-release.ps1 -Version $version -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -OutputDirectory .\release -RepositoryUrl $repositoryUrl
           .\scripts\verify-release.ps1 -Version $version -Directory .\release
 
+      - name: Install packaged binary with binstall and no Rust on PATH
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/test-binstall.py --platform windows-x86_64 --packages release
+
       - name: Install, exercise, and uninstall the packaged application
         shell: pwsh
         run: |

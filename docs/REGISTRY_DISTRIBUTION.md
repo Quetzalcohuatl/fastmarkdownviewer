@@ -15,6 +15,25 @@ winget uninstall --id Quetzalcohuatl.FastMarkdownViewer --exact
 
 The Windows installer is x64 and **per-user**, without administrator privileges. It adds Start menu and Open With entries without changing default file associations. It is currently unsigned; WinGet publication does not add Authenticode signing. Machine-wide installation/MSI deployment is not provided.
 
+## Binstall prebuilt installation
+
+Starting with v0.2.6, [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) installs our official GitHub release binary. Install binstall once using its [precompiled installation options](https://github.com/cargo-bins/cargo-binstall#installation); building binstall from source may itself require a newer Rust compiler.
+
+```sh
+cargo binstall fast-markdown-viewer
+FastMarkdownViewer document.md
+```
+
+An existing Cargo/Rust 1.92 installation can keep its toolchain. If Cargo is absent altogether, run the precompiled tool directly as `cargo-binstall fast-markdown-viewer`. Neither route compiles the viewer. To update, rerun the same install command; to pin a version, append `--version 0.2.6`.
+
+Supported downloads are Windows x64, macOS 15+ Apple Silicon/Intel, and Linux x64 targeting Ubuntu 24.04 (glibc 2.39). The [desktop runtime requirements](CROSS_PLATFORM.md) still apply, including Linux graphics and desktop libraries. Binstall does not make this Linux binary compatible with older glibc, musl/Alpine, or ARM Linux.
+
+Binstall installs `FastMarkdownViewer` into the Cargo bin directory, normally `~/.cargo/bin` (Windows: `%USERPROFILE%\.cargo\bin`). Ensure it is on PATH. It installs the executable only, including on macOS; use the release installer, full `.app` bundle, or `.deb` for desktop shortcuts, Finder integration, file associations, and native uninstall support. Remove a binstall installation with `cargo uninstall fast-markdown-viewer`.
+
+Package metadata disables community quick-install binaries and fallback to source compilation. A missing or unsupported release binary produces an installation error instead of attempting a build with an older Rust compiler. Do not override these strategies when relying on this behavior.
+
+Binstall obtains crate metadata from the registry and binaries from GitHub Releases. Mirroring crates.io alone does not mirror these binaries; enterprises should also approve or mirror the [ready-to-run releases](#mirroring-ready-to-run-releases). Source builds through an internal registry remain available below.
+
 ## Cargo installation
 
 Cargo compiles the viewer from source. Install Rust **1.95.0 or newer**, the platform's native compiler, and the [platform build dependencies](CROSS_PLATFORM.md#verification-and-development). On macOS, use the Xcode command line tools and set `MACOSX_DEPLOYMENT_TARGET=15.0` before building. On Windows, use the MSVC Rust toolchain and Visual Studio C++ Build Tools with the Windows SDK.
@@ -56,7 +75,7 @@ registry = "sparse+https://registry.example.com/cargo/index/"
 Replace the example URL with the endpoint supplied by IT; keep the trailing slash. This source replacement routes crates.io dependencies through the company mirror as well as the application. A mirror must serve unchanged crate archives/checksums and their index entries; configuring only `--registry company` is not a guarantee that dependencies avoid crates.io.
 
 ```sh
-cargo install fast-markdown-viewer --version 0.2.5 --registry company --locked
+cargo install fast-markdown-viewer --version 0.2.6 --registry company --locked
 ```
 
 For authenticated registries, follow the registry provider's instructions for a Cargo credential provider and `cargo login --registry company`. Keep credentials out of repository files, command arguments, and tickets. A fully disconnected environment must prepopulate the entire dependency graph and the Rust/native toolchains; a Cargo registry alone does not supply system libraries.
@@ -74,6 +93,8 @@ Windows uses a per-user Inno installer, macOS uses an application bundle, and Ub
 ### Automated releases
 
 The [Package distribution workflow](../.github/workflows/distribution.yml) runs after the existing **Release** workflow succeeds. Stable `vMAJOR.MINOR.PATCH` releases publish missing Cargo workspace versions and submit a WinGet pull request using the released Windows installer. Prereleases are excluded. Microsoft still validates and reviews each WinGet submission before it becomes installable.
+
+Before publication, native release checks install each packaged archive through binstall with Rust and Cargo removed from PATH, compare the installed bytes, check the version, and render a Mermaid diagram. After Cargo publication, the distribution workflow repeats these checks using live crates.io metadata and official HTTPS downloads on all four supported targets.
 
 The workflow verifies the annotated tag, exact source commit, successful release run, and installer checksum. Cargo publication uses crates.io trusted publishing with a temporary credential. Existing crate versions are compared against the packaged source: changed contents require a version bump. Unchanged supporting crates keep their versions. Checkout provenance and library-only lockfiles are excluded from that comparison; the application's lockfile is compared. Text line endings are normalized to match Git's checkout policy. WinGet retries reuse the existing version's PR and never force-push branches.
 
@@ -103,7 +124,7 @@ The workspace contains these independently versioned packages, in dependency ord
 | `fmv-egui-commonmark` | `0.25.0-fmv.1` | Runtime Markdown viewer using the patched backend |
 | `fmv-macos-events` | `0.1.0` | Native Mac event adapter |
 | `fmv-rusty-mermaid-diagrams` | `0.2.0-fmv.1` | Patched, bounded diagram renderer |
-| `fast-markdown-viewer` | `0.2.5` | Desktop executable |
+| `fast-markdown-viewer` | `0.2.6` | Desktop executable |
 
 The fork names distinguish these packages from upstream releases; original licenses and patch records are included. Cargo's published manifests use versioned registry dependencies, with no reliance on `[patch.crates-io]`. The upstream compile-time Markdown macros are outside the runtime viewer fork's scope.
 

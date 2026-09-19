@@ -113,6 +113,10 @@ jobs:
           env -u DISPLAY WAYLAND_DISPLAY=fmv-test LIBGL_ALWAYS_SOFTWARE=1 target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/wayland.png
       - name: Package desktop build
         run: python3 scripts/package-unix.py --platform '${{ matrix.platform }}' --binary target/release/FastMarkdownViewer
+      - name: Install packaged binary with binstall and no Rust on PATH
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/test-binstall.py --platform '${{ matrix.platform }}' --packages dist
       - name: Exercise Finder opening and saved sessions in the extracted Mac app
         if: runner.os == 'macOS'
         run: python3 scripts/test-macos-package.py dist/*.zip

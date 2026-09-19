@@ -124,6 +124,34 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: python scripts/publish-cargo.py --source release-source --publish
 
+  binstall:
+    needs: [verify, cargo]
+    if: github.event_name == 'workflow_dispatch' && !inputs.dry_run
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            platform: windows-x86_64
+          - os: ubuntu-24.04
+            platform: linux-x86_64
+          - os: macos-15
+            platform: macos-aarch64
+          - os: macos-15-intel
+            platform: macos-x86_64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+          persist-credentials: false
+      - name: Verify published metadata and official binary installation without Rust
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/test-binstall.py --platform '${{ matrix.platform }}' --published
+
   winget:
     needs: verify
     if: github.event_name == 'workflow_dispatch' && (inputs.channel == 'both' || inputs.channel == 'winget')

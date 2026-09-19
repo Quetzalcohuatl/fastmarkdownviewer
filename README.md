@@ -6,13 +6,22 @@ See [desktop installation instructions](docs/CROSS_PLATFORM.md) for Windows x64,
 macOS 15 or later (Apple Silicon and Intel), and Ubuntu 24.04 x64 packages,
 platform requirements, and tested configurations.
 
-> **v0.2.5:** Windows can fall back from OpenGL to Direct3D and CPU rendering on machines with limited graphics drivers. See [graphics compatibility](docs/CROSS_PLATFORM.md#windows). Competitor performance comparisons below retain their measured v0.2.1 baseline.
+> **v0.2.6:** Install official prebuilt binaries with `cargo binstall fast-markdown-viewer`, without compiling or upgrading Rust. Windows retains its automatic Direct3D/CPU graphics fallback. Competitor performance comparisons below retain their measured v0.2.1 baseline.
 
 ## Package managers and enterprise deployment
 
 **WinGet:** Publication is pending Microsoft's validation, review, and indexing. Track [package submissions](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+Quetzalcohuatl.FastMarkdownViewer).
 
-**Cargo:** Install the latest version from [crates.io](https://crates.io/crates/fast-markdown-viewer). Install Rust 1.95+ and the [native build dependencies](docs/REGISTRY_DISTRIBUTION.md#cargo-installation), then run:
+**Binstall (prebuilt):** Install [cargo-binstall](https://github.com/cargo-bins/cargo-binstall#installation) once using its precompiled installer, then run:
+
+```sh
+cargo binstall fast-markdown-viewer
+FastMarkdownViewer document.md
+```
+
+Downloads our official release binary for Windows x64, Linux x64, or macOS Apple Silicon/Intel. No Rust compiler upgrade is required. [OS requirements and desktop integration](docs/REGISTRY_DISTRIBUTION.md#binstall-prebuilt-installation) still apply.
+
+**Cargo (build from source):** Install the latest version from [crates.io](https://crates.io/crates/fast-markdown-viewer). Install Rust 1.95+ and the [native build dependencies](docs/REGISTRY_DISTRIBUTION.md#cargo-installation), then run:
 
 ```sh
 cargo install fast-markdown-viewer --locked

@@ -1,6 +1,6 @@
 [package]
 name = "fast-markdown-viewer"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2024"
 rust-version = "1.95"
 description = "A fast, read-only Markdown viewer"
@@ -12,6 +12,34 @@ build = "build.rs"
 keywords = ["markdown", "viewer", "desktop", "native"]
 categories = ["visualization", "gui"]
 include = ["/src/**", "/assets/**", "/build.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE-*", "/THIRD_PARTY_NOTICES.md", "/docs/REGISTRY_DISTRIBUTION.md", "/tests/**", "/examples/**"]
+
+# Install only official release binaries; unsupported targets must not silently
+# fall back to a compiler that may be older than our source-build minimum.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/FastMarkdownViewer-{ version }-{ target }.tar.gz"
+pkg-fmt = "tgz"
+bin-dir = "{ bin }{ binary-ext }"
+disabled-strategies = ["quick-install", "compile"]
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/FastMarkdownViewer-{ version }-windows-x86_64.zip"
+pkg-fmt = "zip"
+bin-dir = "{ bin }{ binary-ext }"
+
+[package.metadata.binstall.overrides.x86_64-unknown-linux-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/FastMarkdownViewer-{ version }-linux-x86_64.tar.gz"
+pkg-fmt = "tgz"
+bin-dir = "FastMarkdownViewer-{ version }-linux-x86_64/{ bin }"
+
+[package.metadata.binstall.overrides.aarch64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/FastMarkdownViewer-{ version }-macos-aarch64.zip"
+pkg-fmt = "zip"
+bin-dir = "FastMarkdownViewer-{ version }-macos-aarch64/FastMarkdownViewer.app/Contents/MacOS/{ bin }"
+
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/FastMarkdownViewer-{ version }-macos-x86_64.zip"
+pkg-fmt = "zip"
+bin-dir = "FastMarkdownViewer-{ version }-macos-x86_64/FastMarkdownViewer.app/Contents/MacOS/{ bin }"
 
 [workspace]
 resolver = "3"

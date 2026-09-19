@@ -1,13 +1,18 @@
-FastMarkdownViewer v0.2.5 fixes Windows startup when the display driver cannot provide the OpenGL version the viewer needs, including the failure reported by WinGet's validation VM.
+FastMarkdownViewer v0.2.6 adds cargo-binstall support, so installing the viewer no longer requires compiling it or upgrading an older Rust compiler.
 
-- **Automatic graphics fallback:** Keep OpenGL as the normal renderer; if initialization fails, try Direct3D 12 and Windows' WARP software renderer. Software rendering runs on the CPU and can be slower. No separate graphics-runtime download is needed on supported Windows versions.
-- **Real startup checks:** Windows CI now opens the application with and without a document, checks it survives beyond WinGet's ten-second launch window, exercises scrolling and independent windows, and explicitly tests the CPU renderer. The installer check also opens the installed app.
-- **Distribution:** This release triggers the configured Cargo publication and WinGet submission workflows. WinGet availability still depends on Microsoft's validation, review, and indexing.
+Install [cargo-binstall](https://github.com/cargo-bins/cargo-binstall#installation) once using its precompiled installer, then run:
 
-In local optimized builds, the additional Windows renderer takes the executable from the published v0.2.3's 16.6 MiB to 19.8 MiB, and the installer from 8.3 MiB to 9.2 MiB. macOS and Linux retain their existing graphics path. Rust 1.95+ is still required to build from source; downloaded desktop packages do not require Rust.
+```sh
+cargo binstall fast-markdown-viewer
+FastMarkdownViewer document.md
+```
 
-Packages are available for Windows x64, macOS 15+ Apple Silicon/Intel, and Ubuntu 24.04 x64. Windows builds remain unsigned; Mac apps are ad-hoc signed and unnotarized. Multilingual text rendering still depends on installed system fonts; UI labels remain English.
+- **Official binaries:** Downloads the matching GitHub release archive for Windows x64, Linux x64, and macOS Apple Silicon/Intel. Missing or unsupported binaries fail explicitly; source compilation and community quick-install fallbacks are disabled.
+- **Installation checks:** Native checks install the packaged binary with no Rust or Cargo on PATH, compare its bytes against the archive, verify its version, and render a Mermaid diagram. After publication, the distribution workflow also tests real crates.io metadata and release downloads.
+- **Future updates:** Each stable release publishes the version's binstall metadata with the crate automatically. Users rerun the install command to update. WinGet submission remains automatic, subject to Microsoft's validation, review, and indexing.
 
-The 20-second demo retains its v0.2.2 label, and competitor performance comparisons retain their measured v0.2.1 baseline.
+Binstall installs the executable into the Cargo bin directory. Use the desktop installer, full Mac app bundle, or Debian package for desktop integration. Existing OS requirements remain: Windows 10 22H2/11 x64, macOS 15+ Apple Silicon/Intel, or Ubuntu 24.04 x64 (glibc 2.39 and desktop libraries). Source builds still require Rust 1.95+.
 
-See [desktop installation](https://github.com/Quetzalcohuatl/fastmarkdownviewer/blob/v0.2.5/docs/CROSS_PLATFORM.md) and the [code-signing policy](https://github.com/Quetzalcohuatl/fastmarkdownviewer/blob/v0.2.5/CODE_SIGNING.md). Download SHA256SUMS.txt with your package and verify its checksum and GitHub build-provenance attestation.
+Windows retains v0.2.5's automatic Direct3D/CPU fallback when OpenGL initialization fails. Windows builds remain unsigned; Mac apps are ad-hoc signed and unnotarized. The demo retains its v0.2.2 label, and performance comparisons retain their measured v0.2.1 baseline.
+
+See the [installation guide](https://github.com/Quetzalcohuatl/fastmarkdownviewer/blob/v0.2.6/docs/REGISTRY_DISTRIBUTION.md#binstall-prebuilt-installation). Download SHA256SUMS.txt with your package and verify its checksum and GitHub build-provenance attestation.

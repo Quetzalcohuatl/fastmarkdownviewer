@@ -7,6 +7,29 @@ policy checks. All packages come from the same annotated tag. Checksums and
 provenance cover every platform. The desktop workflow name is now Desktop builds;
 its existing filename is retained so links and workflow history remain useful.
 
+## Platform icons — 2026-10-01 candidate
+
+[Native run 36915166347](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/36915166347)
+passed on Ubuntu 24.04 and macOS 15 on both architectures, using source commit
+`7f0820576627791c52cae298078a697a049c74f7`. The full source, optimized-build,
+registry-installation, graphics, and desktop-package checks passed again.
+Mac package tests extract all ten standard/Retina representations from the actual
+bundled ICNS, up to 1024 pixels. The actual Apple Silicon Dock capture shows the
+rounded icon beside the system apps. Linux package tests verify the desktop
+identity, eight installed PNG sizes, and scalable SVG in the hicolor theme.
+
+Windows locally passed application Clippy, the runtime icon test, an optimized
+build, native launch/scroll/independent-window smoke checks, and packaging/hash
+verification. Resource checks compare all fifteen embedded PNG representations
+byte-for-byte in both the shipping EXE and Inno Setup installer. The optimized
+EXE is 20,998,144 bytes (46,592 bytes larger than the preceding appearance build),
+with SHA-256 `d9c6bfa04aab566b191b81dd4ed0d75512a2954d49d29242df4f54d7f2769cfb`.
+Artwork was inspected at small and large sizes against light and dark backgrounds.
+Icons are prebuilt; runtime decoding is cached and requires no SVG rendering.
+
+See [icon sources, regeneration, and design references](../assets/icons/README.md).
+These remain candidate packages; no release was published.
+
 ## Progressive rendering and appearance — 2026-10-01 candidate
 
 [Native run 36908874422](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/36908874422)

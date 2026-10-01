@@ -4,6 +4,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- Replace the stretched 32-pixel app icon with platform artwork: a rounded,
+  Retina macOS bundle icon, multiple Windows EXE/installer resolutions, and
+  installed Linux launcher icons including a scalable SVG. Cache runtime icon
+  decoding and retain pixel-aligned artwork at small sizes.
 - Show large code blocks immediately as plain text, then add syntax colors in
   the background without byte, token-count, or formatted-output cutoffs. Cancel
   stale work on appearance changes and document close/reload, with bounded queues

@@ -31,7 +31,7 @@ def generate(release, templates, output):
     files = {}
     for path in sorted(template.glob("*.yaml")):
         text = path.read_text(encoding="utf-8")
-        text = re.sub(r"(?m)^(PackageVersion|  DisplayVersion): .*", r"\g<1>: " + version, text)
+        text = re.sub(r"(?m)^PackageVersion: .*", "PackageVersion: " + version, text)
         text = re.sub(r"(?m)^- DisplayName: FastMarkdownViewer version .*",
                       "- DisplayName: FastMarkdownViewer version " + version, text)
         text = text.replace(f"/v{template.name}/", f"/v{version}/")

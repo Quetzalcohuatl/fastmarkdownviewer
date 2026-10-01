@@ -119,6 +119,7 @@ class DistributionTests(unittest.TestCase):
             self.assertIn("InstallerSha256: " + "A" * 64, installer)
             self.assertIn("ReleaseDate: 2026-09-16", installer)
             self.assertIn("DisplayName: FastMarkdownViewer version 9.8.7", installer)
+            self.assertNotIn("DisplayVersion:", installer)
             self.assertIn("RelativeFilePath: FastMarkdownViewer.exe", installer)
             with self.assertRaises(ValueError):
                 winget.generate(dict(release, installer_url="https://example.com/evil.exe"),

@@ -164,7 +164,7 @@ optional = true
 version = "2"
 
 [dependencies.winnow]
-version = "0.7.15"
+version = "1.0.4"
 
 [dev-dependencies.proptest]
 version = "1.10.0"

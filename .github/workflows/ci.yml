@@ -19,6 +19,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Test release distribution decisions
         run: python scripts/test-distribution.py
+      - name: Validate shipping icon assets
+        run: python scripts/test-icons.py
       - name: Lint release distribution workflow
         run: |
           Invoke-WebRequest https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip -OutFile actionlint.zip
@@ -53,6 +55,8 @@ jobs:
 
       - name: Build native UI smoke target
         run: cargo build --locked --bin FastMarkdownViewer --example visual_check
+      - name: Verify embedded Windows icon representations
+        run: python scripts/test-icons.py --binary target/debug/FastMarkdownViewer.exe
 
       - name: Verify real OpenGL failure recovery and software-rendered frames
         run: .\scripts\test-windows-graphics.ps1

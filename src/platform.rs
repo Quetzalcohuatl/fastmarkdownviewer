@@ -47,33 +47,25 @@ pub fn reveal_in_file_manager(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
+/// Decode the platform artwork once; detached windows reuse the cached pixels.
+/// The OS packages also carry multi-resolution icons for launchers and file managers.
+///
+/// # Panics
+///
+/// Panics if the embedded, build-verified PNG asset is corrupt.
 #[must_use]
 pub fn app_icon() -> eframe::egui::IconData {
-    const SIZE: usize = 32;
-    const SIZE_U32: u32 = 32;
-    let mut rgba = Vec::with_capacity(SIZE * SIZE * 4);
-    for y in 0..SIZE {
-        for x in 0..SIZE {
-            let page = (5..27).contains(&x) && (3..29).contains(&y);
-            let fold = x >= 21 && y < 9 && x - 21 >= 8 - y;
-            let line = (9..24).contains(&x) && matches!(y, 12 | 17 | 22) && (!fold || y >= 12);
-            let color = if line {
-                [31, 41, 55, 255]
-            } else if page && !fold {
-                [243, 244, 246, 255]
-            } else if page {
-                [145, 164, 188, 255]
-            } else {
-                [30, 111, 214, 255]
-            };
-            rgba.extend_from_slice(&color);
-        }
-    }
-    eframe::egui::IconData {
-        rgba,
-        width: SIZE_U32,
-        height: SIZE_U32,
-    }
+    static ICON: std::sync::OnceLock<eframe::egui::IconData> = std::sync::OnceLock::new();
+    ICON.get_or_init(|| {
+        #[cfg(target_os = "windows")]
+        let png = include_bytes!("../assets/icons/windows/256.png").as_slice();
+        #[cfg(target_os = "macos")]
+        let png = include_bytes!("../assets/icons/macos.iconset/icon_128x128@2x.png").as_slice();
+        #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+        let png = include_bytes!("../assets/icons/linux/256.png").as_slice();
+        eframe::icon_data::from_png_bytes(png).expect("Bundled application icon is a valid PNG")
+    })
+    .clone()
 }
 
 /// Format the primary keyboard modifier for this desktop.

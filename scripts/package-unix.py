@@ -24,8 +24,13 @@ if args.platform.startswith('macos'):
     contents = bundle / 'Contents'
     executable = contents / 'MacOS' / 'FastMarkdownViewer'
     executable.parent.mkdir(parents=True)
+    resources = contents / 'Resources'
+    resources.mkdir()
+    subprocess.run(['iconutil', '-c', 'icns', '-o', str(resources / 'AppIcon.icns'),
+                    str(root / 'assets/icons/macos.iconset')], check=True)
     info = {
         'CFBundleExecutable': 'FastMarkdownViewer',
+        'CFBundleIconFile': 'AppIcon.icns',
         'CFBundleIdentifier': 'io.github.quetzalcohuatl.fastmarkdownviewer',
         'CFBundleName': 'FastMarkdownViewer',
         'CFBundleDisplayName': 'FastMarkdownViewer',
@@ -57,7 +62,17 @@ else:
     (stage / 'FastMarkdownViewer.desktop').write_text(
         '[Desktop Entry]\nType=Application\nName=FastMarkdownViewer\n'
         'Comment=Read-only Markdown viewer\nExec=FastMarkdownViewer %f\n'
+        'Icon=FastMarkdownViewer\nStartupWMClass=FastMarkdownViewer\n'
         'Terminal=false\nCategories=Office;Viewer;\nMimeType=text/markdown;\n', encoding='utf-8')
+    icon_theme = stage / 'share/icons/hicolor'
+    for source in sorted((root / 'assets/icons/linux').glob('*.png')):
+        size = int(source.stem)
+        destination = icon_theme / f'{size}x{size}/apps/FastMarkdownViewer.png'
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+    scalable = icon_theme / 'scalable/apps/FastMarkdownViewer.svg'
+    scalable.parent.mkdir(parents=True)
+    shutil.copy2(root / 'assets/icons/linux.svg', scalable)
 shutil.copy2(args.binary, executable)
 executable.chmod(0o755)
 for filename in ['LICENSE-MIT', 'LICENSE-APACHE', 'THIRD_PARTY_NOTICES.md', 'PRIVACY.md']:
@@ -100,6 +115,7 @@ if args.platform == 'linux-x86_64':
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
     deb = args.output / (name + '.deb')
+    shutil.copytree(stage / 'share/icons', deb_root / 'usr/share/icons')
     subprocess.run(['dpkg-deb', '--root-owner-group', '--build', str(deb_root), str(deb)], check=True)
     archives.append(deb)
 for archive in archives:

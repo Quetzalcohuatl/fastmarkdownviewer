@@ -52,39 +52,8 @@ Copy-Item -LiteralPath (Join-Path $repositoryRoot 'assets\fonts\OFL-NotoEmoji.tx
 $zip = Join-Path $output "FastMarkdownViewer-$Version-windows-x86_64.zip"
 Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zip -CompressionLevel Optimal
 
-function New-ApplicationIcon([string] $Path) {
-    $size = 32
-    $xorSize = $size * $size * 4
-    $andSize = 4 * $size
-    $imageSize = 40 + $xorSize + $andSize
-    $stream = [System.IO.MemoryStream]::new()
-    $writer = [System.IO.BinaryWriter]::new($stream)
-    $writer.Write([uint16] 0); $writer.Write([uint16] 1); $writer.Write([uint16] 1)
-    $writer.Write([byte] $size); $writer.Write([byte] $size); $writer.Write([byte] 0); $writer.Write([byte] 0)
-    $writer.Write([uint16] 1); $writer.Write([uint16] 32); $writer.Write([uint32] $imageSize); $writer.Write([uint32] 22)
-    $writer.Write([uint32] 40); $writer.Write([int32] $size); $writer.Write([int32] ($size * 2))
-    $writer.Write([uint16] 1); $writer.Write([uint16] 32); $writer.Write([uint32] 0); $writer.Write([uint32] $xorSize)
-    $writer.Write([int32] 0); $writer.Write([int32] 0); $writer.Write([uint32] 0); $writer.Write([uint32] 0)
-    for ($y = $size - 1; $y -ge 0; $y--) {
-        for ($x = 0; $x -lt $size; $x++) {
-            $page = $x -ge 5 -and $x -lt 27 -and $y -ge 3 -and $y -lt 29
-            $fold = $x -ge 21 -and $y -lt 9 -and ($x - 21) -ge (8 - $y)
-            $line = $x -ge 9 -and $x -lt 24 -and $y -in @(12, 17, 22) -and (-not $fold -or $y -ge 12)
-            if ($line) { $rgba = @(31, 41, 55, 255) }
-            elseif ($page -and -not $fold) { $rgba = @(243, 244, 246, 255) }
-            elseif ($page) { $rgba = @(145, 164, 188, 255) }
-            else { $rgba = @(30, 111, 214, 255) }
-            $writer.Write([byte] $rgba[2]); $writer.Write([byte] $rgba[1]); $writer.Write([byte] $rgba[0]); $writer.Write([byte] $rgba[3])
-        }
-    }
-    for ($index = 0; $index -lt $andSize; $index++) { $writer.Write([byte] 0) }
-    $writer.Flush()
-    [System.IO.File]::WriteAllBytes($Path, $stream.ToArray())
-    $writer.Dispose(); $stream.Dispose()
-}
-
 $icon = Join-Path $output 'FastMarkdownViewer.ico'
-New-ApplicationIcon $icon
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'assets\icons\windows\app.ico') -Destination $icon
 if (-not (Test-Path -LiteralPath $InnoCompiler)) {
     throw "Inno Setup compiler not found: $InnoCompiler"
 }

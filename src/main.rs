@@ -49,9 +49,8 @@ fn main() -> eframe::Result {
         Box::new(move |creation_context| {
             network::install(&creation_context.egui_ctx);
             fonts::install(&creation_context.egui_ctx);
-            creation_context
-                .egui_ctx
-                .set_theme(egui::ThemePreference::System);
+            fast_markdown_viewer::appearance::ThemeChoice::default()
+                .apply(&creation_context.egui_ctx);
             creation_context.egui_ctx.all_styles_mut(|style| {
                 style.spacing.item_spacing.y = 7.0;
                 style.visuals.selection.stroke.width = 1.0;

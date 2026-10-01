@@ -1,0 +1,544 @@
+{
+  "windows-native": {
+    "0.2.7 / gfm-math-images-100k.md": {
+      "window_proxy_ms": {
+        "median": 19.559,
+        "min": 16.552,
+        "max": 306.104
+      },
+      "checkpoint_rss_mib": {
+        "median": 138.754,
+        "min": 138.539,
+        "max": 206.691
+      },
+      "checkpoint_private_mib": {
+        "median": 168.258,
+        "min": 167.348,
+        "max": 220.969
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.7 / images.md": {
+      "window_proxy_ms": {
+        "median": 19.939,
+        "min": 16.976,
+        "max": 20.611
+      },
+      "checkpoint_rss_mib": {
+        "median": 89.934,
+        "min": 88.059,
+        "max": 93.973
+      },
+      "checkpoint_private_mib": {
+        "median": 201.371,
+        "min": 199.98,
+        "max": 209.191
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.7 / ordinary-5k.md": {
+      "window_proxy_ms": {
+        "median": 18.312,
+        "min": 16.107,
+        "max": 21.273
+      },
+      "checkpoint_rss_mib": {
+        "median": 132.469,
+        "min": 132.094,
+        "max": 132.559
+      },
+      "checkpoint_private_mib": {
+        "median": 160.305,
+        "min": 159.691,
+        "max": 160.832
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 15.549
+      }
+    },
+    "0.2.8 / large-image.md": {
+      "window_proxy_ms": {
+        "median": 18.19,
+        "min": 15.733,
+        "max": 300.613
+      },
+      "checkpoint_rss_mib": {
+        "median": 125.648,
+        "min": 97.699,
+        "max": 141.645
+      },
+      "checkpoint_private_mib": {
+        "median": 338.5,
+        "min": 308.816,
+        "max": 353.973
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.8 / large-mermaid.md": {
+      "window_proxy_ms": {
+        "median": 17.1,
+        "min": 16.209,
+        "max": 20.024
+      },
+      "checkpoint_rss_mib": {
+        "median": 84.629,
+        "min": 83.945,
+        "max": 84.727
+      },
+      "checkpoint_private_mib": {
+        "median": 117.371,
+        "min": 114.602,
+        "max": 119.82
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.8 / images.md": {
+      "window_proxy_ms": {
+        "median": 16.772,
+        "min": 15.614,
+        "max": 20.219
+      },
+      "checkpoint_rss_mib": {
+        "median": 94.57,
+        "min": 90.715,
+        "max": 94.645
+      },
+      "checkpoint_private_mib": {
+        "median": 205.656,
+        "min": 205.07,
+        "max": 208.164
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.8 / large-code.md": {
+      "window_proxy_ms": {
+        "median": 19.917,
+        "min": 16.474,
+        "max": 24.134
+      },
+      "checkpoint_rss_mib": {
+        "median": 120.773,
+        "min": 114.773,
+        "max": 121.234
+      },
+      "checkpoint_private_mib": {
+        "median": 151.859,
+        "min": 146.711,
+        "max": 153.457
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.8 / ordinary-5k.md": {
+      "window_proxy_ms": {
+        "median": 20.169,
+        "min": 16.685,
+        "max": 24.221
+      },
+      "checkpoint_rss_mib": {
+        "median": 132.707,
+        "min": 132.648,
+        "max": 133.141
+      },
+      "checkpoint_private_mib": {
+        "median": 160.848,
+        "min": 159.73,
+        "max": 161.562
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.7 / large-code.md": {
+      "window_proxy_ms": {
+        "median": 18.112,
+        "min": 16.695,
+        "max": 21.973
+      },
+      "checkpoint_rss_mib": {
+        "median": 83.523,
+        "min": 78.855,
+        "max": 83.691
+      },
+      "checkpoint_private_mib": {
+        "median": 112.605,
+        "min": 107.473,
+        "max": 113.281
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.7 / large-mermaid.md": {
+      "window_proxy_ms": {
+        "median": 16.083,
+        "min": 15.467,
+        "max": 20.013
+      },
+      "checkpoint_rss_mib": {
+        "median": 83.434,
+        "min": 82.863,
+        "max": 83.457
+      },
+      "checkpoint_private_mib": {
+        "median": 110.52,
+        "min": 110.336,
+        "max": 111.109
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.8 / gfm-math-images-100k.md": {
+      "window_proxy_ms": {
+        "median": 17.468,
+        "min": 16.298,
+        "max": 21.248
+      },
+      "checkpoint_rss_mib": {
+        "median": 139.559,
+        "min": 137.523,
+        "max": 143.434
+      },
+      "checkpoint_private_mib": {
+        "median": 168.41,
+        "min": 167.289,
+        "max": 171.738
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    },
+    "0.2.7 / large-image.md": {
+      "window_proxy_ms": {
+        "median": 16.561,
+        "min": 15.711,
+        "max": 17.578
+      },
+      "checkpoint_rss_mib": {
+        "median": 67.035,
+        "min": 66.66,
+        "max": 67.062
+      },
+      "checkpoint_private_mib": {
+        "median": 95.074,
+        "min": 94.914,
+        "max": 96.383
+      },
+      "cpu_ms_per_second": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      }
+    }
+  },
+  "windows-layout": {
+    "candidate / images.md": {
+      "scroll_median_ms": {
+        "median": 0.13119999999999998,
+        "min": 0.1164,
+        "max": 0.4387
+      },
+      "scroll_p95_ms": {
+        "median": 0.6292,
+        "min": 0.3441,
+        "max": 0.8749
+      }
+    },
+    "candidate / gfm-math-images-100k.md": {
+      "scroll_median_ms": {
+        "median": 8.6929,
+        "min": 8.3967,
+        "max": 15.120700000000001
+      },
+      "scroll_p95_ms": {
+        "median": 14.072,
+        "min": 9.7613,
+        "max": 16.9462
+      }
+    },
+    "baseline / images.md": {
+      "scroll_median_ms": {
+        "median": 0.25789999999999996,
+        "min": 0.2456,
+        "max": 0.4452
+      },
+      "scroll_p95_ms": {
+        "median": 0.6829,
+        "min": 0.3654,
+        "max": 1.0709
+      }
+    },
+    "baseline / ordinary-5k.md": {
+      "scroll_median_ms": {
+        "median": 0.4727,
+        "min": 0.4518,
+        "max": 1.2712999999999999
+      },
+      "scroll_p95_ms": {
+        "median": 1.1513,
+        "min": 0.7791,
+        "max": 1.5954000000000002
+      }
+    },
+    "baseline / stress-2m.md": {
+      "scroll_median_ms": {
+        "median": 240.58350000000002,
+        "min": 237.3564,
+        "max": 243.2587
+      },
+      "scroll_p95_ms": {
+        "median": 293.8371,
+        "min": 287.0737,
+        "max": 407.29789999999997
+      }
+    },
+    "candidate / stress-2m.md": {
+      "scroll_median_ms": {
+        "median": 241.98590000000002,
+        "min": 235.8697,
+        "max": 242.5973
+      },
+      "scroll_p95_ms": {
+        "median": 294.1315,
+        "min": 238.17669999999998,
+        "max": 404.2227
+      }
+    },
+    "candidate / ordinary-5k.md": {
+      "scroll_median_ms": {
+        "median": 0.4601,
+        "min": 0.4554,
+        "max": 0.5191
+      },
+      "scroll_p95_ms": {
+        "median": 0.9195,
+        "min": 0.8476999999999999,
+        "max": 1.3108
+      }
+    },
+    "baseline / gfm-math-images-100k.md": {
+      "scroll_median_ms": {
+        "median": 13.264,
+        "min": 8.4069,
+        "max": 15.4433
+      },
+      "scroll_p95_ms": {
+        "median": 16.1004,
+        "min": 9.967,
+        "max": 16.9618
+      }
+    }
+  },
+  "windows-mermaid": {
+    "candidate-display / large": {
+      "geometry_ms": {
+        "median": 38.139500000397675,
+        "min": 31.40170000551734,
+        "max": 48.79500000970438
+      },
+      "first_png_ms": {
+        "median": 59.7154999995837,
+        "min": 53.065000000060536,
+        "max": 81.50319999549538
+      },
+      "complete_ms": {
+        "median": 174.71690000093076,
+        "min": 168.50040000281297,
+        "max": 197.12840000283904
+      },
+      "exit_codes": [
+        "0"
+      ],
+      "errors": [
+        ""
+      ],
+      "dimensions": [
+        [
+          "800",
+          "1010"
+        ]
+      ]
+    },
+    "candidate-display / small": {
+      "geometry_ms": {
+        "median": 14.818700001342222,
+        "min": 14.351000005262904,
+        "max": 21.827100004884414
+      },
+      "first_png_ms": {
+        "median": 20.421699999133125,
+        "min": 14.818700001342222,
+        "max": 27.840400012792088
+      },
+      "complete_ms": {
+        "median": 78.94789999409113,
+        "min": 74.64200000686105,
+        "max": 93.00260001327842
+      },
+      "exit_codes": [
+        "0"
+      ],
+      "errors": [
+        ""
+      ],
+      "dimensions": [
+        [
+          "529",
+          "73"
+        ]
+      ]
+    },
+    "candidate-natural / small": {
+      "geometry_ms": {
+        "median": 20.660800000769086,
+        "min": 14.129700008197688,
+        "max": 22.0738999923924
+      },
+      "first_png_ms": {
+        "median": 21.702399986679666,
+        "min": 19.63340000656899,
+        "max": 28.229999996256083
+      },
+      "complete_ms": {
+        "median": 82.04920000571292,
+        "min": 79.08450000104494,
+        "max": 97.5083000084851
+      },
+      "exit_codes": [
+        "0"
+      ],
+      "errors": [
+        ""
+      ],
+      "dimensions": [
+        [
+          "529",
+          "73"
+        ]
+      ]
+    },
+    "candidate-natural / large": {
+      "geometry_ms": {
+        "median": 39.85099999408703,
+        "min": 30.44919999956619,
+        "max": 48.2895000022836
+      },
+      "first_png_ms": {
+        "median": 45.39179999846965,
+        "min": 36.31630000018049,
+        "max": 53.96099999779835
+      },
+      "complete_ms": {
+        "median": 397.72130000346806,
+        "min": 338.4346000093501,
+        "max": 423.21319998882245
+      },
+      "exit_codes": [
+        "0"
+      ],
+      "errors": [
+        ""
+      ],
+      "dimensions": [
+        [
+          "2357",
+          "2974"
+        ]
+      ]
+    },
+    "baseline / small": {
+      "geometry_ms": null,
+      "first_png_ms": {
+        "median": 21.16109999769833,
+        "min": 19.92170000448823,
+        "max": 26.880299992626533
+      },
+      "complete_ms": {
+        "median": 86.36549999937415,
+        "min": 73.57609999598935,
+        "max": 91.99339999759104
+      },
+      "exit_codes": [
+        "0"
+      ],
+      "errors": [
+        ""
+      ],
+      "dimensions": [
+        [
+          "",
+          ""
+        ]
+      ]
+    },
+    "baseline / large": {
+      "geometry_ms": null,
+      "first_png_ms": null,
+      "complete_ms": {
+        "median": 107.91500000050291,
+        "min": 100.421399998595,
+        "max": 118.74180000449996
+      },
+      "exit_codes": [
+        "2"
+      ],
+      "errors": [
+        "Diagram exceeds 4 megapixel limit"
+      ],
+      "dimensions": [
+        [
+          "",
+          ""
+        ]
+      ]
+    }
+  },
+  "windows-highlighting": {
+    "candidate": {
+      "first_plain_ms": {
+        "median": 8.6484,
+        "min": 8.0061,
+        "max": 10.426
+      },
+      "complete_ms": {
+        "median": 1250.3588000000002,
+        "min": 1147.2287999999999,
+        "max": 1253.2886
+      }
+    }
+  }
+}

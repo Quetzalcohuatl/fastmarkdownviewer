@@ -15,8 +15,10 @@ pub(crate) struct State {
     pub theme: ThemeChoice,
     pub fonts: [Option<String>; 2],
     pub zoom: f32,
+    pub text_size_percent: u16,
     pub automatic_images: bool,
     pub word_wrap: bool,
+    pub document_width: crate::appearance::DocumentWidth,
     pub windows: Vec<Window>,
 }
 
@@ -24,11 +26,13 @@ impl Default for State {
     fn default() -> Self {
         Self {
             version: 1,
-            theme: ThemeChoice::System,
+            theme: ThemeChoice::default(),
             fonts: [None, None],
             zoom: 1.0,
+            text_size_percent: 100,
             automatic_images: true,
             word_wrap: true,
+            document_width: crate::appearance::DocumentWidth::default(),
             windows: Vec::new(),
         }
     }
@@ -85,6 +89,10 @@ pub(crate) fn read(path: &Path) -> State {
         } else {
             1.0
         };
+        state.text_size_percent = state.text_size_percent.clamp(
+            crate::appearance::MIN_TEXT_SIZE,
+            crate::appearance::MAX_TEXT_SIZE,
+        );
         // Bound restoration independently of how much a corrupt file claims to contain.
         state.windows.truncate(32);
         for window in &mut state.windows {
@@ -136,11 +144,40 @@ mod tests {
         state.theme = ThemeChoice::Monokai;
         write(&path, &state).unwrap();
         assert_eq!(read(&path).theme, ThemeChoice::Monokai);
+        state.document_width = crate::appearance::DocumentWidth::FitWindow;
+        write(&path, &state).unwrap();
+        assert_eq!(
+            read(&path).document_width,
+            crate::appearance::DocumentWidth::FitWindow
+        );
         std::fs::write(&path, b"{truncated").unwrap();
-        assert_eq!(read(&path).theme, ThemeChoice::System);
+        assert_eq!(read(&path).theme, ThemeChoice::Monokai);
         std::fs::write(&path, br#"{"version":99,"zoom":2}"#).unwrap();
         assert!((read(&path).zoom - 1.0).abs() < f32::EPSILON);
         std::fs::write(&path, br#"{"zoom":999}"#).unwrap();
         assert!((read(&path).zoom - 3.0).abs() < f32::EPSILON);
+        assert_eq!(
+            read(&path).document_width,
+            crate::appearance::DocumentWidth::Comfortable
+        );
+        assert!(read(&path).word_wrap);
+    }
+
+    #[test]
+    fn new_settings_use_monokai_and_existing_theme_and_zoom_are_preserved() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("state.json");
+        let defaults = read(&path);
+        assert_eq!(defaults.theme, ThemeChoice::Monokai);
+        assert_eq!(defaults.text_size_percent, 100);
+        std::fs::write(&path, br#"{"theme":"System","zoom":1.5}"#).unwrap();
+        let old = read(&path);
+        assert_eq!(old.theme, ThemeChoice::System);
+        assert_eq!(old.text_size_percent, 100);
+        assert!((old.zoom - 1.5).abs() < f32::EPSILON);
+        for (stored, expected) in [(0, 75), (150, 150), (999, 200)] {
+            std::fs::write(&path, format!("{{\"text_size_percent\":{stored}}}")).unwrap();
+            assert_eq!(read(&path).text_size_percent, expected);
+        }
     }
 }

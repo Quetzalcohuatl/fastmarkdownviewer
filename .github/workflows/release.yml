@@ -86,6 +86,10 @@ jobs:
           $repositoryUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY"
           .\scripts\package-release.ps1 -Version $version -Binary .\target\x86_64-pc-windows-msvc\release\FastMarkdownViewer.exe -OutputDirectory .\release -RepositoryUrl $repositoryUrl
           .\scripts\verify-release.ps1 -Version $version -Directory .\release
+          python scripts/test-icons.py --binary ".\release\FastMarkdownViewer-$version-windows-x86_64.exe"
+          if ($LASTEXITCODE -ne 0) { throw 'Executable icon validation failed.' }
+          python scripts/test-icons.py --binary ".\release\FastMarkdownViewer-Setup-$version.exe"
+          if ($LASTEXITCODE -ne 0) { throw 'Installer icon validation failed.' }
 
       - name: Install packaged binary with binstall and no Rust on PATH
         env:

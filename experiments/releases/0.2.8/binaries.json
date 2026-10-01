@@ -1,0 +1,18 @@
+{
+  "published_0.2.7": {
+    "bytes": 20806656,
+    "sha256": "e9e5b69cc9b856a7d39a3647cb09983fec5aeaa4b11847112596475c6e1ab16b"
+  },
+  "local_0.2.8": {
+    "bytes": 20998144,
+    "sha256": "2faa158ba1951797514e9fd5c01d3e19e2cbfd9daf400850f5e4bb6adfedf159"
+  },
+  "layout_0.2.7": {
+    "bytes": 15254016,
+    "sha256": "ee48ca0738ffe87511a562d62c394679d77b52339b67e07880712f37bf323237"
+  },
+  "layout_0.2.8": {
+    "bytes": 15428096,
+    "sha256": "8dccda04a3db7a67b9d79090fd4ac76e9d0e65391f87facc947aa33352704124"
+  }
+}

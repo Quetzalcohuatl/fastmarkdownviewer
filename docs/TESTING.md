@@ -53,6 +53,25 @@ the focused regression for the v0.1 nested-list crash in
 
 Image resource unit tests cover LRU payload budgets, worker concurrency permits, and stale worker completions after invalidation. Exploratory performance evidence and its limitations are recorded in [reader-results.md](../experiments/architecture/reader-results.md).
 
+The size-limit regressions load Markdown beyond 32 MiB, local and included SVG
+inputs beyond 10 MiB, a remote response beyond 10 MiB, and a PNG beyond 40
+megapixels. They check display sizing and original image dimensions, including
+graphics-hardware downsampling and soft cache budgets. Mermaid executable tests
+render source beyond 64 KiB and verify complete tile coverage of a diagram beyond
+four megapixels. Unit tests check offscreen deferral, stale appearance results,
+and cancellation on tab release. Release measurements and framebuffer checks are
+recorded in [the appearance report](APPEARANCE.md#progressive-diagrams-and-size-cutoff-removal--2026-10-01).
+
+`tests/highlighting.rs` verifies that an 820,000-byte Rust block first appears
+plain, later gains colors through its final byte, crosses the former 16,384-span
+and 8 MiB formatted-output limits, and stays highlighted on the next frame. The
+backend's unit tests cover obsolete-work cancellation and cache release:
+`cargo test --locked -p fmv-egui-commonmark-backend --lib`. Both suites run in
+Windows CI and the Ubuntu / Apple Silicon / Intel Mac desktop matrix.
+`scripts/generate-progressive-fixtures.py` creates large-code and large-Mermaid
+fixtures for native framebuffer checks; `FMV_VISUAL_WAIT_MS=10000` gives the
+capture tool time to observe completed highlighting on slower runners.
+
 ## Native Windows process smoke test
 
 `scripts/test-windows-ui.ps1` launches the compiled executable with the feature

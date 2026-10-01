@@ -13,7 +13,7 @@
 edition = "2024"
 rust-version = "1.95"
 name = "fmv-egui-commonmark-backend"
-version = "0.25.0-fmv.1"
+version = "0.25.0-fmv.2"
 authors = ["Erlend Walstad"]
 build = false
 include = [

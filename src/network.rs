@@ -15,7 +15,7 @@ use eframe::egui::{
         LoadError, SizeHint,
     },
 };
-use image::{GenericImageView as _, ImageFormat, ImageReader, Limits};
+use image::{GenericImageView as _, ImageFormat, ImageReader};
 use url::{Host, Url};
 
 mod resources;
@@ -92,8 +92,6 @@ pub fn image_placeholder(ui: &mut egui::Ui, uri: &str, alt: &str) -> bool {
     true
 }
 
-pub const MAX_REMOTE_BYTES: usize = 10 * 1024 * 1024;
-pub const MAX_DECODED_PIXELS: u64 = 40_000_000;
 const MAX_REDIRECTS: usize = 5;
 
 #[derive(Clone)]
@@ -212,14 +210,7 @@ fn mime_from_path(path: &std::path::Path) -> Option<String> {
 }
 
 fn read_local_image(path: &std::path::Path) -> std::io::Result<Vec<u8>> {
-    let mut bytes = Vec::new();
-    std::fs::File::open(path)?
-        .take((MAX_REMOTE_BYTES + 1) as u64)
-        .read_to_end(&mut bytes)?;
-    if bytes.len() > MAX_REMOTE_BYTES {
-        return Err(std::io::Error::other("local image is larger than 10 MiB"));
-    }
-    Ok(bytes)
+    std::fs::read(path)
 }
 
 #[derive(Default)]
@@ -355,37 +346,30 @@ fn fetch_remote(mut url: Url) -> Result<RemoteFile, String> {
         if !(200..300).contains(&response.status()) {
             return Err(format!("image server returned HTTP {}", response.status()));
         }
-        if response
-            .header("Content-Length")
-            .and_then(|length| length.parse::<usize>().ok())
-            .is_some_and(|length| length > MAX_REMOTE_BYTES)
-        {
-            return Err("remote image is larger than 10 MiB".to_owned());
-        }
 
-        let mime = response.header("Content-Type").map(|mime| {
-            mime.split(';')
-                .next()
-                .unwrap_or(mime)
-                .trim()
-                .to_ascii_lowercase()
-        });
-        let mut bytes = Vec::new();
-        response
-            .into_reader()
-            .take((MAX_REMOTE_BYTES + 1) as u64)
-            .read_to_end(&mut bytes)
-            .map_err(|error| format!("could not read image response: {error}"))?;
-        if bytes.len() > MAX_REMOTE_BYTES {
-            return Err("remote image is larger than 10 MiB".to_owned());
-        }
-        return Ok(RemoteFile {
-            bytes: bytes.into(),
-            mime,
-        });
+        return read_remote_response(response);
     }
 
     Err("image redirected too many times".to_owned())
+}
+
+fn read_remote_response(response: ureq::Response) -> Result<RemoteFile, String> {
+    let mime = response.header("Content-Type").map(|mime| {
+        mime.split(';')
+            .next()
+            .unwrap_or(mime)
+            .trim()
+            .to_ascii_lowercase()
+    });
+    let mut bytes = Vec::new();
+    response
+        .into_reader()
+        .read_to_end(&mut bytes)
+        .map_err(|error| format!("could not read image response: {error}"))?;
+    Ok(RemoteFile {
+        bytes: bytes.into(),
+        mime,
+    })
 }
 
 /// Validate the static policy for a remote image URL.
@@ -507,12 +491,13 @@ impl ImageLoader for SafeImageLoader {
                 let pending_key = key.clone();
                 let cache = Arc::clone(&self.cache);
                 let viewport = context.viewport_id();
+                let max_side = context.input(|input| input.max_texture_side);
                 let context = context.clone();
                 thread::Builder::new()
                     .name("FastMarkdownViewer image decode".to_owned())
                     .spawn(move || {
                         let _permit = permit;
-                        let result = decode_image(&key.0, &bytes, mime.as_deref(), key.1)
+                        let result = decode_image(&key.0, &bytes, mime.as_deref(), key.1, max_side)
                             .map_or_else(DecodedEntry::Failed, |image| {
                                 DecodedEntry::Ready(Arc::new(image))
                             });
@@ -568,9 +553,10 @@ fn decode_image(
     bytes: &Bytes,
     mime: Option<&str>,
     size_hint: SizeHint,
+    max_side: usize,
 ) -> Result<ColorImage, String> {
     if is_svg(uri, mime, bytes) {
-        return decode_svg(bytes, size_hint);
+        return decode_svg(bytes, size_hint, max_side);
     }
 
     let format = image::guess_format(bytes).map_err(|error| error.to_string())?;
@@ -580,28 +566,23 @@ fn decode_image(
     ) {
         return Err("unsupported image format".to_owned());
     }
-    let dimensions = ImageReader::with_format(Cursor::new(bytes.as_ref()), format)
-        .into_dimensions()
-        .map_err(|error| error.to_string())?;
-    enforce_pixel_limit(u64::from(dimensions.0), u64::from(dimensions.1))?;
-
     let mut reader = ImageReader::with_format(Cursor::new(bytes.as_ref()), format);
-    let mut limits = Limits::default();
-    limits.max_image_width = Some(dimensions.0);
-    limits.max_image_height = Some(dimensions.1);
-    limits.max_alloc = Some(256 * 1024 * 1024);
-    reader.limits(limits);
+    reader.no_limits();
     let decoded = reader.decode().map_err(|error| error.to_string())?;
     let (width, height) = decoded.dimensions();
-    enforce_pixel_limit(u64::from(width), u64::from(height))?;
+    #[allow(clippy::cast_precision_loss)]
+    let source = egui::vec2(width as f32, height as f32);
+    let size = raster_size(source, size_hint, max_side, false)?;
+    let decoded = if size == [width, height] {
+        decoded
+    } else {
+        decoded.resize_exact(size[0], size[1], image::imageops::FilterType::Triangle)
+    };
     let rgba = decoded.into_rgba8();
-    Ok(ColorImage::from_rgba_unmultiplied(
-        [
-            usize::try_from(width).map_err(|error| error.to_string())?,
-            usize::try_from(height).map_err(|error| error.to_string())?,
-        ],
-        rgba.as_raw(),
-    ))
+    Ok(
+        ColorImage::from_rgba_unmultiplied([size[0] as usize, size[1] as usize], rgba.as_raw())
+            .with_source_size(source),
+    )
 }
 
 // Check SVG dimensions before allocating its raster buffer. Match egui_extras' sizing.
@@ -610,11 +591,36 @@ fn decode_image(
     clippy::cast_sign_loss,
     clippy::cast_precision_loss
 )]
-fn decode_svg(bytes: &[u8], hint: SizeHint) -> Result<ColorImage, String> {
+fn decode_svg(bytes: &[u8], hint: SizeHint, max_side: usize) -> Result<ColorImage, String> {
     let tree = resvg::usvg::Tree::from_data(bytes, &resvg::usvg::Options::default())
         .map_err(|error| error.to_string())?;
     let source = egui::vec2(tree.size().width(), tree.size().height());
-    let size = match hint {
+    let [width, height] = raster_size(source, hint, max_side, true)?;
+    let mut pixels = resvg::tiny_skia::Pixmap::new(width, height)
+        .ok_or_else(|| "could not allocate SVG pixels".to_owned())?;
+    resvg::render(
+        &tree,
+        resvg::usvg::Transform::from_scale(width as f32 / source.x, height as f32 / source.y),
+        &mut pixels.as_mut(),
+    );
+    Ok(
+        ColorImage::from_rgba_premultiplied([width as usize, height as usize], pixels.data())
+            .with_source_size(source),
+    )
+}
+
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss
+)]
+fn raster_size(
+    source: egui::Vec2,
+    hint: SizeHint,
+    max_side: usize,
+    upscale: bool,
+) -> Result<[u32; 2], String> {
+    let mut size = match hint {
         SizeHint::Size {
             width,
             height,
@@ -628,24 +634,18 @@ fn decode_svg(bytes: &[u8], hint: SizeHint) -> Result<ColorImage, String> {
         SizeHint::Width(width) => source * (width as f32 / source.x),
         SizeHint::Height(height) => source * (height as f32 / source.y),
         SizeHint::Scale(scale) => source * scale.into_inner(),
-    }
-    .round();
-    if !size.is_finite() || size.x < 1.0 || size.y < 1.0 {
+    };
+    if !size.is_finite() || size.x <= 0.0 || size.y <= 0.0 {
         return Err("invalid SVG dimensions".into());
     }
-    enforce_pixel_limit(size.x as u64, size.y as u64)?;
-    let (width, height) = (size.x as u32, size.y as u32);
-    let mut pixels = resvg::tiny_skia::Pixmap::new(width, height)
-        .ok_or_else(|| "could not allocate SVG pixels".to_owned())?;
-    resvg::render(
-        &tree,
-        resvg::usvg::Transform::from_scale(size.x / source.x, size.y / source.y),
-        &mut pixels.as_mut(),
-    );
-    Ok(
-        ColorImage::from_rgba_premultiplied([width as usize, height as usize], pixels.data())
-            .with_source_size(source),
-    )
+    if !upscale {
+        size *= (source.x / size.x).min(source.y / size.y).min(1.0);
+    }
+    size *= ((max_side.max(1) as f32) / size.x.max(size.y)).min(1.0);
+    Ok([
+        size.x.round().max(1.0) as u32,
+        size.y.round().max(1.0) as u32,
+    ])
 }
 
 fn is_svg(uri: &str, mime: Option<&str>, bytes: &[u8]) -> bool {
@@ -667,17 +667,6 @@ fn is_svg(uri: &str, mime: Option<&str>, bytes: &[u8]) -> bool {
             .is_some_and(|extension| extension.eq_ignore_ascii_case("svg"))
         || std::str::from_utf8(bytes.get(..bytes.len().min(512)).unwrap_or(bytes))
             .is_ok_and(|start| start.contains("<svg"))
-}
-
-fn enforce_pixel_limit(width: u64, height: u64) -> Result<(), String> {
-    if width
-        .checked_mul(height)
-        .is_none_or(|pixels| pixels > MAX_DECODED_PIXELS)
-    {
-        Err("decoded image is larger than 40 megapixels".to_owned())
-    } else {
-        Ok(())
-    }
 }
 
 fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
@@ -730,22 +719,40 @@ mod tests {
     }
 
     #[test]
-    fn enforces_decoded_pixel_limit() {
-        assert!(enforce_pixel_limit(8_000, 5_000).is_ok());
-        assert!(enforce_pixel_limit(8_001, 5_000).is_err());
+    fn large_images_fit_hardware_without_rejection() {
+        assert_eq!(
+            raster_size(
+                egui::vec2(80_000.0, 50_000.0),
+                SizeHint::Width(800),
+                2048,
+                false
+            )
+            .unwrap(),
+            [800, 500]
+        );
+    }
+
+    #[test]
+    fn remote_responses_are_not_truncated_at_ten_mib() {
+        let body = "a".repeat(11 * 1024 * 1024);
+        let response = ureq::Response::new(200, "OK", &body).unwrap();
+        let result = read_remote_response(response).unwrap();
+        assert_eq!(result.bytes.len(), body.len());
+        assert_eq!(&*result.bytes, body.as_bytes());
     }
 
     #[test]
     fn svg_checks_raster_size_and_preserves_source_dimensions() {
         let svg = br#"<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><rect width="80" height="40" fill="red"/></svg>"#;
-        let image = decode_svg(svg, SizeHint::Width(160)).unwrap();
+        let image = decode_svg(svg, SizeHint::Width(160), 2048).unwrap();
         assert_eq!(image.size, [160, 80]);
         assert_eq!(image.source_size, egui::vec2(80.0, 40.0));
         assert_eq!(image.pixels[0], egui::Color32::RED);
-        assert!(
-            decode_svg(svg, SizeHint::Width(100_000))
-                .unwrap_err()
-                .contains("40 megapixels")
+        assert_eq!(
+            decode_svg(svg, SizeHint::Width(100_000), 2048)
+                .unwrap()
+                .size,
+            [2048, 1024]
         );
     }
 }

@@ -161,6 +161,15 @@ pub(crate) fn preferences(context: &egui::Context) -> [Option<String>; 2] {
         .map_or([None, None], |state| state.preferred)
 }
 
+/// Read only the selected text font; avoid cloning the font database each frame.
+pub(crate) fn diagram_font(context: &egui::Context) -> Option<String> {
+    context.data_mut(|data| {
+        data.get_temp_mut_or_default::<FontState>(state_id())
+            .preferred[0]
+            .clone()
+    })
+}
+
 pub(crate) fn restore(context: &egui::Context, preferences: &[Option<String>; 2]) {
     let Some(state) = context.data(|data| data.get_temp::<FontState>(state_id())) else {
         return;

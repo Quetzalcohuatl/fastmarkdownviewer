@@ -6,7 +6,7 @@ Vendored `egui_commonmark_backend` 0.25.0, under its original MIT OR Apache-2.0 
 2. Keep code lines unwrapped in a horizontal scroll area.
 3. Record selectable text galleys and search geometry while Find is active; preserve egui's selection and AccessKit paths.
 4. Record link captions through the same geometry path while preserving safe URL interception and fragment links.
-5. Load syntect syntax/theme sets on a background worker only for visible tagged code. Bound work queues, block size, and per-tab caches; keep plain text until results arrive and for unsupported languages.
+5. Load syntect syntax/theme sets on a background worker only for visible tagged code. Keep plain text until results arrive and for unsupported languages, without input-byte, token-count, or formatted-output cutoffs. Bound request/result queues; cache budgets are soft targets that retain an individual oversized result. Cancel obsolete work between lines on appearance changes or cache release, and repaint the originating viewport.
 6. Reveal code search targets inside the nested horizontal scroll area.
 7. Invoke an optional image gate before image loading or cached texture display, preserving alt text for placeholders.
 8. Forward fragment link clicks through the application's link interceptor, which resolves explicit IDs and generated heading slugs consistently across tabs.

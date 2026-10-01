@@ -1,0 +1,30 @@
+{
+  "environment": "Ordinary Windows desktop; fresh processes and warm filesystem caches; no CPU isolation or reboot; isolated app profiles; no concurrent local builds or tests during measurements",
+  "memory_bytes": 272303050752,
+  "rust": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "os": {
+    "Caption": "Microsoft Windows 11 Pro",
+    "Version": "10.0.26300",
+    "BuildNumber": "26300",
+    "OSArchitecture": "64-bit"
+  },
+  "profile": "Release: opt-level=3, fat LTO, one codegen unit, panic=abort, crt-static",
+  "cpu": {
+    "Name": "AMD Ryzen 9 9950X 16-Core Processor            ",
+    "NumberOfCores": 16,
+    "NumberOfLogicalProcessors": 32
+  },
+  "baseline_source": "98fc1e259938980486ee3bcc3f3086eef73a0328",
+  "date": "2026-10-01",
+  "gpu": [
+    {
+      "Name": "NVIDIA GeForce RTX 5080",
+      "DriverVersion": "32.0.15.9186"
+    },
+    {
+      "Name": "AMD Radeon(TM) Graphics",
+      "DriverVersion": "32.0.21030.2001"
+    }
+  ],
+  "system_dpi": 144
+}

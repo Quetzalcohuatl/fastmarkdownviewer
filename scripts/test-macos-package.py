@@ -32,6 +32,18 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
     info = plistlib.loads((bundle / 'Contents/Info.plist').read_bytes())
     assert info['LSMinimumSystemVersion'] == '15.0'
     assert info['CFBundleDocumentTypes'][0]['CFBundleTypeRole'] == 'Viewer'
+    assert info['CFBundleIconFile'] == 'AppIcon.icns'
+    icon = bundle / 'Contents/Resources' / info['CFBundleIconFile']
+    iconset = work / 'extracted.iconset'
+    subprocess.run(['iconutil', '-c', 'iconset', '-o', str(iconset), str(icon)], check=True)
+    for nominal in [16, 32, 128, 256, 512]:
+        for density in [1, 2]:
+            suffix = '@2x' if density == 2 else ''
+            png = (iconset / f'icon_{nominal}x{nominal}{suffix}.png').read_bytes()
+            assert png[:8] == b'\x89PNG\r\n\x1a\n'
+            assert int.from_bytes(png[16:20], 'big') == nominal * density
+            assert int.from_bytes(png[20:24], 'big') == nominal * density
+    print('Bundle icon: all ten native standard/Retina representations verified.', flush=True)
     binary = bundle / 'Contents/MacOS/FastMarkdownViewer'
     subprocess.run(['codesign', '--verify', '--strict', str(bundle)], check=True)
     subprocess.run(['/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister', '-f', str(bundle)], check=True)

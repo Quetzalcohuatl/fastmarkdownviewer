@@ -18,6 +18,7 @@ struct Capture {
     requested: bool,
     query: Option<String>,
     find_opened: bool,
+    delay: Duration,
 }
 
 impl eframe::App for Capture {
@@ -68,13 +69,13 @@ impl eframe::App for Capture {
             }
         }
         self.viewer.show(ui);
-        if !self.requested && self.start.elapsed() > Duration::from_secs(2) {
+        if !self.requested && self.start.elapsed() > self.delay {
             ui.ctx()
                 .send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
             self.requested = true;
         }
         assert!(
-            self.start.elapsed() < Duration::from_secs(15),
+            self.start.elapsed() < self.delay + Duration::from_secs(15),
             "framebuffer capture timed out"
         );
         ui.ctx().request_repaint_after(Duration::from_millis(16));
@@ -110,6 +111,15 @@ fn main() -> eframe::Result {
         Box::new(move |creation| {
             fonts::install(&creation.egui_ctx);
             network::install(&creation.egui_ctx);
+            fast_markdown_viewer::appearance::ThemeChoice::default().apply(&creation.egui_ctx);
+            if let Ok(value) = std::env::var("FMV_VISUAL_TEXT_SIZE")
+                && let Ok(percent) = value.parse()
+            {
+                fast_markdown_viewer::appearance::set_text_size_percent(
+                    &creation.egui_ctx,
+                    percent,
+                );
+            }
             // Optional palette for repeatable visual checks; not an application setting.
             if let Ok(name) = std::env::var("FMV_VISUAL_THEME")
                 && let Some(theme) = fast_markdown_viewer::appearance::ThemeChoice::ALL
@@ -134,6 +144,12 @@ fn main() -> eframe::Result {
                 requested: false,
                 query,
                 find_opened: false,
+                delay: Duration::from_millis(
+                    std::env::var("FMV_VISUAL_WAIT_MS")
+                        .ok()
+                        .and_then(|value| value.parse().ok())
+                        .unwrap_or(2000),
+                ),
             }))
         }),
     )

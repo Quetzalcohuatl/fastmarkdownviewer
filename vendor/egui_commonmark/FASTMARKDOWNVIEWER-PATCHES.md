@@ -13,3 +13,5 @@ Vendored `egui_commonmark` 0.25.0, under its original MIT OR Apache-2.0 license.
 Use the stable `show` path; upstream `show_scrollable` can split nested list parser state. Original licenses and crate provenance are retained. No upstream submission is claimed.
 
 - Expose an optional Mermaid diagram callback while retaining source rendering.
+- Version 0.25.0-fmv.2 pins the matching backend with deferred large-code
+  highlighting and cancellation; the wrapper's rendering API is unchanged.

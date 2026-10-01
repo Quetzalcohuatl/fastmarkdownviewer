@@ -1,6 +1,27 @@
 use super::*;
 
 #[test]
+fn fresh_settings_apply_monokai_to_the_actual_window() {
+    let directory = tempfile::tempdir().unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::restore_from(
+        InitialState::Empty,
+        &context,
+        directory.path().join("new-state.json"),
+    );
+    frame(&context, &mut app, input(Vec::new()));
+    assert_eq!(
+        *app.root.theme.lock().unwrap(),
+        crate::appearance::ThemeChoice::Monokai
+    );
+    assert_eq!(
+        context.global_style().visuals.panel_fill,
+        egui::Color32::from_rgb(39, 40, 34)
+    );
+    assert_eq!(crate::appearance::text_size_percent(&context), 100);
+}
+
+#[test]
 fn tab_titles_load_glyphs_without_loading_inactive_documents() {
     // Use a fresh font context for each script: one language must not accidentally
     // load a broad fallback that hides a missing fallback for another language.
@@ -204,10 +225,12 @@ fn saved_session_restores_lazily_and_keeps_reading_position() {
         app.root.show_outline = false;
         *app.root.theme.lock().unwrap() = crate::appearance::ThemeChoice::Light;
         context.set_zoom_factor(1.25);
+        crate::appearance::set_text_size_percent(&context, 150);
         frame(&context, &mut app, input(Vec::new()));
         app.root.tabs[0].scroll_offset = 500.0;
         crate::network::set_automatic_images(&context, false);
         context.data_mut(|data| data.insert_temp(egui::Id::new("word_wrap"), false));
+        crate::appearance::DocumentWidth::FitWindow.apply(&context);
     }
     let context = egui::Context::default();
     let mut restored = ViewerApp::restore_from(InitialState::Empty, &context, path.clone());
@@ -225,6 +248,10 @@ fn saved_session_restores_lazily_and_keeps_reading_position() {
     );
     assert!(!crate::network::automatic_images(&context));
     assert!(!restored.root.show_outline);
+    assert_eq!(
+        crate::appearance::DocumentWidth::current(&context),
+        crate::appearance::DocumentWidth::FitWindow
+    );
     let mut sizing = input(Vec::new());
     sizing.screen_rect = Some(egui::Rect::from_min_size(
         egui::Pos2::ZERO,
@@ -235,6 +262,7 @@ fn saved_session_restores_lazily_and_keeps_reading_position() {
         frame(&context, &mut restored, input(Vec::new()));
     }
     assert!((context.zoom_factor() - 1.25).abs() < 0.001);
+    assert_eq!(crate::appearance::text_size_percent(&context), 150);
     assert!((restored.document_scroll_offset() - 500.0).abs() < 1.0);
     assert!(restored.root.tabs[1].pending_load);
     // A file changed while its restored tab was inactive: opening it reads current content.

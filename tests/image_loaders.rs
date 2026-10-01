@@ -9,7 +9,7 @@ use std::{
 };
 
 fn load(context: &egui::Context, uri: &str) -> Arc<egui::ColorImage> {
-    let deadline = Instant::now() + Duration::from_secs(5);
+    let deadline = Instant::now() + Duration::from_secs(30);
     loop {
         match context
             .try_load_image(uri, egui::load::SizeHint::Width(80))
@@ -93,4 +93,50 @@ fn registered_loaders_decode_supported_raster_formats() {
             );
         }
     }
+}
+
+#[test]
+fn local_and_included_images_beyond_ten_mib_and_large_svg_dimensions_load() {
+    let context = egui::Context::default();
+    network::install(&context);
+    let mut svg =
+        String::from(r#"<svg xmlns="http://www.w3.org/2000/svg" width="10000" height="5000"><!--"#);
+    svg.push_str(&"padding ".repeat(1_400_000));
+    svg.push_str(r#"--><rect width="10000" height="5000" fill="red"/></svg>"#);
+    assert!(svg.len() > 10 * 1024 * 1024);
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("large.svg");
+    std::fs::write(&path, &svg).unwrap();
+    let local = url::Url::from_file_path(path).unwrap();
+    context.include_bytes("bytes://large.svg", svg.into_bytes());
+    for uri in [local.as_str(), "bytes://large.svg"] {
+        let result = load(&context, uri);
+        assert_eq!(result.size, [80, 40]);
+        assert_eq!(result.source_size, egui::vec2(10000.0, 5000.0));
+        assert!(
+            result
+                .pixels
+                .iter()
+                .all(|pixel| *pixel == egui::Color32::RED)
+        );
+    }
+}
+
+#[test]
+fn raster_above_forty_megapixels_loads_at_display_size() {
+    let context = egui::Context::default();
+    network::install(&context);
+    let source = image::DynamicImage::ImageLuma8(image::GrayImage::from_pixel(
+        8001,
+        5000,
+        image::Luma([128]),
+    ));
+    let mut bytes = Cursor::new(Vec::new());
+    source
+        .write_to(&mut bytes, image::ImageFormat::Png)
+        .unwrap();
+    context.include_bytes("bytes://large-raster.png", bytes.into_inner());
+    let result = load(&context, "bytes://large-raster.png");
+    assert_eq!(result.size, [80, 50]);
+    assert_eq!(result.source_size, egui::vec2(8001.0, 5000.0));
 }

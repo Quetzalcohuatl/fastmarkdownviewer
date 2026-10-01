@@ -57,7 +57,7 @@ Prefer the Debian package, which installs the executable and desktop entry and
 declares the runtime libraries:
 
 ```sh
-sudo apt install ./FastMarkdownViewer-0.2.7-linux-x86_64.deb
+sudo apt install ./FastMarkdownViewer-0.2.8-linux-x86_64.deb
 sudo apt remove fast-markdown-viewer
 ```
 
@@ -70,6 +70,10 @@ Linux binary. Dialogs use XDG Desktop Portal (for example its GTK or KDE backend
 
 To integrate the tar archive with the desktop, put its executable on PATH (for
 example ~/.local/bin) and its .desktop file in ~/.local/share/applications.
+Copy the archive's `share/icons/hicolor` directory into
+`~/.local/share/icons/hicolor` as well (merge with existing icons). The Debian
+package installs these launcher icons automatically. A standalone CLI executable
+installed by Cargo does not install desktop integration or a macOS app bundle.
 
 ## Preferences, sessions, and limits
 

@@ -9,6 +9,7 @@ pub mod graphics;
 pub mod links;
 pub mod math;
 pub mod mermaid;
+mod mermaid_tiles;
 mod mermaid_worker;
 pub mod network;
 mod persistence;

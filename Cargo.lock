@@ -1252,7 +1252,7 @@ dependencies = [
 
 [[package]]
 name = "fast-markdown-viewer"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "eframe",
  "fmv-egui-commonmark",
@@ -1332,7 +1332,7 @@ checksum = "98de4bbd547a563b716d8dfa9aad1cb19bfab00f4fa09a6a4ed21dbcf44ce9c4"
 
 [[package]]
 name = "fmv-egui-commonmark"
-version = "0.25.0-fmv.1"
+version = "0.25.0-fmv.2"
 dependencies = [
  "document-features",
  "egui",
@@ -1343,7 +1343,7 @@ dependencies = [
 
 [[package]]
 name = "fmv-egui-commonmark-backend"
-version = "0.25.0-fmv.1"
+version = "0.25.0-fmv.2"
 dependencies = [
  "data-url",
  "egui",

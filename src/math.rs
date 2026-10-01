@@ -58,7 +58,11 @@ impl MathRenderer {
                         uri: uri.into(),
                         bytes: egui::load::Bytes::Shared(svg),
                     })
-                    .fit_to_original_size(1.0 / pixels_per_point)
+                    .fit_to_original_size(
+                        f32::from(crate::appearance::text_size_percent(ui.ctx()))
+                            / 100.0
+                            / pixels_per_point,
+                    )
                     .max_width(ui.available_width())
                     .alt_text(formula),
                 );

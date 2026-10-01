@@ -12,6 +12,12 @@ Run `experiments/architecture/fixtures/generate.ps1` to generate deterministic d
 
 ## Machine record
 
+The [v0.2.8 release check](../experiments/releases/0.2.8/README.md) records 60
+fresh Windows resource samples against published v0.2.7, 40 CPU-layout runs,
+30 Mermaid helper samples, and five optimized large-code highlighting runs.
+It distinguishes initial availability from completion and retains all raw data.
+The existing dense-document layout limitation is reported explicitly.
+
 The [September 14 expanded Windows comparison](../experiments/competitors/google-results.md)
 provides the main README's current resource table: published FMV 0.2.1 and eleven
 competitors, five fresh launches per app/document, and all 120 attempts in one

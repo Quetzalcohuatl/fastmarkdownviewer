@@ -1114,6 +1114,93 @@ fn tab_menu_reveals_and_renames_the_real_file() {
 }
 
 #[test]
+fn document_reflows_to_ultrawide_viewport_and_back() {
+    use fast_markdown_viewer::appearance::DocumentWidth;
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    let paragraph = "This paragraph should use the available document width. ".repeat(100);
+    writeln!(file, "{paragraph}").unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
+    let mut sizes = Vec::new();
+    for (width, setting) in [
+        (900.0, DocumentWidth::FitWindow),
+        (3440.0, DocumentWidth::FitWindow),
+        (900.0, DocumentWidth::FitWindow),
+        (3440.0, DocumentWidth::Comfortable),
+    ] {
+        setting.apply(&context);
+        let mut output = egui::FullOutput::default();
+        for _ in 0..8 {
+            let mut raw = input(vec![]);
+            raw.screen_rect = Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(width, 1400.0),
+            ));
+            output = run_frame(&context, &mut app, raw);
+        }
+        let size = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text) if text.galley.text().starts_with("This paragraph") => {
+                    Some(text.galley.size())
+                }
+                _ => None,
+            })
+            .expect("paragraph rendered");
+        assert!(size.x < width, "prose must wrap inside viewport");
+        sizes.push(size);
+    }
+    assert!(
+        sizes[1].x > 2800.0,
+        "ultrawide prose remained capped: {sizes:?}"
+    );
+    assert!(
+        sizes[1].y < sizes[0].y / 2.0,
+        "paragraph did not reflow: {sizes:?}"
+    );
+    assert!((sizes[2].x - sizes[0].x).abs() < 1.0);
+    assert!((sizes[2].y - sizes[0].y).abs() < 1.0);
+    assert!(sizes[3].x <= 960.0);
+    assert!(sizes[3].y > sizes[1].y * 2.0);
+}
+
+#[test]
+fn settings_width_is_independent_of_word_wrap() {
+    use fast_markdown_viewer::appearance::DocumentWidth;
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Empty);
+    assert_eq!(DocumentWidth::current(&context), DocumentWidth::Comfortable);
+    for (role, label) in [
+        (egui::accesskit::Role::Button, "Settings"),
+        (egui::accesskit::Role::Button, "Document width:"),
+        (egui::accesskit::Role::RadioButton, "Fit window"),
+    ] {
+        let output = run_frame(&context, &mut app, input(vec![]));
+        let node = node_with_text(accesskit_update(&output), role, label);
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![accesskit_action(
+                egui::accesskit::Action::Click,
+                node,
+                None,
+            )]),
+        );
+    }
+    assert_eq!(DocumentWidth::current(&context), DocumentWidth::FitWindow);
+    assert!(context.data(|data| {
+        data.get_temp::<bool>(egui::Id::new("word_wrap"))
+            .unwrap_or(true)
+    }));
+    // Disabling wrapping must not silently change the chosen column width.
+    context.data_mut(|data| data.insert_temp(egui::Id::new("word_wrap"), false));
+    run_frame(&context, &mut app, input(vec![]));
+    assert_eq!(DocumentWidth::current(&context), DocumentWidth::FitWindow);
+}
+
+#[test]
 fn document_overflow_can_scroll_horizontally() {
     let mut file = tempfile::NamedTempFile::new().unwrap();
     // Deep indentation is an object that cannot fit even when its text wraps.
@@ -1305,4 +1392,122 @@ fn settings_text_font_selection_updates_rendered_fonts() {
         &egui::FontId::proportional(16.0),
         '日'
     ));
+}
+
+#[test]
+fn document_text_size_reflows_content_without_zooming_the_interface() {
+    use fast_markdown_viewer::appearance::set_text_size_percent;
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    writeln!(file, "# Size heading\n\n{}\n\n`Inline marker`\n\n```text\nCode marker\n```\n\n| Column |\n|---|\n| Table marker |", "Paragraph marker with enough words to reflow. ".repeat(12)).unwrap();
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Path(file.path().to_owned()));
+    let mut samples = Vec::new();
+    for percent in [100, 150, 150, 100] {
+        set_text_size_percent(&context, percent);
+        let mut output = egui::FullOutput::default();
+        for _ in 0..4 {
+            let mut raw = input(vec![]);
+            raw.screen_rect = Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(900.0, 1600.0),
+            ));
+            output = run_frame(&context, &mut app, raw);
+        }
+        let fonts: Vec<f32> = [
+            "Settings",
+            "Size heading",
+            "Paragraph marker",
+            "Inline marker",
+            "Code marker",
+            "Table marker",
+        ]
+        .into_iter()
+        .map(|marker| {
+            output
+                .shapes
+                .iter()
+                .filter_map(|shape| match &shape.shape {
+                    egui::Shape::Text(text) if text.galley.text().starts_with(marker) => {
+                        Some(text.galley.job.sections[0].format.font_id.size)
+                    }
+                    _ => None,
+                })
+                .reduce(f32::max)
+                .unwrap_or_else(|| panic!("missing {marker}"))
+        })
+        .collect();
+        let height = output
+            .shapes
+            .iter()
+            .find_map(|shape| match &shape.shape {
+                egui::Shape::Text(text) if text.galley.text().starts_with("Paragraph marker") => {
+                    Some(text.galley.size().y)
+                }
+                _ => None,
+            })
+            .unwrap();
+        samples.push((fonts, height));
+        assert!((context.zoom_factor() - 1.0).abs() < f32::EPSILON);
+    }
+    assert!(
+        (samples[0].0[0] - samples[1].0[0]).abs() < f32::EPSILON,
+        "toolbar size changed"
+    );
+    for index in 1..samples[0].0.len() {
+        assert!((samples[1].0[index] / samples[0].0[index] - 1.5).abs() < 0.01);
+    }
+    assert!(
+        samples[1].1 > samples[0].1 * 1.5,
+        "text must reflow in the same width"
+    );
+    assert_eq!(
+        samples[1], samples[2],
+        "scaling must not compound across frames"
+    );
+    assert_eq!(
+        samples[0], samples[3],
+        "100% must restore the original typography"
+    );
+}
+
+#[test]
+fn settings_text_size_slider_sets_document_size_without_changing_zoom() {
+    let context = egui::Context::default();
+    context.enable_accesskit();
+    let mut app = ViewerApp::new(InitialState::Empty);
+    let mut raw = input(vec![]);
+    raw.screen_rect = Some(egui::Rect::from_min_size(
+        egui::Pos2::ZERO,
+        egui::vec2(900.0, 900.0),
+    ));
+    let output = run_frame(&context, &mut app, raw.clone());
+    let settings = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::Button,
+        "Settings",
+    );
+    raw.events = vec![accesskit_action(
+        egui::accesskit::Action::Click,
+        settings,
+        None,
+    )];
+    run_frame(&context, &mut app, raw.clone());
+    raw.events.clear();
+    let output = run_frame(&context, &mut app, raw.clone());
+    let slider = node_with_text(
+        accesskit_update(&output),
+        egui::accesskit::Role::Slider,
+        "Document text size",
+    );
+    raw.events = vec![accesskit_action(
+        egui::accesskit::Action::SetValue,
+        slider,
+        Some(egui::accesskit::ActionData::NumericValue(150.0)),
+    )];
+    run_frame(&context, &mut app, raw);
+    assert_eq!(
+        fast_markdown_viewer::appearance::text_size_percent(&context),
+        150
+    );
+    assert!((context.zoom_factor() - 1.0).abs() < f32::EPSILON);
 }

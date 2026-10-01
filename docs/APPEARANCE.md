@@ -270,3 +270,61 @@ Before SHA-256:
 `013BCF55F52A93660940F3F87EB212008E49B727B0B6DB1C131ED0543745557E`.
 After SHA-256:
 `9CEE606AB5E2F4395B0F8CCD832386673E166E70FF072662140C4E5EA4DA7264`.
+
+## Deferred large-code highlighting — 2026-10-01
+
+Large tagged code blocks now use the same plain-first, background-highlighting
+path as small blocks. The former 256 KiB input, 16,384-section, and 8 MiB
+formatted-output fallbacks are removed. An individual completed result can exceed
+the cache's soft target. The request queue holds four items and the completed
+result queue holds one, providing backpressure when a tab is not being drawn.
+Changing palette/font size or dropping the document cache cancels obsolete work
+between lines. Repaint notifications target the window that requested the work,
+including detached windows. Unknown languages still use plain text; computation
+and memory scale with the source, and a single complex line can delay cancellation.
+
+The new integration regression uses an 820,000-byte Rust block. It verifies an
+initial plain frame, eventual colors through the final byte, a result exceeding
+both old formatting cutoffs, and reuse of that result on the next frame. Two
+backend tests check cache-release and obsolete-generation cancellation.
+Windows passes 110 application tests plus both backend tests. Local Ubuntu 24.04
+under WSL passes 107 application tests plus both backend tests; the differences
+are existing platform-specific tests. Formatting and application Clippy pass.
+Local WSL builds used `RUSTFLAGS=--diagnostic-width=140` to avoid a Rust 1.95
+diagnostic-rendering panic; this changes diagnostic formatting, not runtime code.
+
+Native macOS Apple Silicon, Intel Mac, and Ubuntu validation runs against the
+same source snapshot in [desktop run 36908874422](https://github.com/Quetzalcohuatl/fastmarkdownviewer/actions/runs/36908874422),
+commit `a630223ccb7b4db872fedaac17a18ad746d2c11d`. The native matrix includes the
+appearance, width, text-size, image-size, Mermaid-tile, and highlighting
+regressions, with large-content graphics fixtures added for both Mac architectures
+and Linux X11/Wayland.
+
+All three native jobs completed successfully, including source-package/registry
+installation, packaged-binary installation, native graphics captures, Finder
+opening/session checks on both Macs, and Linux package/session checks. Inspected
+the large-code and large-Mermaid screenshots from both Mac architectures and
+Linux X11/Wayland. Candidate packages were downloaded and verified against their
+SHA-256 files. These are validation artifacts, not a newly published release.
+
+Actual Windows/OpenGL and local Linux/X11/Mesa screenshots were inspected before
+and after highlighting: plain text becomes Monokai-colored text without reflow.
+The large tiled diagram also renders with the Monokai canvas on Linux.
+
+Three fresh runs of the optimized Windows highlighting test, with no builds or
+other local test work overlapping, measured:
+
+| Sample | Initial plain layout (ms) | Completed test (ms) |
+|---|---:|---:|
+| 1 | 8.68 | 1,149.34 |
+| 2 | 7.92 | 1,248.08 |
+| 3 | 7.96 | 1,148.12 |
+
+[Raw samples](../experiments/architecture/progressive-highlighting-2026-10-01.csv).
+Reproduce by building `cargo test --locked --release --test highlighting --no-run`
+and running the resulting test executable three times with `--nocapture`.
+These are headless CPU-layout measurements, not file-open or application-startup
+times. Completion includes the test's 100 ms polling and final cache-retention
+check; this is a small repeated-source fixture, not a general performance claim.
+The Windows executable SHA-256 is
+`A4949097897F99F3FBD35A475C7AE290314BCA2EAF7E265F13AEDB95D435C383`.

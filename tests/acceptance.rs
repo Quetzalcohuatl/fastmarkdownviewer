@@ -1,24 +1,22 @@
-use std::{fs::OpenOptions, io::Write as _, path::Path};
+use std::{io::Write as _, path::Path};
 
 use fast_markdown_viewer::{
-    document::{Document, LoadError, MAX_DOCUMENT_BYTES},
+    document::Document,
     links::{self, LinkAction},
     math::render_formula_svg,
 };
 
 #[test]
-fn rejects_a_file_one_byte_over_the_limit_without_reading_it() {
-    let file = tempfile::NamedTempFile::new().unwrap();
-    OpenOptions::new()
-        .write(true)
-        .open(file.path())
-        .unwrap()
-        .set_len(MAX_DOCUMENT_BYTES + 1)
-        .unwrap();
-    assert!(matches!(
-        Document::load(file.path()),
-        Err(LoadError::TooLarge { .. })
-    ));
+fn loads_documents_beyond_the_former_32_mib_cutoff() {
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    let block = "Ordinary Markdown text.\n".repeat(50_000);
+    for _ in 0..30 {
+        file.write_all(block.as_bytes()).unwrap();
+    }
+    file.write_all(b"\n# End marker\n").unwrap();
+    let document = Document::load(file.path()).unwrap();
+    assert!(document.source.len() > 32 * 1024 * 1024);
+    assert!(document.source.ends_with("# End marker\n"));
 }
 
 #[test]

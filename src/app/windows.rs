@@ -61,6 +61,7 @@ impl ViewerApp {
     #[must_use]
     pub fn with_saved_state(initial: InitialState, context: &egui::Context) -> Self {
         let Some(path) = crate::persistence::path() else {
+            crate::appearance::ThemeChoice::default().apply(context);
             return Self::new(initial);
         };
         Self::restore_from(initial, context, path)
@@ -77,9 +78,11 @@ impl ViewerApp {
         *app.root.theme.lock().expect("appearance lock") = state.theme;
         state.theme.apply(context);
         context.set_zoom_factor(state.zoom);
+        crate::appearance::set_text_size_percent(context, state.text_size_percent);
         crate::fonts::restore(context, &state.fonts);
         crate::network::set_automatic_images(context, state.automatic_images);
         context.data_mut(|data| data.insert_temp(egui::Id::new("word_wrap"), state.word_wrap));
+        state.document_width.apply(context);
         if restore_session {
             let mut windows = state.windows.into_iter();
             if let Some(window) = windows.next() {
@@ -379,7 +382,9 @@ impl Drop for ViewerApp {
         let state = crate::persistence::State {
             theme: *self.root.theme.lock().expect("appearance lock"),
             fonts: crate::fonts::preferences(context),
+            document_width: crate::appearance::DocumentWidth::current(context),
             zoom: context.zoom_factor(),
+            text_size_percent: crate::appearance::text_size_percent(context),
             automatic_images: crate::network::automatic_images(context),
             word_wrap: context.data(|data| {
                 data.get_temp::<bool>(egui::Id::new("word_wrap"))

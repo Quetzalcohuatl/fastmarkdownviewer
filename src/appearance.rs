@@ -1,7 +1,98 @@
 //! Small built-in palettes inspired by familiar editor themes.
 use eframe::egui::{self, Color32};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum DocumentWidth {
+    #[default]
+    Comfortable,
+    FitWindow,
+}
+
+impl DocumentWidth {
+    #[must_use]
+    pub fn current(context: &egui::Context) -> Self {
+        context.data(|data| {
+            data.get_temp(egui::Id::new("document_width"))
+                .unwrap_or_default()
+        })
+    }
+
+    pub fn apply(self, context: &egui::Context) {
+        context.data_mut(|data| data.insert_temp(egui::Id::new("document_width"), self));
+        repaint_all(context);
+    }
+
+    pub(crate) fn available(self, width: f32) -> f32 {
+        match self {
+            Self::Comfortable => width.min(960.0),
+            Self::FitWindow => width,
+        }
+        .max(1.0)
+    }
+
+    pub(crate) fn menu(ui: &mut egui::Ui) {
+        let previous = Self::current(ui.ctx());
+        let mut width = previous;
+        let label = |width| match width {
+            Self::Comfortable => "Comfortable (960)",
+            Self::FitWindow => "Fit window",
+        };
+        ui.menu_button(format!("Document width: {}", label(width)), |ui| {
+            for choice in [Self::Comfortable, Self::FitWindow] {
+                if ui.radio_value(&mut width, choice, label(choice)).clicked() {
+                    ui.close();
+                }
+            }
+        });
+        if width != previous {
+            width.apply(ui.ctx());
+        }
+    }
+}
+
+pub(crate) const MIN_TEXT_SIZE: u16 = 75;
+pub(crate) const MAX_TEXT_SIZE: u16 = 200;
+
+/// Document typography, independent of interface zoom and image dimensions.
+#[must_use]
+pub fn text_size_percent(context: &egui::Context) -> u16 {
+    context.data(|data| {
+        data.get_temp(egui::Id::new("document_text_size"))
+            .unwrap_or(100)
+    })
+}
+
+pub fn set_text_size_percent(context: &egui::Context, percent: u16) {
+    context.data_mut(|data| {
+        data.insert_temp(
+            egui::Id::new("document_text_size"),
+            percent.clamp(MIN_TEXT_SIZE, MAX_TEXT_SIZE),
+        )
+    });
+    repaint_all(context);
+}
+
+pub(crate) fn text_size_menu(ui: &mut egui::Ui) {
+    let mut percent = text_size_percent(ui.ctx());
+    if ui.add(egui::Slider::new(&mut percent, MIN_TEXT_SIZE..=MAX_TEXT_SIZE)
+        .text("Document text size").suffix("%"))
+        .on_hover_text("Resize prose, headings, tables, and code. Click the number to type a value. Images and Mermaid diagrams keep their size.")
+        .changed() {
+        set_text_size_percent(ui.ctx(), percent);
+    }
+}
+
+pub(crate) fn scale_document_text(ui: &mut egui::Ui) {
+    let percent = text_size_percent(ui.ctx());
+    if percent != 100 {
+        let scale = f32::from(percent) / 100.0;
+        for font in ui.style_mut().text_styles.values_mut() {
+            font.size *= scale;
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum ThemeChoice {
     System,
     Light,
@@ -9,6 +100,7 @@ pub enum ThemeChoice {
     SolarizedLight,
     SolarizedDark,
     QuietLight,
+    #[default]
     Monokai,
     TomorrowNightBlue,
 }

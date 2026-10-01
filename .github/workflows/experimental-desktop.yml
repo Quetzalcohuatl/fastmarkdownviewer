@@ -73,6 +73,7 @@ jobs:
           cargo fmt -p fast-markdown-viewer -p fmv-macos-events -- --check
           cargo clippy --locked --all-targets --no-deps -- -D warnings
           cargo test --locked --all-targets
+          cargo test --locked -p fmv-egui-commonmark-backend --lib
       - name: Build optimized executable and capture tool
         run: cargo build --locked --release --bin FastMarkdownViewer --example visual_check
       - name: Cache compiled artifacts before native acceptance
@@ -95,6 +96,9 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/linux.png
           FMV_VISUAL_THEME=Light LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-light.png '中文'
           FMV_VISUAL_THEME=Dark LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-dark.png '中文'
+          python3 scripts/generate-progressive-fixtures.py target/evidence
+          FMV_VISUAL_WAIT_MS=10000 LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check target/evidence/large-code.md target/evidence/large-code.png
+          LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a target/release/examples/visual_check target/evidence/large-mermaid.md target/evidence/large-mermaid.png
       - name: Exercise macOS graphics
         if: runner.os == 'macOS'
         run: |
@@ -102,6 +106,9 @@ jobs:
           target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/macos.png
           FMV_VISUAL_THEME=Light target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-light.png '中文'
           FMV_VISUAL_THEME=Dark target/release/examples/visual_check tests/fixtures/multilingual-ui.md target/evidence/multilingual-dark.png '中文'
+          python3 scripts/generate-progressive-fixtures.py target/evidence
+          FMV_VISUAL_WAIT_MS=10000 target/release/examples/visual_check target/evidence/large-code.md target/evidence/large-code.png
+          target/release/examples/visual_check target/evidence/large-mermaid.md target/evidence/large-mermaid.png
       - name: Exercise native Wayland graphics
         if: runner.os == 'Linux'
         run: |
@@ -111,6 +118,8 @@ jobs:
           trap 'kill "$compositor"' EXIT
           for attempt in $(seq 1 50); do test ! -S "$XDG_RUNTIME_DIR/fmv-test" || break; sleep 0.1; done
           env -u DISPLAY WAYLAND_DISPLAY=fmv-test LIBGL_ALWAYS_SOFTWARE=1 target/release/examples/visual_check tests/fixtures/cross-platform.md target/evidence/wayland.png
+          env -u DISPLAY WAYLAND_DISPLAY=fmv-test LIBGL_ALWAYS_SOFTWARE=1 FMV_VISUAL_WAIT_MS=10000 target/release/examples/visual_check target/evidence/large-code.md target/evidence/wayland-large-code.png
+          env -u DISPLAY WAYLAND_DISPLAY=fmv-test LIBGL_ALWAYS_SOFTWARE=1 target/release/examples/visual_check target/evidence/large-mermaid.md target/evidence/wayland-large-mermaid.png
       - name: Package desktop build
         run: python3 scripts/package-unix.py --platform '${{ matrix.platform }}' --binary target/release/FastMarkdownViewer
       - name: Install packaged binary with binstall and no Rust on PATH

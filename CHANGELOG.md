@@ -4,6 +4,31 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- Show large code blocks immediately as plain text, then add syntax colors in
+  the background without byte, token-count, or formatted-output cutoffs. Cancel
+  stale work on appearance changes and document close/reload, with bounded queues
+  and repaint notifications for the originating window.
+- Add large-code and tiled-Mermaid regressions to native desktop validation on
+  Windows, Linux, and both Mac architectures, including Linux graphics captures
+  on X11 and Wayland.
+- Remove application size cutoffs for Markdown, Mermaid source/output, and local
+  or downloaded images. Keep image cache budgets as soft eviction targets that
+  can accommodate an individual larger resource.
+- Render Mermaid progressively in background tiles when visible, with a Cancel
+  control in place of the ten-second timeout. Remove the four-megapixel and
+  32-diagram cache cutoffs; retain and document the flowchart crash guards.
+- Size image uploads for their display and graphics hardware after background
+  decoding, and document the remaining renderer and compatibility limits.
+- Default new settings to Monokai while preserving saved theme choices.
+- Add a saved Document text size slider (75–200%) with numeric entry. Prose,
+  headings, tables, code, and math resize independently of the interface; retain
+  the existing zoom controls under the clearer Interface zoom label.
+- Add a saved Document width setting: Comfortable (960) remains the default;
+  Fit window uses all available width, including ultrawide displays. Word wrap
+  stays enabled by default and can be changed independently.
+- Match Mermaid backgrounds, labels, and diagram colors to the active reader
+  palette and text font. Refresh diagrams in the background when appearance
+  changes while retaining bounded caching and reusing images during resize.
 - Automate Cargo publication and WinGet PR submission after successful stable
   releases, with trusted publishing, verified release provenance, dry runs, and
   duplicate-safe retries. Requires the documented one-time account configuration.

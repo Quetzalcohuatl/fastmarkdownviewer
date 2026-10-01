@@ -165,9 +165,11 @@ There is no editor, file watcher, search index, history database, updater, or te
 
 ### Appearance
 
-Settings → Color theme offers System, Light, Dark, Solarized Light, Solarized Dark, Quiet Light, Monokai, and Tomorrow Night Blue. These are lightweight built-in interpretations of familiar editor palettes, not imported VS Code themes or extension support. Code highlighting follows the chosen palette, including changes between two light or two dark themes.
+Monokai is the default for new settings; existing saved themes are preserved. Settings → Color theme offers System, Light, Dark, Solarized Light, Solarized Dark, Quiet Light, Monokai, and Tomorrow Night Blue. These are lightweight built-in interpretations of familiar editor palettes, not imported VS Code themes or extension support. Code highlighting follows the chosen palette, including changes between two light or two dark themes.
 
-Settings → Text font changes proportional text (including menus and headings); Code font independently changes code and inline code. Choices include familiar Windows families, Helvetica and Menlo on macOS, and DejaVu, Liberation, and Noto families on Linux, when installed. Only available choices appear. Default restores the bundled family. Fonts load on selection, retain emoji/script fallbacks, and are never downloaded or redistributed. This is a curated font list, not an arbitrary installed-font browser; custom font files and editor ligature settings are not supported. Theme, font, and zoom changes apply to all windows in the current process and are saved on normal exit.
+Settings → Text font changes proportional text (including menus and headings); Code font independently changes code and inline code. Choices include familiar Windows families, Helvetica and Menlo on macOS, and DejaVu, Liberation, and Noto families on Linux, when installed. Only available choices appear. Default restores the bundled family. Fonts load on selection, retain emoji/script fallbacks, and are never downloaded or redistributed. This is a curated font list, not an arbitrary installed-font browser; custom font files and editor ligature settings are not supported.
+
+**Settings → Document text size** provides a 75–200% slider with an editable percentage for prose, headings, tables, code, and math. It leaves menus, images, and Mermaid diagram dimensions unchanged. **Interface zoom** retains the existing whole-interface zoom controls and shortcuts. Theme, font, document text size, and zoom changes apply to all windows in the current process and are saved on normal exit.
 
 ## Usage
 
@@ -204,17 +206,17 @@ Right-click a tab for **Rename file…** or **Show in Explorer**. Rename changes
 
 **Show in Explorer** opens the parent folder and selects the file. A portable platform abstraction also provides Finder selection on macOS and parent-folder opening elsewhere; The supported desktop baselines are listed in docs/CROSS_PLATFORM.md. Reading never edits document contents; filename changes happen only through the explicit rename action.
 
-Mermaid support renders supported Mermaid fences using patched Rusty, with the source retained underneath. Rendering runs offline in a separate process with a 10-second timeout; unsupported or oversized diagrams show an error and their source. This is not full Mermaid.js compatibility. See [the Rusty fixes](docs/RUSTY_FIXES.md) for details.
+Mermaid support renders supported Mermaid fences using patched Rusty, with the source retained underneath. Diagrams follow the active reader palette and text font, including dark and system themes; explicit colors in the diagram source remain in effect. Appearance changes refresh diagrams in the background. Resizing reuses cached tiles. Rendering starts when a diagram becomes visible, runs offline in a separate process, and fills in progressively while the document remains usable. A **Cancel diagram** control replaces the old automatic timeout. Unsupported or malformed diagrams show an error with a retry control and their source. This is not full Mermaid.js compatibility. See [the Rusty fixes](docs/RUSTY_FIXES.md) for details.
 
 **Settings → Automatically load remote images** defaults to on. Turn it off to hide remote images and show individual **Load image** buttons. This setting applies to every window in the current session and is remembered between launches. Requests already running may finish. Ordinary links still open only when clicked.
 
 The current eframe backend does not initialize native accessibility for dynamically created child windows. For screen-reader access, open the file through a separate application launch instead of detaching its tab.
 
-Syntax definitions initialize on a worker only when a language-tagged code block becomes visible. Results are cached by content, language, theme, and font size. Unknown languages remain plain text; blocks over 256 KiB skip highlighting. Highlight caches are bounded to 128 entries and approximately 8 MiB per tab.
+Syntax definitions initialize on a worker only when a language-tagged code block becomes visible. Code appears as plain text immediately, then gains syntax colors after background highlighting finishes, including large blocks. Results are cached by content, language, theme, and font size. Unknown languages remain plain text. Request and result queues are bounded; the cache targets 128 entries and approximately 8 MiB per tab but retains an individual larger result. Changing appearance or closing/reloading the document cancels obsolete highlighting between lines.
 
 East Asian, Indic, and Thai/Lao system fonts load on demand. Glyph coverage depends on installed fonts; no system fonts are redistributed or downloaded. Regression tests cover multilingual filenames, headings, code, Find/rename input, and font changes on the tested Windows, macOS, and Ubuntu baselines. The renderer already uses HarfRust shaping, but full Unicode bidirectional paragraph layout remains limited, so mixed Arabic/Hebrew and left-to-right text needs further renderer work. Coverage is not a guarantee of correct layout for every language. Myanmar, Khmer, Tibetan, Ethiopic, and historic scripts have no dedicated fallback configured and remain unverified. Emoji are monochrome.
 
-Ordinary prose, including long unbroken words, wraps within a reading column capped at 960 logical pixels. Tables give longer columns more room, wrap text and long tokens, and scroll horizontally when their minimum widths exceed the available space. **Settings → Word wrap** is enabled by default for prose, table cells, and code, and is shared across windows in the current session. Disable it to retain long lines and scroll horizontally. Code blocks retain their own horizontal scroll area when needed. Scrollbars stay visible while content overflows and reserve space beside it. The document also has a horizontal scrollbar as a fallback for objects that cannot fit. Nested blockquotes and inline styles preserve their surrounding structure and formatting.
+Ordinary prose, including long unbroken words, wraps within the chosen document width. **Settings → Document width** defaults to **Comfortable (960)**; choose **Fit window** to use the full available area on wider displays. This setting is shared across windows and saved on exit, independently of Word wrap. Tables give longer columns more room, wrap text and long tokens, and scroll horizontally when their minimum widths exceed the available space. **Settings → Word wrap** is enabled by default for prose, table cells, and code, and is shared across windows in the current session. Disable it to retain long lines and scroll horizontally. Code blocks retain their own horizontal scroll area when needed. Scrollbars stay visible while content overflows and reserve space beside it. The document also has a horizontal scrollbar as a fallback for objects that cannot fit. Nested blockquotes and inline styles preserve their surrounding structure and formatting.
 
 Definition lists are an extension, not part of core CommonMark. Write a term on one line followed by `: Definition` on the next; multiple definitions and indented continuation paragraphs are supported. Failed images display an **Image unavailable** placeholder with alt text, error details on hover, and a **Retry** button.
 
@@ -233,7 +235,44 @@ Release artifacts are built by GitHub Actions from annotated `vX.Y.Z` tags. See 
 
 ## Privacy and security
 
-Local Markdown is rendered without a browser engine; raw HTML is inert text. Remote images referenced by a document load asynchronously when enabled, with scheme, redirect, response-size, and decoded-size limits. Image workers and memory caches are bounded and start only when needed. No cookies, credentials, referrer, persistent cache, analytics, or update request is used. Details are in [PRIVACY.md](PRIVACY.md) and security reports belong under [SECURITY.md](SECURITY.md).
+Local Markdown is rendered without a browser engine; raw HTML is inert text. Remote images referenced by a document load asynchronously when enabled, with scheme, destination, redirect, and stalled-connection checks. Images have no application file-size or megapixel cutoff; uploads fit their display size and graphics hardware. Workers and memory caches start only when needed. No cookies, credentials, referrer, persistent cache, analytics, or update request is used. Details are in [PRIVACY.md](PRIVACY.md) and security reports belong under [SECURITY.md](SECURITY.md).
+
+### Limits and compatibility
+
+- **File sizes:** no application MB cutoff for Markdown, Mermaid source/output,
+  or local/downloaded images. The former 32 MiB document, 64 KiB Mermaid source,
+  10 MiB SVG/image input, 4-megapixel diagram, and 40-megapixel image cutoffs are
+  removed. Available memory, temporary disk space, and renderer dimensions still
+  constrain what can load. Markdown is read and laid out as a whole; arbitrarily
+  large documents are not guaranteed to open instantly. Markdown documents must
+  be regular files containing UTF-8 text.
+- **Mermaid:** one helper renders at a time. Offscreen diagrams wait until visible;
+  after layout, small tiles appear progressively and only visible tiles are
+  requested by the viewer. Tiles remain on temporary disk until reload, tab close,
+  or an appearance change. The flowchart renderer still allows at most **512
+  vertices, 1,024 edges, and 32 subgraphs** to avoid known recursive-layout crashes.
+  Removing those guards safely needs a separate layout-engine change. Mermaid.js
+  syntax support is partial; source is always retained. No automatic ten-second
+  rendering deadline or 32-diagram cache cutoff remains.
+- **Images:** PNG, JPEG, GIF, WebP, and SVG are supported; animated images show
+  their first frame. Large images decode in the background and are downsampled
+  for display, including the hardware's maximum texture dimension. Full raster
+  decoding can still need substantial temporary RAM. Image cache budgets are soft
+  eviction targets, not maximum accepted file sizes; a single large result can
+  exceed a target. See [network and cache details](PRIVACY.md#remote-images).
+- **Network:** image URLs must use HTTP(S) and public destinations, without URL
+  credentials. Up to five redirects are followed; connection setup has an
+  eight-second timeout and an idle read has a twenty-second timeout. These are
+  not file-size limits. Authenticated/private-network image hosting is unsupported.
+- **Highlighting:** no application block-byte, token-count, or formatted-output
+  cutoff. Large code blocks start as plain text and receive syntax colors later.
+  Unknown languages remain plain text. Highlighting time and memory scale with
+  code complexity; a single complex line can delay cancellation until it finishes.
+- **Other boundaries:** raw HTML stays inert; full Unicode bidirectional layout,
+  full Mermaid.js/TeX compatibility, animation, editing, automatic file watching,
+  printing, and export are not provided. Fonts depend on the bundled and selected
+  installed families. Session restoration has separate limits documented below;
+  those do not cap how many documents can be opened during a session.
 
 ## License
 

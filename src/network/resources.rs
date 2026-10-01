@@ -92,7 +92,9 @@ impl<K: Eq + Hash + Clone, V: Cost> Cache<K, V> {
             let oldest = self
                 .entries
                 .iter()
-                .filter(|(_, entry)| !entry.value.pending())
+                // A cache budget is an eviction target, never an input-size cutoff.
+                // Keep the newest result even when it alone exceeds the budget.
+                .filter(|(_, entry)| !entry.value.pending() && entry.ticket != self.serial)
                 .min_by_key(|(_, entry)| entry.touched)
                 .map(|(key, _)| key.clone());
             let Some(oldest) = oldest else {
@@ -169,14 +171,8 @@ impl eframe::egui::load::TextureLoader for Textures {
         if !super::allowed(context, uri) {
             return Err(LoadError::Loading("Remote image loading is off".into()));
         }
-        // Raster pixels don't depend on layout size. SVGs retain a size-specific key.
-        let hint = if url::Url::parse(uri)
-            .is_ok_and(|url| url.path().to_ascii_lowercase().ends_with(".svg"))
-        {
-            size
-        } else {
-            eframe::egui::load::SizeHint::default()
-        };
+        // Both raster and vector uploads now respect display resolution.
+        let hint = size;
         let key = (uri.to_owned(), options, hint);
         if let Some(texture) = lock(&self.cache).get(&key).cloned() {
             return Ok(TexturePoll::Ready {
@@ -255,5 +251,17 @@ mod tests {
         cache.clear();
         cache.complete("job", ticket, Item(5, false));
         assert!(cache.get("job").is_none());
+    }
+
+    #[test]
+    fn an_individual_result_can_exceed_the_cache_budget() {
+        let mut cache = Cache::default();
+        cache.insert("old", Item(4, false));
+        let ticket = cache.insert("large", Item(0, true));
+        cache.complete("large", ticket, Item(100, false));
+        assert!(cache.get("old").is_none());
+        assert_eq!(cache.get("large").unwrap().0, 100);
+        cache.insert("new", Item(4, false));
+        assert!(cache.get("large").is_none());
     }
 }

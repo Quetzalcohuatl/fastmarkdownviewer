@@ -140,7 +140,7 @@ impl ViewerWindow {
             tab_ids: Arc::new(AtomicU64::new(0)),
             error: None,
             services,
-            theme: Arc::new(Mutex::new(ThemeChoice::System)),
+            theme: Arc::new(Mutex::new(ThemeChoice::default())),
             show_outline: true,
             focus_search: false,
             tab_drag: None,
@@ -434,6 +434,7 @@ impl ViewerWindow {
                     ui.ctx().data_mut(|data| data.insert_temp(wrap_id, wrap));
                     ui.ctx().request_repaint();
                 }
+                crate::appearance::DocumentWidth::menu(ui);
                 ui.checkbox(&mut self.show_outline, crate::platform::shortcut_label("Outline sidebar    Ctrl+H"));
                 let mut automatic = crate::network::automatic_images(ui.ctx());
                 if ui.checkbox(&mut automatic, "Automatically load remote images").on_hover_text("Shared by this session's windows. Turning off hides remote images and stops new automatic requests; requests already running may finish.").changed() {
@@ -456,7 +457,8 @@ impl ViewerWindow {
                 crate::fonts::menu(ui);
 
                 ui.separator();
-                ui.label(format!("Text size: {:.0}%", ui.ctx().zoom_factor() * 100.0));
+                crate::appearance::text_size_menu(ui);
+                ui.label(format!("Interface zoom: {:.0}%", ui.ctx().zoom_factor() * 100.0));
                 egui::gui_zoom::zoom_menu_buttons(ui);
                 ui.weak("Appearance is shared by this session’s windows.");
             });
@@ -948,7 +950,8 @@ impl ViewerWindow {
                         // A horizontal scroll area otherwise offers unlimited width.
                         // Keep prose wrapping to the visible viewport, while allowing
                         // oversized objects to grow the scrollable content bounds.
-                        ui.set_max_width((viewport.width() - 8.0).clamp(1.0, 960.0));
+                        let width = crate::appearance::DocumentWidth::current(ui.ctx());
+                        ui.set_max_width(width.available(viewport.width() - 8.0));
                         tab.document_ui(ui);
                     })
             })
@@ -1179,8 +1182,7 @@ impl DocumentTab {
     }
 
     fn document_ui(&mut self, ui: &mut egui::Ui) {
-        // Keep ordinary prose readable, regardless of the natural width of nearby blocks.
-        ui.set_max_width(ui.available_width().min(960.0));
+        crate::appearance::scale_document_text(ui);
         let document = &self.document;
         self.markdown_cache.navigation.capture_text = self.search.open;
         self.markdown_cache.navigation.clear();

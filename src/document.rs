@@ -7,8 +7,6 @@ use url::Url;
 
 use crate::render_source::normalize_for_rendering;
 
-pub const MAX_DOCUMENT_BYTES: u64 = 32 * 1024 * 1024;
-
 #[derive(Debug, Clone)]
 pub struct Document {
     pub path: PathBuf,
@@ -21,7 +19,6 @@ pub struct Document {
 pub enum LoadError {
     Metadata { path: PathBuf, source: io::Error },
     NotAFile(PathBuf),
-    TooLarge { path: PathBuf, size: u64 },
     Read { path: PathBuf, source: io::Error },
     InvalidUtf8(PathBuf),
     InvalidBasePath(PathBuf),
@@ -34,15 +31,6 @@ impl fmt::Display for LoadError {
                 write!(f, "Cannot open {}: {source}", path.display())
             }
             Self::NotAFile(path) => write!(f, "{} is not a regular file", path.display()),
-            Self::TooLarge { path, size } => {
-                let whole = size / 1_048_576;
-                let tenths = (size % 1_048_576) * 10 / 1_048_576;
-                write!(
-                    f,
-                    "{} is too large ({whole}.{tenths} MiB). The v0.1 limit is 32 MiB.",
-                    path.display()
-                )
-            }
             Self::Read { path, source } => write!(f, "Cannot read {}: {source}", path.display()),
             Self::InvalidUtf8(path) => write!(
                 f,
@@ -63,7 +51,7 @@ impl Document {
     ///
     /// # Errors
     ///
-    /// Returns a [`LoadError`] for missing, unreadable, non-file, oversized, or
+    /// Returns a [`LoadError`] for missing, unreadable, non-file, or
     /// invalid UTF-8 input, or when its resource base cannot be represented.
     pub fn load(path: impl AsRef<Path>) -> Result<Self, LoadError> {
         let path = path.as_ref();
@@ -73,12 +61,6 @@ impl Document {
         })?;
         if !metadata.is_file() {
             return Err(LoadError::NotAFile(path.to_owned()));
-        }
-        if metadata.len() > MAX_DOCUMENT_BYTES {
-            return Err(LoadError::TooLarge {
-                path: path.to_owned(),
-                size: metadata.len(),
-            });
         }
 
         let bytes = fs::read(path).map_err(|source| LoadError::Read {

@@ -148,6 +148,8 @@ impl ViewerApp {
                     context
                         .data_mut(|data| data.insert_temp(egui::Id::new("quit_application"), true));
                 }
+                // The viewer declares no URL schemes; `Event` is non-exhaustive.
+                _ => {}
             }
         }
     }

@@ -21,3 +21,8 @@ LaunchServices delivery rather than substituting CLI arguments for Finder
 events. This crate uses the existing objc2 stack and is MIT OR Apache-2.0 licensed.
 
 Published as fmv-macos-events. Requires macOS; other targets intentionally expose no API.
+
+GetURL events (`GURL`/`GURL`) arrive as `Event::Url`, for apps whose bundle lists
+URL schemes in `CFBundleURLTypes`. The adapter passes the text on unchecked except
+for its length (`MAX_URL_BYTES`); the app must accept only the schemes it expects.
+`Event` is `#[non_exhaustive]`: match with a wildcard arm.

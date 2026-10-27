@@ -11,8 +11,16 @@ use objc2_foundation::{
 };
 use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
+/// Longest URL, in bytes, that is queued. A longer one is dropped, not cut short.
+pub const MAX_URL_BYTES: usize = 8192;
+
+#[non_exhaustive]
 pub enum Event {
     Open(Vec<PathBuf>),
+    /// A GetURL event: a link the system handed to the app (`mailto:`, or any scheme the
+    /// bundle declares in `CFBundleURLTypes`). The text is not checked beyond its length
+    /// ([`MAX_URL_BYTES`]); the app decides which schemes it accepts.
+    Url(String),
     Quit,
 }
 
@@ -66,6 +74,18 @@ define_class!(
                 Some(PathBuf::from(url.path()?.to_string()))
             }).collect::<Vec<_>>();
             if !paths.is_empty() { self.ivars().push(Event::Open(paths)); }
+        }
+
+        // SAFETY: Apple-event selectors take two NSAppleEventDescriptor objects and return void.
+        #[unsafe(method(getURL:withReplyEvent:))]
+        fn get_url(&self, event: &NSAppleEventDescriptor, _reply: &NSAppleEventDescriptor) {
+            // SAFETY: keyDirectObject ('----') is an AEKeyword/u32; Cocoa returns a nullable descriptor.
+            let direct: Option<Retained<NSAppleEventDescriptor>> = unsafe {
+                msg_send![event, paramDescriptorForKeyword: u32::from_be_bytes(*b"----")]
+            };
+            let Some(url) = direct.and_then(|direct| direct.stringValue()) else { return; };
+            let url = url.to_string();
+            if !url.is_empty() && url.len() <= MAX_URL_BYTES { self.ivars().push(Event::Url(url)); }
         }
 
         #[unsafe(method(quitApplication:withReplyEvent:))]
@@ -122,6 +142,9 @@ impl Handler {
                 andSelector: sel!(openDocuments:withReplyEvent:),
                 forEventClass: u32::from_be_bytes(*b"aevt"), andEventID: u32::from_be_bytes(*b"odoc")];
             let _: () = msg_send![&*manager, setEventHandler: self,
+                andSelector: sel!(getURL:withReplyEvent:),
+                forEventClass: u32::from_be_bytes(*b"GURL"), andEventID: u32::from_be_bytes(*b"GURL")];
+            let _: () = msg_send![&*manager, setEventHandler: self,
                 andSelector: sel!(quitApplication:withReplyEvent:),
                 forEventClass: u32::from_be_bytes(*b"aevt"), andEventID: u32::from_be_bytes(*b"quit")];
         }
@@ -159,8 +182,12 @@ impl Drop for Registration {
         unsafe {
             NSNotificationCenter::defaultCenter().removeObserver(&self.0);
             let manager = NSAppleEventManager::sharedAppleEventManager();
-            for id in [*b"odoc", *b"quit"] {
-                let _: () = msg_send![&*manager, removeEventHandlerForEventClass: u32::from_be_bytes(*b"aevt"),
+            for (class, id) in [
+                (*b"aevt", *b"odoc"),
+                (*b"GURL", *b"GURL"),
+                (*b"aevt", *b"quit"),
+            ] {
+                let _: () = msg_send![&*manager, removeEventHandlerForEventClass: u32::from_be_bytes(class),
                     andEventID: u32::from_be_bytes(id)];
             }
         }

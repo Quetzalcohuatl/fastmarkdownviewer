@@ -4,6 +4,11 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- `fmv-macos-events`: deliver GetURL Apple events (`GURL`/`GURL`) as
+  `Event::Url(String)`, for apps that declare `CFBundleURLTypes` (for example
+  `mailto:`). URLs over `MAX_URL_BYTES` (8192) are dropped. `Event` is now
+  `#[non_exhaustive]`, which is a breaking change (needs a 0.2.0 release).
+
 ## [0.2.8] - 2026-10-01
 
 - Replace the stretched 32-pixel app icon with platform artwork: a rounded,

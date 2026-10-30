@@ -4,6 +4,11 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+- Update the Markdown parser, TLS libraries, and certificate roots to address
+  seven RustSec advisories, and replace the yanked Windows clipboard dependency.
+- Track the upstream Linux D-Bus crate migration with review dates for exceptions to
+  three unmaintained-only advisories; vulnerability and yanked-crate checks remain enabled.
+
 ## [0.2.8] - 2026-10-01
 
 - Replace the stretched 32-pixel app icon with platform artwork: a rounded,

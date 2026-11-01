@@ -63,7 +63,7 @@ jobs:
           args=(--tag "$RELEASE_TAG" --output distribution/release.json)
           if [[ -n "$RELEASE_RUN_ID" ]]; then args+=(--run-id "$RELEASE_RUN_ID"); fi
           python3 scripts/prepare-distribution.py "${args[@]}"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: distribution-release
           path: distribution/release.json
@@ -116,7 +116,7 @@ jobs:
         run: python scripts/publish-cargo.py --source release-source
       - name: Authenticate using crates.io trusted publishing
         if: steps.plan.outputs.needed == 'true' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
-        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
         id: auth
       - name: Publish missing versions and verify registry contents
         if: steps.plan.outputs.needed == 'true' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
@@ -188,7 +188,7 @@ jobs:
           winget --version
           winget validate --manifest "distribution/winget/manifests/q/Quetzalcohuatl/FastMarkdownViewer/$env:RELEASE_VERSION" --disable-interactivity
           if ($LASTEXITCODE -ne 0) { throw 'WinGet manifest validation failed.' }
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: winget-manifests-${{ needs.verify.outputs.version }}
           path: distribution/winget
@@ -216,7 +216,7 @@ jobs:
           persist-credentials: false
       # Obtains and revokes a temporary token, but publishes nothing.
       - name: Check crates.io trusted-publisher authentication
-        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
       - name: Check WinGet identity and token scope without writing
         env:
           WINGET_GITHUB_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}

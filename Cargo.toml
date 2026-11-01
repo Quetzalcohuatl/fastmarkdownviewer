@@ -56,7 +56,7 @@ name = "FastMarkdownViewer"
 path = "src/main.rs"
 
 [dependencies]
-eframe = { version = "0.36.0", default-features = false, features = ["accesskit", "default_fonts"] }
+eframe = { version = "0.37.0", default-features = false, features = ["accesskit", "default_fonts"] }
 # FMV registers its bounded loaders; commonmark's loader features are redundant.
 egui_commonmark = { package = "fmv-egui-commonmark", version = "=0.25.0-fmv.2", path = "vendor/egui_commonmark", default-features = false, features = ["pulldown_cmark"] }
 image = { version = "0.25.10", default-features = false, features = ["gif", "jpeg", "png", "webp"] }
@@ -69,7 +69,7 @@ ratex-layout = "0.1.14"
 ratex-parser = "0.1.14"
 ratex-svg = { version = "0.1.14", features = ["embed-fonts"] }
 ratex-types = "0.1.14"
-resvg = { version = "0.48.1", default-features = false, features = ["text"] }
+resvg = { version = "0.49.0", default-features = false, features = ["text"] }
 rusty-mermaid-core = "=0.2.0"
 rusty-mermaid-svg = "=0.2.0"
 rusty-mermaid-diagrams = { package = "fmv-rusty-mermaid-diagrams", version = "=0.2.0-fmv.1", path = "crates/mermaid-diagrams" }

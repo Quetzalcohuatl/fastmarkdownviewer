@@ -70,7 +70,7 @@ version = "0.2"
 optional = true
 
 [dependencies.egui]
-version = "0.36.0"
+version = "0.37.0"
 default-features = false
 
 [dependencies.egui_commonmark_backend]
@@ -80,7 +80,7 @@ path = "../egui_commonmark_backend"
 default-features = false
 
 [dependencies.egui_extras]
-version = "0.36.0"
+version = "0.37.0"
 default-features = false
 
 [dependencies.pulldown-cmark]

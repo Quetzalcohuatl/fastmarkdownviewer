@@ -1,6 +1,6 @@
 [package]
 name = "fast-markdown-viewer"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2024"
 rust-version = "1.95"
 description = "A fast, read-only Markdown viewer"
@@ -86,6 +86,7 @@ rfd = { version = "0.15.4", default-features = false, features = ["xdg-portal", 
 # Keep OpenGL as the fast path, with Direct3D/WARP for basic display drivers.
 # Do not pull in unused Vulkan/Metal/GLES backends for this fallback.
 eframe = { version = "0.36.0", default-features = false, features = ["wgpu_no_default_features"] }
+uds_windows = "1.2.1"
 wgpu = { version = "30.0", default-features = false, features = ["dx12", "wgsl"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]

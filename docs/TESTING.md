@@ -76,9 +76,10 @@ capture tool time to observe completed highlighting on slower runners.
 
 `scripts/test-windows-ui.ps1` launches the compiled executable with the feature
 fixture, waits for the content window, sends native Page Down, Down, End, and
-Home key messages, confirms the process stays alive, and verifies that two
-separate launches create two independent processes and windows. It always
-closes the processes it creates.
+Home key messages, and confirms the process stays alive. A second launch passes
+multiple paths to the original window and exits. The smoke test checks that the
+last file becomes active and that the saved session contains three distinct tabs
+in one window. It always closes the processes it creates.
 
 Run the local gates from a Visual Studio developer shell:
 

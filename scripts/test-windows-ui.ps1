@@ -141,18 +141,38 @@ try {
         throw "FastMarkdownViewer crashed while processing scroll keys (exit code $($primary.ExitCode))."
     }
 
-    $secondary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -WindowStyle Hidden -PassThru
-    Wait-ForViewerWindow -Process $secondary
-    if ($primary.Id -eq $secondary.Id) {
-        throw 'Separate launches unexpectedly reused one process.'
+    $secondName = 'Second 日本語.md'
+    $thirdName = 'Third file.md'
+    [System.IO.File]::WriteAllText((Join-Path $testDirectory $secondName), '# Second')
+    [System.IO.File]::WriteAllText((Join-Path $testDirectory $thirdName), '# Third')
+    $arguments = @($quotedFixture, ('"' + $secondName + '"'), ('"' + $thirdName + '"'))
+    $secondary = Start-Process -FilePath $binaryPath -ArgumentList $arguments `
+        -WorkingDirectory $testDirectory -WindowStyle Hidden -PassThru
+    if (-not $secondary.WaitForExit($TimeoutSeconds * 1000) -or $secondary.ExitCode -ne 0) {
+        throw 'The second launch did not hand its files to the running viewer.'
     }
-    $primary.Refresh()
-    $secondary.Refresh()
-    if ($primary.HasExited -or $secondary.HasExited) {
-        throw 'One of the independent viewer windows exited unexpectedly.'
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    do {
+        $primary.Refresh()
+        if ($primary.HasExited) {
+            throw 'The running viewer exited during file handoff.'
+        }
+        if ($primary.MainWindowTitle -eq ($thirdName + ' — FastMarkdownViewer')) {
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    } while ([DateTime]::UtcNow -lt $deadline)
+    if ($primary.MainWindowTitle -ne ($thirdName + ' — FastMarkdownViewer')) {
+        throw "The last file did not become active in the original window: $($primary.MainWindowTitle)"
+    }
+    Close-TestProcess -Process $primary
+    $state = Get-Content (Join-Path $testDirectory 'FastMarkdownViewer/state.json') -Raw | ConvertFrom-Json
+    $names = @($state.windows[0].tabs | ForEach-Object { [System.IO.Path]::GetFileName($_.path) })
+    if ($state.windows.Count -ne 1 -or $names.Count -ne 3 -or $names[1] -ne $secondName -or $names[2] -ne $thirdName) {
+        throw "Expected three distinct tabs in the original window, got: $($names -join ', ')"
     }
 
-    Write-Output "WINDOWS_UI_SMOKE=passed renderer=$Renderer bare-startup=passed primary=$($primary.Id) secondary=$($secondary.Id)"
+    Write-Output "WINDOWS_UI_SMOKE=passed renderer=$Renderer bare-startup=passed file-handoff=passed"
 }
 finally {
     Close-TestProcess -Process $secondary

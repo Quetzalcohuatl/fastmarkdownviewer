@@ -2,7 +2,7 @@ use std::{ffi::OsString, path::PathBuf};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Command {
-    Open(Option<PathBuf>),
+    Open(Vec<PathBuf>),
     Version,
     Error(String),
 }
@@ -14,7 +14,7 @@ where
     let mut args = args.into_iter();
     let _program = args.next();
     let Some(first) = args.next() else {
-        return Command::Open(None);
+        return Command::Open(Vec::new());
     };
 
     if first == "--version" || first == "-V" {
@@ -27,16 +27,17 @@ where
 
     if first == "--help" || first == "-h" {
         return Command::Error(
-            "Usage: FastMarkdownViewer.exe [PATH]\n       FastMarkdownViewer.exe --version"
+            "Usage: FastMarkdownViewer.exe [PATH ...]\n       FastMarkdownViewer.exe --version"
                 .to_owned(),
         );
     }
 
-    if args.next().is_some() {
-        return Command::Error("Open one Markdown file at a time".to_owned());
-    }
-
-    Command::Open(Some(PathBuf::from(first)))
+    Command::Open(
+        std::iter::once(first)
+            .chain(args)
+            .map(PathBuf::from)
+            .collect(),
+    )
 }
 
 #[cfg(test)]
@@ -48,20 +49,16 @@ mod tests {
     }
 
     #[test]
-    fn accepts_zero_or_one_path() {
-        assert_eq!(parse(strings(&["fmv"])), Command::Open(None));
+    fn accepts_zero_or_more_paths() {
+        assert_eq!(parse(strings(&["fmv"])), Command::Open(Vec::new()));
         assert_eq!(
             parse(strings(&["fmv", "a file.md"])),
-            Command::Open(Some(PathBuf::from("a file.md")))
+            Command::Open(vec![PathBuf::from("a file.md")])
         );
-    }
-
-    #[test]
-    fn rejects_multiple_paths() {
-        assert!(matches!(
-            parse(strings(&["fmv", "a.md", "b.md"])),
-            Command::Error(_)
-        ));
+        assert_eq!(
+            parse(strings(&["fmv", "a file.md", "b.md"])),
+            Command::Open(vec![PathBuf::from("a file.md"), PathBuf::from("b.md")])
+        );
     }
 
     #[test]

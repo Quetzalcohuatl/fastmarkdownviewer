@@ -19,8 +19,10 @@ profile.mkdir()
 state_path = profile / 'FastMarkdownViewer/state.json'
 first = work / 'First 日本語 中文 한국어.md'
 second = work / 'Second.markdown'
+third = work / 'Third 日本語 file.md'
 first.write_text('# Native acceptance\n\n' + 'Read and find needle in this paragraph.\n\n' * 200)
 second.write_text('# Second\n\nOpened through the native portal.')
+third.write_text('# Third\n\nOpened by another command-line launch.')
 env = dict(os.environ, XDG_CONFIG_HOME=str(profile))
 
 def command(*args):
@@ -94,14 +96,18 @@ try:
     capture('portal-selection')
     wait_for(lambda: 'Second.markdown' in command('xdotool', 'getwindowname', root), 'portal selected file')
     capture('second-tab')
+    subprocess.run([binary, first.name, third.name], cwd=work, env=env, check=True, timeout=20)
+    wait_for(lambda: third.name in command('xdotool', 'getwindowname', root), 'forwarded files')
+    assert windows() == [root], windows()
     close(root)
     process.wait(timeout=20)
     assert process.returncode == 0
     restored = json.loads(state_path.read_text())
-    assert [tab['path'] for tab in restored['windows'][0]['tabs']] == [str(first), str(second)], restored
+    assert len(restored['windows']) == 1, restored
+    assert [tab['path'] for tab in restored['windows'][0]['tabs']] == [str(first), str(second), str(third)], restored
     for field in ['theme', 'zoom', 'automatic_images', 'word_wrap']:
         assert restored[field] == state[field], (field, restored)
-    print('PASS: native window, Find, clipboard, scrolling, clean exit, saved preferences/session, portal file dialog, multiple tabs')
+    print('PASS: native window, Find, clipboard, scrolling, clean exit, saved preferences/session, portal file dialog, multi-file handoff and tab deduplication')
 finally:
     if process.poll() is None:
         for window in windows():

@@ -208,6 +208,31 @@ fn external_open_reuses_tabs_and_revives_a_hidden_root() {
 }
 
 #[test]
+fn external_open_uses_the_most_recently_focused_window() {
+    let (directory, context, mut app, start) = fixture();
+    let output = drag(&context, &mut app, start, egui::pos2(900.0, 150.0));
+    let child = *app.detached.first_key_value().unwrap().0;
+    let callback = output.viewport_output[&child]
+        .viewport_ui_cb
+        .as_deref()
+        .unwrap();
+    child_frame(&context, child, callback, Vec::new(), false);
+
+    let first = directory.path().join("tear-out.md");
+    let second = directory.path().join("second.md");
+    std::fs::write(&second, "# Second").unwrap();
+    app.open_external_files(&[first, second.clone()], &context);
+
+    assert_eq!(app.tab_count(), 0);
+    let window = app.detached[&child].state.lock().unwrap();
+    assert_eq!(window.tab_count(), 2);
+    assert_eq!(
+        window.document_path(),
+        Some(second.canonicalize().unwrap().as_path())
+    );
+}
+
+#[test]
 fn saved_session_restores_lazily_and_keeps_reading_position() {
     let directory = tempfile::tempdir().unwrap();
     let first = directory.path().join("first.md");
@@ -332,7 +357,7 @@ fn quit_restores_all_windows_and_last_detached_close_preserves_its_tabs() {
     app.handle_root_close(&context);
     let id = *app.detached.keys().next().unwrap();
     app.pending.lock().unwrap().push(WindowEvent::Close(id));
-    app.process_events();
+    app.process_events(&context);
     app.handle_root_close(&context);
     drop(app);
     let app = ViewerApp::restore_from(InitialState::Empty, &context, path);
@@ -537,9 +562,107 @@ fn child_frame(
         info.events.push(egui::ViewportEvent::Close);
     }
     raw.viewports.insert(id, info);
+    run_child_frame(context, callback, raw)
+}
+
+fn run_child_frame(
+    context: &egui::Context,
+    callback: &egui::DeferredViewportUiCallback,
+    raw: egui::RawInput,
+) -> egui::FullOutput {
     let mut output = context.run_ui(raw, |ui| callback(ui));
     output.textures_delta.clear();
     output
+}
+
+#[test]
+fn dragging_between_windows_moves_the_tab_in_both_directions_at_mixed_dpi() {
+    let (directory, context, mut app, start) = fixture();
+    drag(&context, &mut app, start, egui::pos2(900.0, 150.0));
+    let child = *app.detached.first_key_value().unwrap().0;
+    let second = directory.path().join("second.md");
+    std::fs::write(
+        &second,
+        format!("# Second\n\n{}", "marker paragraph\n\n".repeat(150)),
+    )
+    .unwrap();
+    app.root.load(&second);
+    let id = app.root.tabs[0].id;
+    app.root.tabs[0].search.open = true;
+    app.root.tabs[0].search.query = "marker".into();
+    app.root.tabs[0].search.invalidate();
+
+    let inputs = |viewport_id, events| {
+        let mut raw = input(events);
+        raw.viewport_id = viewport_id;
+        raw.viewports.insert(
+            child,
+            egui::ViewportInfo {
+                parent: Some(egui::ViewportId::ROOT),
+                native_pixels_per_point: Some(1.5),
+                // The root ends at -392 physical pixels; the child starts at -360.
+                inner_rect: Some(egui::Rect::from_min_size(
+                    egui::pos2(-240.0, 50.0),
+                    egui::vec2(800.0, 600.0),
+                )),
+                ..Default::default()
+            },
+        );
+        raw
+    };
+    let root = egui::ViewportId::ROOT;
+    app.root.tabs[0].scroll_offset = 250.0;
+    let output = frame(&context, &mut app, inputs(root, Vec::new()));
+    let start = tab_center(&output, "second.md");
+    let drop_in_child = egui::pos2(950.0, 130.0);
+    frame(
+        &context,
+        &mut app,
+        inputs(
+            root,
+            vec![egui::Event::PointerMoved(start), button(start, true)],
+        ),
+    );
+    let output = frame(
+        &context,
+        &mut app,
+        inputs(root, vec![button(drop_in_child, false)]),
+    );
+    assert_eq!(app.detached_window_count(), 1);
+    assert_eq!(app.tab_count(), 0);
+    {
+        let state = app.detached[&child].state.lock().unwrap();
+        assert_eq!(state.tab_count(), 2);
+        assert_eq!(state.tabs[state.active].id, id);
+        assert_eq!(state.tabs[state.active].search.query, "marker");
+        assert!((state.document_scroll_offset() - 250.0).abs() < 1.0);
+    }
+
+    let callback = output.viewport_output[&child]
+        .viewport_ui_cb
+        .as_deref()
+        .unwrap();
+    let output = run_child_frame(&context, callback, inputs(child, Vec::new()));
+    let start = tab_center(&output, "second.md");
+    let drop_in_root = egui::pos2(-180.0, 90.0);
+    run_child_frame(
+        &context,
+        callback,
+        inputs(
+            child,
+            vec![egui::Event::PointerMoved(start), button(start, true)],
+        ),
+    );
+    run_child_frame(
+        &context,
+        callback,
+        inputs(child, vec![button(drop_in_root, false)]),
+    );
+    frame(&context, &mut app, inputs(root, Vec::new()));
+    assert_eq!(app.detached_window_count(), 1);
+    assert_eq!(app.detached[&child].state.lock().unwrap().tab_count(), 1);
+    assert_eq!(app.tab_count(), 1);
+    assert_eq!(app.root.tabs[app.root.active].id, id);
 }
 
 #[test]

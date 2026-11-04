@@ -61,7 +61,7 @@ else:
     executable = stage / 'FastMarkdownViewer'
     (stage / 'FastMarkdownViewer.desktop').write_text(
         '[Desktop Entry]\nType=Application\nName=FastMarkdownViewer\n'
-        'Comment=Read-only Markdown viewer\nExec=FastMarkdownViewer %f\n'
+        'Comment=Read-only Markdown viewer\nExec=FastMarkdownViewer %F\n'
         'Icon=FastMarkdownViewer\nStartupWMClass=FastMarkdownViewer\n'
         'Terminal=false\nCategories=Office;Viewer;\nMimeType=text/markdown;\n', encoding='utf-8')
     icon_theme = stage / 'share/icons/hicolor'

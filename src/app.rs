@@ -494,14 +494,22 @@ impl ViewerWindow {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 let handle = ui
                     .add(
-                        egui::Button::new("Drag window")
-                            .truncate()
-                            .min_size(egui::vec2(112.0, ui.spacing().interact_size.y))
+                        egui::Button::new("")
+                            .min_size(egui::vec2(44.0, ui.spacing().interact_size.y))
                             .fill(panel.lerp_to_gamma(text, 0.30))
                             .stroke(egui::Stroke::new(1.0, panel.lerp_to_gamma(text, 0.80)))
                             .sense(egui::Sense::drag()),
                     )
-                    .on_hover_and_drag_cursor(egui::CursorIcon::Grab);
+                    .on_hover_and_drag_cursor(egui::CursorIcon::Grab)
+                    .on_hover_text("Move this window");
+                handle.widget_info(|| {
+                    egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), "Move this window")
+                });
+                for x in [-5.0, 0.0, 5.0] {
+                    for y in [-2.5, 2.5] {
+                        ui.painter().circle_filled(handle.rect.center() + egui::vec2(x, y), 1.4, text);
+                    }
+                }
                 if handle.drag_started_by(egui::PointerButton::Primary) {
                     ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
                 }

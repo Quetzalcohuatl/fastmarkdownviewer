@@ -183,23 +183,25 @@ fn empty_window_paints_the_whole_viewport_and_exposes_main_menus() {
 #[test]
 fn only_the_window_handle_starts_a_native_drag() {
     let context = egui::Context::default();
+    context.enable_accesskit();
     let mut app = ViewerApp::new(InitialState::Empty);
     let output = run_frame(&context, &mut app, input(Vec::new()));
+    let update = accesskit_update(&output);
     for (label, button, starts_drag) in [
         ("File", egui::PointerButton::Primary, false),
-        ("Drag window", egui::PointerButton::Secondary, false),
-        ("Drag window", egui::PointerButton::Primary, true),
+        ("Move this window", egui::PointerButton::Secondary, false),
+        ("Move this window", egui::PointerButton::Primary, true),
     ] {
-        let position = output
-            .shapes
+        let id = node_with_text(update, egui::accesskit::Role::Button, label);
+        let bounds = update
+            .nodes
             .iter()
-            .find_map(|clipped| match &clipped.shape {
-                egui::Shape::Text(text) if text.galley.text() == label => {
-                    Some(text.visual_bounding_rect().center())
-                }
-                _ => None,
-            })
-            .unwrap_or_else(|| panic!("no visible {label} label"));
+            .find_map(|(node_id, node)| (*node_id == id).then(|| node.bounds()).flatten())
+            .unwrap();
+        let position = egui::pos2(
+            bounds.x0.midpoint(bounds.x1) as f32,
+            bounds.y0.midpoint(bounds.y1) as f32,
+        );
         let pointer_button = |position, pressed| egui::Event::PointerButton {
             pos: position,
             button,

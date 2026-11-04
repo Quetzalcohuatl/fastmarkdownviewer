@@ -233,6 +233,39 @@ fn external_open_uses_the_most_recently_focused_window() {
 }
 
 #[test]
+fn reopening_a_detached_document_raises_its_window() {
+    let (directory, context, mut app, start) = fixture();
+    drag(&context, &mut app, start, egui::pos2(900.0, 150.0));
+    let child = *app.detached.first_key_value().unwrap().0;
+    let path = directory.path().join("tear-out.md");
+    let canonical = path.canonicalize().unwrap();
+    let tab_id = app.detached[&child].state.lock().unwrap().tabs[0].id;
+    let root = egui::ViewportId::ROOT;
+
+    for from_picker in [false, true] {
+        let mut output = context.run_ui(input(Vec::new()), |ui| {
+            context.data_mut(|data| data.insert_temp(egui::Id::new("last_focused_window"), root));
+            if from_picker {
+                app.root.picked_files.push(path.clone());
+            } else {
+                app.open_external_files(std::slice::from_ref(&path), &context);
+            }
+            app.show(ui);
+        });
+        output.textures_delta.clear();
+        assert_eq!(app.tab_count(), 0);
+        assert_eq!(app.detached.len(), 1);
+        let window = app.detached[&child].state.lock().unwrap();
+        assert_eq!(window.tab_count(), 1);
+        assert_eq!(window.tabs[0].id, tab_id);
+        assert_eq!(window.document_path(), Some(canonical.as_path()));
+        let commands = &output.viewport_output[&child].commands;
+        assert!(commands.contains(&egui::ViewportCommand::Minimized(false)));
+        assert!(commands.contains(&egui::ViewportCommand::Focus));
+    }
+}
+
+#[test]
 fn saved_session_restores_lazily_and_keeps_reading_position() {
     let directory = tempfile::tempdir().unwrap();
     let first = directory.path().join("first.md");

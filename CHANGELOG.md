@@ -7,6 +7,7 @@ All notable changes are documented here. This project follows Semantic Versionin
 ## [0.2.9] - 2026-11-04
 
 - Open multiple files as tabs in the running viewer from the desktop, command line, or file picker.
+- Reopen an existing file by selecting its tab and bringing its window forward, including detached windows.
 - Drag tabs between windows in the same session, keeping their reading position and Find state.
 - Make the menu bar easier to distinguish in light and dark themes, with a labeled handle for moving the window.
 - Keep ISO dates consistently colored in Python console output, including zero-padded months and days.

@@ -135,6 +135,7 @@ struct ViewerWindow {
     tab_drag: Option<TabDrag>,
     drag_cancelled: bool,
     detach_request: Option<DetachRequest>,
+    picked_files: Vec<PathBuf>,
     close_requested: bool,
     rename_dialog: Option<RenameDialog>,
     // Viewport commands request repaint, so only send a changed native title.
@@ -156,6 +157,7 @@ impl ViewerWindow {
             tab_drag: None,
             drag_cancelled: false,
             detach_request: None,
+            picked_files: Vec::new(),
             close_requested: false,
             rename_dialog: None,
             native_title: None,
@@ -299,7 +301,8 @@ impl ViewerWindow {
     }
 
     fn open_dialog(&mut self) {
-        self.load_many(&self.services.choose_markdown_files());
+        self.picked_files
+            .extend(self.services.choose_markdown_files());
     }
 
     fn handle_drops(&mut self, context: &egui::Context) {

@@ -3,7 +3,7 @@ use super::{AppServices, DocumentTab, InitialState, PlatformServices, ViewerWind
 use eframe::egui;
 use std::{
     collections::BTreeMap,
-    path::Path,
+    path::{Path, PathBuf},
     sync::{Arc, Mutex},
 };
 
@@ -20,6 +20,10 @@ struct Spawn {
 
 enum WindowEvent {
     Spawn(Box<Spawn>),
+    OpenFiles {
+        source: egui::ViewportId,
+        paths: Vec<PathBuf>,
+    },
     MoveTab {
         tab_id: u64,
         source: egui::ViewportId,
@@ -184,7 +188,7 @@ impl ViewerApp {
         }
     }
 
-    fn open_external_files(&mut self, paths: &[std::path::PathBuf], context: &egui::Context) {
+    fn open_external_files(&mut self, paths: &[PathBuf], context: &egui::Context) {
         let root = egui::ViewportId::ROOT;
         let last_focused = context
             .data(|data| data.get_temp::<egui::ViewportId>(egui::Id::new("last_focused_window")));
@@ -207,7 +211,11 @@ impl ViewerApp {
             self.root.close_requested = false;
             context.send_viewport_cmd_to(root, egui::ViewportCommand::Visible(true));
         }
+        self.open_files(target, paths, context);
+    }
 
+    fn open_files(&mut self, target: egui::ViewportId, paths: &[PathBuf], context: &egui::Context) {
+        let root = egui::ViewportId::ROOT;
         let mut focused = target;
         let mut errors = Vec::new();
         for path in paths {
@@ -344,6 +352,12 @@ impl ViewerApp {
         context: &egui::Context,
         root_visible: bool,
     ) -> Option<WindowEvent> {
+        if !window.picked_files.is_empty() {
+            return Some(WindowEvent::OpenFiles {
+                source: context.viewport_id(),
+                paths: std::mem::take(&mut window.picked_files),
+            });
+        }
         let request = window.detach_request.take()?;
         if let Some(pointer) = request.pointer
             && let Some(destination) = Self::drop_destination(context, pointer, root_visible)
@@ -367,6 +381,7 @@ impl ViewerApp {
             tab_drag: None,
             drag_cancelled: false,
             detach_request: None,
+            picked_files: Vec::new(),
             close_requested: false,
             rename_dialog: None,
             native_title: None,
@@ -434,6 +449,7 @@ impl ViewerApp {
     fn handle_event(&mut self, event: WindowEvent, context: &egui::Context) {
         match event {
             WindowEvent::Spawn(spawn) => self.spawn(*spawn),
+            WindowEvent::OpenFiles { source, paths } => self.open_files(source, &paths, context),
             WindowEvent::MoveTab {
                 tab_id,
                 source,

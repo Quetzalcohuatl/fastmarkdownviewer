@@ -2,6 +2,7 @@ use egui::{FontId, Pos2, TextFormat, TextStyle, Ui, text::LayoutJob};
 use std::{
     collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
+    ops::Range,
     sync::{
         Arc, OnceLock,
         atomic::{AtomicU64, Ordering},
@@ -217,13 +218,41 @@ fn highlight(syntax: &SyntaxSet, themes: &ThemeSet, request: &Request) -> Option
         .unwrap_or(&themes.themes[fallback]);
     let mut highlighter = HighlightLines::new(definition, theme);
     let mut job = LayoutJob::default();
+    let python_console = definition.name == "Python"
+        && request
+            .text
+            .lines()
+            .map(str::trim_start)
+            .find(|line| !line.is_empty())
+            .is_some_and(|line| line.starts_with(">>> "));
+    let mut console_line = String::new();
     for line in LinesWithEndings::from(&request.text) {
         if request.cancelled() {
             return None;
         }
-        match highlighter.highlight_line(line, syntax) {
+        let date = python_console.then(|| console_date(line)).flatten();
+        let input = if let Some(date) = &date {
+            // Give the Python grammar one numeric token for a printed date. Keep its
+            // byte length so we can paint the original text with the resulting colors.
+            console_line.clear();
+            console_line.push_str(&line[..date.start]);
+            console_line.push_str("1000000000");
+            console_line.push_str(&line[date.end..]);
+            console_line.as_str()
+        } else {
+            line
+        };
+        match highlighter.highlight_line(input, syntax) {
             Ok(spans) => {
+                let mut original = line;
                 for (style, text) in spans {
+                    let text = if date.is_some() {
+                        let (text, rest) = original.split_at(text.len());
+                        original = rest;
+                        text
+                    } else {
+                        text
+                    };
                     let c = palette_color(style.foreground, &request.theme);
                     job.append(
                         text,
@@ -252,6 +281,28 @@ fn highlight(syntax: &SyntaxSet, themes: &ThemeSet, request: &Request) -> Option
         }
     }
     (!request.cancelled()).then_some(job)
+}
+
+/// Find an ISO date in a printed date/value row, optionally preceded by a row number.
+fn console_date(line: &str) -> Option<Range<usize>> {
+    let (first, rest) = line.trim_ascii_start().split_once([' ', '\t'])?;
+    let (date, rest) = if first.parse::<i64>().is_ok() {
+        rest.trim_ascii_start().split_once([' ', '\t'])?
+    } else {
+        (first, rest)
+    };
+    let [year @ .., b'-', m1, m2, b'-', d1, d2] = date.as_bytes() else {
+        return None;
+    };
+    if year.len() != 4
+        || !year.iter().chain([m1, m2, d1, d2]).all(u8::is_ascii_digit)
+        || rest.trim_ascii().parse::<f64>().is_err()
+    {
+        return None;
+    }
+    // split_once removed one ASCII separator between the date and the rest.
+    let end = line.len() - rest.len() - 1;
+    Some(end - date.len()..end)
 }
 
 // Map the bundled Ocean syntax categories into the familiar editor palettes.

@@ -1333,7 +1333,7 @@ checksum = "98de4bbd547a563b716d8dfa9aad1cb19bfab00f4fa09a6a4ed21dbcf44ce9c4"
 
 [[package]]
 name = "fmv-egui-commonmark"
-version = "0.25.0-fmv.2"
+version = "0.25.0-fmv.3"
 dependencies = [
  "document-features",
  "egui",
@@ -1344,7 +1344,7 @@ dependencies = [
 
 [[package]]
 name = "fmv-egui-commonmark-backend"
-version = "0.25.0-fmv.2"
+version = "0.25.0-fmv.3"
 dependencies = [
  "data-url",
  "egui",

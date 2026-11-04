@@ -120,11 +120,11 @@ The workspace contains these independently versioned packages, in dependency ord
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| `fmv-egui-commonmark-backend` | `0.25.0-fmv.2` | Patched layout, selection, and highlighting backend |
-| `fmv-egui-commonmark` | `0.25.0-fmv.2` | Runtime Markdown viewer using the patched backend |
+| `fmv-egui-commonmark-backend` | `0.25.0-fmv.3` | Patched layout, selection, and highlighting backend |
+| `fmv-egui-commonmark` | `0.25.0-fmv.3` | Runtime Markdown viewer using the patched backend |
 | `fmv-macos-events` | `0.1.0` | Native Mac event adapter |
 | `fmv-rusty-mermaid-diagrams` | `0.2.0-fmv.1` | Patched, bounded diagram renderer |
-| `fast-markdown-viewer` | `0.2.8` | Desktop executable |
+| `fast-markdown-viewer` | `0.2.9` | Desktop executable |
 
 The fork names distinguish these packages from upstream releases; original licenses and patch records are included. Cargo's published manifests use versioned registry dependencies, with no reliance on `[patch.crates-io]`. The upstream compile-time Markdown macros are outside the runtime viewer fork's scope.
 

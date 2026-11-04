@@ -181,6 +181,60 @@ fn empty_window_paints_the_whole_viewport_and_exposes_main_menus() {
 }
 
 #[test]
+fn only_the_window_handle_starts_a_native_drag() {
+    let context = egui::Context::default();
+    let mut app = ViewerApp::new(InitialState::Empty);
+    let output = run_frame(&context, &mut app, input(Vec::new()));
+    for (label, button, starts_drag) in [
+        ("File", egui::PointerButton::Primary, false),
+        ("Drag window", egui::PointerButton::Secondary, false),
+        ("Drag window", egui::PointerButton::Primary, true),
+    ] {
+        let position = output
+            .shapes
+            .iter()
+            .find_map(|clipped| match &clipped.shape {
+                egui::Shape::Text(text) if text.galley.text() == label => {
+                    Some(text.visual_bounding_rect().center())
+                }
+                _ => None,
+            })
+            .unwrap_or_else(|| panic!("no visible {label} label"));
+        let pointer_button = |position, pressed| egui::Event::PointerButton {
+            pos: position,
+            button,
+            pressed,
+            modifiers: egui::Modifiers::NONE,
+        };
+        let pressed = run_frame(
+            &context,
+            &mut app,
+            input(vec![
+                egui::Event::PointerMoved(position),
+                pointer_button(position, true),
+            ]),
+        );
+        assert_eq!(
+            pressed.viewport_output[&egui::ViewportId::ROOT]
+                .commands
+                .iter()
+                .any(|command| matches!(command, egui::ViewportCommand::StartDrag)),
+            starts_drag,
+            "{button:?} press on {label}"
+        );
+        let end = position + egui::vec2(0.0, 50.0);
+        run_frame(
+            &context,
+            &mut app,
+            input(vec![
+                egui::Event::PointerMoved(end),
+                pointer_button(end, false),
+            ]),
+        );
+    }
+}
+
+#[test]
 fn control_wheel_zooms_in_and_out() {
     let context = egui::Context::default();
     let mut app = ViewerApp::new(InitialState::Path(fixture()));

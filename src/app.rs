@@ -408,7 +408,16 @@ impl ViewerWindow {
     }
 
     fn menu_bar(&mut self, ui: &mut egui::Ui) {
-        egui::MenuBar::new().ui(ui, |ui| {
+        let panel = ui.visuals().panel_fill;
+        let text = ui.visuals().text_color();
+        let mut bar = egui::Frame::new()
+            .fill(panel.lerp_to_gamma(text, 0.16))
+            .stroke(egui::Stroke::new(1.0, panel.lerp_to_gamma(text, 0.55)))
+            .inner_margin(egui::Margin::symmetric(8, 5))
+            .corner_radius(6)
+            .begin(ui);
+        bar.content_ui.spacing_mut().interact_size.y = 24.0;
+        egui::MenuBar::new().ui(&mut bar.content_ui, |ui| {
             ui.menu_button("File", |ui| {
                 if ui.button("Open…").clicked() {
                     self.open_dialog();
@@ -479,8 +488,23 @@ impl ViewerWindow {
                 egui::gui_zoom::zoom_menu_buttons(ui);
                 ui.weak("Appearance is shared by this session’s windows.");
             });
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let handle = ui
+                    .add(
+                        egui::Button::new("Drag window")
+                            .truncate()
+                            .min_size(egui::vec2(112.0, ui.spacing().interact_size.y))
+                            .fill(panel.lerp_to_gamma(text, 0.30))
+                            .stroke(egui::Stroke::new(1.0, panel.lerp_to_gamma(text, 0.80)))
+                            .sense(egui::Sense::drag()),
+                    )
+                    .on_hover_and_drag_cursor(egui::CursorIcon::Grab);
+                if handle.drag_started_by(egui::PointerButton::Primary) {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
+                }
+            });
         });
-        ui.separator();
+        bar.end(ui);
     }
 
     fn open_find(&mut self) {

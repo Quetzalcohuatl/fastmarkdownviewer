@@ -32,11 +32,16 @@ const MAX_ZOOM_FACTOR: f32 = 3.0;
 pub enum InitialState {
     Empty,
     Path(PathBuf),
+    Paths(Vec<PathBuf>),
     Error(String),
 }
 
 pub trait AppServices: Send + Sync {
     fn choose_markdown_file(&self) -> Option<PathBuf>;
+
+    fn choose_markdown_files(&self) -> Vec<PathBuf> {
+        self.choose_markdown_file().into_iter().collect()
+    }
 
     /// Open a validated web URL.
     ///
@@ -59,6 +64,10 @@ pub struct PlatformServices;
 impl AppServices for PlatformServices {
     fn choose_markdown_file(&self) -> Option<PathBuf> {
         platform::choose_markdown_file()
+    }
+
+    fn choose_markdown_files(&self) -> Vec<PathBuf> {
+        platform::choose_markdown_files()
     }
 
     fn open_browser(&self, url: &Url) -> io::Result<()> {
@@ -100,6 +109,7 @@ struct TabDrag {
 
 struct DetachRequest {
     tab_id: u64,
+    pointer: Option<egui::Pos2>,
     position: Option<egui::Pos2>,
     size: egui::Vec2,
 }
@@ -125,6 +135,7 @@ struct ViewerWindow {
     tab_drag: Option<TabDrag>,
     drag_cancelled: bool,
     detach_request: Option<DetachRequest>,
+    picked_files: Vec<PathBuf>,
     close_requested: bool,
     rename_dialog: Option<RenameDialog>,
     // Viewport commands request repaint, so only send a changed native title.
@@ -146,6 +157,7 @@ impl ViewerWindow {
             tab_drag: None,
             drag_cancelled: false,
             detach_request: None,
+            picked_files: Vec::new(),
             close_requested: false,
             rename_dialog: None,
             native_title: None,
@@ -153,6 +165,7 @@ impl ViewerWindow {
         match initial {
             InitialState::Empty => {}
             InitialState::Path(path) => app.load(&path),
+            InitialState::Paths(paths) => app.load_many(&paths),
             InitialState::Error(error) => app.error = Some(error),
         }
         app
@@ -195,15 +208,19 @@ impl ViewerWindow {
             .map(|tab| (tab.search.current(), tab.search.matches.len()))
     }
 
-    fn load(&mut self, path: &Path) {
-        let canonical = path.canonicalize().unwrap_or_else(|_| path.to_owned());
-        if let Some(index) = self
-            .tabs
-            .iter()
-            .position(|tab| tab.document.path == canonical)
-        {
+    fn activate_tab(&mut self, path: &Path) -> bool {
+        if let Some(index) = self.tabs.iter().position(|tab| tab.document.path == path) {
             self.active = index;
             self.error = None;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn load(&mut self, path: &Path) {
+        let canonical = path.canonicalize().unwrap_or_else(|_| path.to_owned());
+        if self.activate_tab(&canonical) {
             return;
         }
         match Document::load(path) {
@@ -284,9 +301,8 @@ impl ViewerWindow {
     }
 
     fn open_dialog(&mut self) {
-        if let Some(path) = self.services.choose_markdown_file() {
-            self.load(&path);
-        }
+        self.picked_files
+            .extend(self.services.choose_markdown_files());
     }
 
     fn handle_drops(&mut self, context: &egui::Context) {
@@ -298,9 +314,13 @@ impl ViewerWindow {
                 .map(|file| file.path().to_owned())
                 .collect::<Vec<_>>()
         });
+        self.load_many(&paths);
+    }
+
+    fn load_many(&mut self, paths: &[PathBuf]) {
         let mut errors = Vec::new();
         for path in paths {
-            self.load(&path);
+            self.load(path);
             if let Some(error) = self.error.take() {
                 errors.push(error);
             }
@@ -391,7 +411,16 @@ impl ViewerWindow {
     }
 
     fn menu_bar(&mut self, ui: &mut egui::Ui) {
-        egui::MenuBar::new().ui(ui, |ui| {
+        let panel = ui.visuals().panel_fill;
+        let text = ui.visuals().text_color();
+        let mut bar = egui::Frame::new()
+            .fill(panel.lerp_to_gamma(text, 0.16))
+            .stroke(egui::Stroke::new(1.0, panel.lerp_to_gamma(text, 0.55)))
+            .inner_margin(egui::Margin::symmetric(8, 5))
+            .corner_radius(6)
+            .begin(ui);
+        bar.content_ui.spacing_mut().interact_size.y = 24.0;
+        egui::MenuBar::new().ui(&mut bar.content_ui, |ui| {
             ui.menu_button("File", |ui| {
                 if ui.button("Open…").clicked() {
                     self.open_dialog();
@@ -462,8 +491,31 @@ impl ViewerWindow {
                 egui::gui_zoom::zoom_menu_buttons(ui);
                 ui.weak("Appearance is shared by this session’s windows.");
             });
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let handle = ui
+                    .add(
+                        egui::Button::new("")
+                            .min_size(egui::vec2(44.0, ui.spacing().interact_size.y))
+                            .fill(panel.lerp_to_gamma(text, 0.30))
+                            .stroke(egui::Stroke::new(1.0, panel.lerp_to_gamma(text, 0.80)))
+                            .sense(egui::Sense::drag()),
+                    )
+                    .on_hover_and_drag_cursor(egui::CursorIcon::Grab)
+                    .on_hover_text("Move this window");
+                handle.widget_info(|| {
+                    egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), "Move this window")
+                });
+                for x in [-5.0, 0.0, 5.0] {
+                    for y in [-2.5, 2.5] {
+                        ui.painter().circle_filled(handle.rect.center() + egui::vec2(x, y), 1.4, text);
+                    }
+                }
+                if handle.drag_started_by(egui::PointerButton::Primary) {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
+                }
+            });
         });
-        ui.separator();
+        bar.end(ui);
     }
 
     fn open_find(&mut self) {
@@ -584,7 +636,7 @@ impl ViewerWindow {
                                 .add(egui::Button::selectable(index == self.active, &tab.document.title)
                                     .sense(egui::Sense::click_and_drag()))
                                 .on_hover_cursor(egui::CursorIcon::Grab)
-                                .on_hover_text(format!("{}\nDrag onto another tab to reorder, or outside this window to create a new window.", tab.document.path.display()));
+                                .on_hover_text(format!("{}\nDrag to reorder, move to another viewer window, or create a new window.", tab.document.path.display()));
                             tab_rects.push((tab.id, response.rect));
                             if response.is_pointer_button_down_on()
                                 && ui.input(|input| input.pointer.primary_down())
@@ -746,7 +798,16 @@ impl ViewerWindow {
             return;
         };
         let (released, down, focused, bounds) = context.input(|input| {
-            if let Some(position) = input.pointer.latest_pos() {
+            let release = input.events.iter().rev().find_map(|event| match event {
+                egui::Event::PointerButton {
+                    pos,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    ..
+                } => Some(*pos),
+                _ => None,
+            });
+            if let Some(position) = release.or_else(|| input.pointer.latest_pos()) {
                 drag.latest = position;
             }
             let viewport = input.viewport();
@@ -757,7 +818,7 @@ impl ViewerWindow {
                     outer.translate(-inner.min.to_vec2())
                 });
             (
-                input.pointer.button_released(egui::PointerButton::Primary),
+                release.is_some(),
                 input.pointer.primary_down(),
                 input.focused,
                 bounds,
@@ -820,6 +881,7 @@ impl ViewerWindow {
         });
         self.detach_request = Some(DetachRequest {
             tab_id,
+            pointer,
             position,
             size,
         });
@@ -1001,6 +1063,10 @@ impl ViewerWindow {
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
         let context = ui.ctx().clone();
+        if ui.input(|input| input.focused) {
+            let id = context.viewport_id();
+            context.data_mut(|data| data.insert_temp(egui::Id::new("last_focused_window"), id));
+        }
         self.load_active();
         Self::apply_zoom_input(&context);
         self.handle_drops(&context);

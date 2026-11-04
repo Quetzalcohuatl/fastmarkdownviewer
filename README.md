@@ -202,7 +202,9 @@ The installer registers `.md` and `.markdown` under **Open with**. It does not a
 
 Search operates on rendered text, including code and link captions, and can span inline formatting. `*` matches zero or more characters on the same line (for example, `hello*world`); `\*` finds a literal asterisk. Other punctuation is literal. Wildcards match as much of the line as possible. Image contents and rendered math are not searchable. The outline supports ATX and Setext headings, including duplicate titles. A failed open leaves existing tabs intact. The empty-window page lists reading shortcuts.
 
-Drag a tab onto another tab to reorder it, or outside the window to move it into a new native window, keeping its document, scroll position, search, and caches. Escape cancels a drag. The tab's right-click menu also offers **Move to new window**. Closing the original window keeps detached windows alive; closing the last window exits. Theme and text size are shared within a process; each window has its own outline toggle. Moving tabs into an existing window is not supported yet. Separate command-line launches still start separate processes. On macOS, Finder opens files in the running app and activates an existing tab when possible. Local Markdown links open or activate a tab in the current window.
+Files opened from the desktop or command line go into tabs in the most recently used viewer window. If a file is already open, the viewer selects its tab. **File → Open** also accepts multiple files. Local Markdown links open or activate a tab in the current window.
+
+Drag a tab onto another tab to reorder it, or drop it onto another viewer window to move it there. Dropping outside the viewer windows creates a new window. The tab keeps its document, scroll position, Find state, and caches. Escape cancels a drag. The tab's right-click menu also offers **Move to new window**. Closing the original window keeps detached windows alive, and closing the last window exits. Theme and text size are shared across windows, while each window has its own outline toggle. Cross-window drops require the desktop to report window positions, which native Wayland does not provide.
 
 Reload reads the file again and refreshes its image and rendering caches. If the file has become unreadable, the current document stays open with an error message.
 
@@ -216,7 +218,7 @@ Mermaid support renders supported Mermaid fences using patched Rusty, with the s
 
 **Settings → Automatically load remote images** defaults to on. Turn it off to hide remote images and show individual **Load image** buttons. This setting applies to every window in the current session and is remembered between launches. Requests already running may finish. Ordinary links still open only when clicked.
 
-The current eframe backend does not initialize native accessibility for dynamically created child windows. For screen-reader access, open the file through a separate application launch instead of detaching its tab.
+The current eframe backend does not initialize native accessibility for dynamically created child windows. Keep tabs in the original window for screen-reader access.
 
 Syntax definitions initialize on a worker only when a language-tagged code block becomes visible. Code appears as plain text immediately, then gains syntax colors after background highlighting finishes, including large blocks. Results are cached by content, language, theme, and font size. Unknown languages remain plain text. Request and result queues are bounded; the cache targets 128 entries and approximately 8 MiB per tab but retains an individual larger result. Changing appearance or closing/reloading the document cancels obsolete highlighting between lines.
 

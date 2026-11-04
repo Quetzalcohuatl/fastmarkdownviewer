@@ -4,8 +4,17 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-11-04
+
+- Open multiple files as tabs in the running viewer from the desktop, command line, or file picker.
+- Reopen an existing file by selecting its tab and bringing its window forward, including detached windows.
+- Drag tabs between windows in the same session, keeping their reading position and Find state.
+- Make the menu bar easier to distinguish in light and dark themes, with a grip icon for moving the window.
+- Keep ISO dates consistently colored in Python console output, including zero-padded months and days.
 - Update the Markdown parser, TLS libraries, and certificate roots to address
   seven RustSec advisories, and replace the yanked Windows clipboard dependency.
+- Update the Markdown parser to 0.13.6 for [RUSTSEC-2026-0433](https://rustsec.org/advisories/RUSTSEC-2026-0433.html).
+- Replace the yanked Linux `async-executor` dependency with 1.14.1.
 - Track the upstream Linux D-Bus crate migration with review dates for exceptions to
   three unmaintained-only advisories; vulnerability and yanked-crate checks remain enabled.
 

@@ -4,10 +4,18 @@ use std::{io, path::Path};
 
 #[must_use]
 pub fn choose_markdown_file() -> Option<std::path::PathBuf> {
+    markdown_dialog().pick_file()
+}
+
+#[must_use]
+pub fn choose_markdown_files() -> Vec<std::path::PathBuf> {
+    markdown_dialog().pick_files().unwrap_or_default()
+}
+
+fn markdown_dialog() -> rfd::FileDialog {
     rfd::FileDialog::new()
         .add_filter("Markdown", &["md", "markdown"])
         .add_filter("Text", &["txt"])
-        .pick_file()
 }
 
 /// Open a validated HTTP(S) URL in the default browser.

@@ -46,6 +46,20 @@ public static class FastMarkdownViewerNativeTest
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool PostMessage(IntPtr window, uint message, UIntPtr word, IntPtr data);
 
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool IsIconic(IntPtr window);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShowWindowAsync(IntPtr window, int command);
+
+    public static bool Minimize(IntPtr window)
+    {
+        const int MinimizeWindow = 6;
+        return ShowWindowAsync(window, MinimizeWindow);
+    }
+
     public static bool SendKey(IntPtr window, uint virtualKey)
     {
         const uint KeyDown = 0x0100;
@@ -141,18 +155,69 @@ try {
         throw "FastMarkdownViewer crashed while processing scroll keys (exit code $($primary.ExitCode))."
     }
 
-    $secondary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -WindowStyle Hidden -PassThru
-    Wait-ForViewerWindow -Process $secondary
-    if ($primary.Id -eq $secondary.Id) {
-        throw 'Separate launches unexpectedly reused one process.'
+    $secondName = 'Second 日本語.md'
+    $thirdName = 'Third file.md'
+    [System.IO.File]::WriteAllText((Join-Path $testDirectory $secondName), '# Second')
+    [System.IO.File]::WriteAllText((Join-Path $testDirectory $thirdName), '# Third')
+    $arguments = @($quotedFixture, ('"' + $secondName + '"'), ('"' + $thirdName + '"'))
+    $secondary = Start-Process -FilePath $binaryPath -ArgumentList $arguments `
+        -WorkingDirectory $testDirectory -WindowStyle Hidden -PassThru
+    if (-not $secondary.WaitForExit($TimeoutSeconds * 1000) -or $secondary.ExitCode -ne 0) {
+        throw 'The second launch did not hand its files to the running viewer.'
     }
-    $primary.Refresh()
-    $secondary.Refresh()
-    if ($primary.HasExited -or $secondary.HasExited) {
-        throw 'One of the independent viewer windows exited unexpectedly.'
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    do {
+        $primary.Refresh()
+        if ($primary.HasExited) {
+            throw 'The running viewer exited during file handoff.'
+        }
+        if ($primary.MainWindowTitle -eq ($thirdName + ' — FastMarkdownViewer')) {
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    } while ([DateTime]::UtcNow -lt $deadline)
+    if ($primary.MainWindowTitle -ne ($thirdName + ' — FastMarkdownViewer')) {
+        throw "The last file did not become active in the original window: $($primary.MainWindowTitle)"
+    }
+    $originalWindow = $primary.MainWindowHandle
+    if (-not [FastMarkdownViewerNativeTest]::Minimize($originalWindow)) {
+        throw 'Could not minimize the viewer before reopening the first document.'
+    }
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    while (-not [FastMarkdownViewerNativeTest]::IsIconic($originalWindow)) {
+        if ([DateTime]::UtcNow -ge $deadline) {
+            throw 'The original window did not minimize.'
+        }
+        Start-Sleep -Milliseconds 100
     }
 
-    Write-Output "WINDOWS_UI_SMOKE=passed renderer=$Renderer bare-startup=passed primary=$($primary.Id) secondary=$($secondary.Id)"
+    $secondary = Start-Process -FilePath $binaryPath -ArgumentList $quotedFixture -WindowStyle Hidden -PassThru
+    if (-not $secondary.WaitForExit($TimeoutSeconds * 1000) -or $secondary.ExitCode -ne 0) {
+        throw 'Reopening the first file did not hand it to the running viewer.'
+    }
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    do {
+        $primary.Refresh()
+        if ($primary.MainWindowTitle -eq $expectedTitle -and
+            -not [FastMarkdownViewerNativeTest]::IsIconic($originalWindow)) {
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    } while ([DateTime]::UtcNow -lt $deadline)
+    if ($primary.MainWindowHandle -ne $originalWindow -or $primary.MainWindowTitle -ne $expectedTitle -or
+        [FastMarkdownViewerNativeTest]::IsIconic($originalWindow)) {
+        throw 'Reopening the file did not restore the original window and select its existing tab.'
+    }
+
+    Close-TestProcess -Process $primary
+    $state = Get-Content (Join-Path $testDirectory 'FastMarkdownViewer/state.json') -Raw | ConvertFrom-Json
+    $names = @($state.windows[0].tabs | ForEach-Object { [System.IO.Path]::GetFileName($_.path) })
+    if ($state.windows.Count -ne 1 -or $names.Count -ne 3 -or
+        $state.windows[0].active -ne 0 -or $names[1] -ne $secondName -or $names[2] -ne $thirdName) {
+        throw "Expected three distinct tabs in the original window, got: $($names -join ', ')"
+    }
+
+    Write-Output "WINDOWS_UI_SMOKE=passed renderer=$Renderer bare-startup=passed file-handoff=passed reopen=passed"
 }
 finally {
     Close-TestProcess -Process $secondary

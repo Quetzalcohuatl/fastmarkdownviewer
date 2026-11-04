@@ -15,3 +15,4 @@ Use the stable `show` path; upstream `show_scrollable` can split nested list par
 - Expose an optional Mermaid diagram callback while retaining source rendering.
 - Version 0.25.0-fmv.2 pins the matching backend with deferred large-code
   highlighting and cancellation; the wrapper's rendering API is unchanged.
+- Version 0.25.0-fmv.3 pins the backend with consistent dates in Python console output.

@@ -94,9 +94,12 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         subprocess.run(['open', '-a', str(bundle), str(first)], check=True)
         wait_for(running, 'Finder launch')
         ready(first)
+        subprocess.run([str(binary), second.name, second.name], cwd=work, check=True, timeout=20)
+        ready(second)
         subprocess.run(['open', '-a', str(bundle), str(second), str(first)], check=True)
         time.sleep(3)
         state = quit_and_read()
+        assert len(state['windows']) == 1, state
         tabs = state['windows'][0]['tabs']
         assert [tab['path'] for tab in tabs] == [str(first), str(second)], state
         assert state['windows'][0]['active'] == 0, state
@@ -143,7 +146,7 @@ with tempfile.TemporaryDirectory(prefix='fmv-package-') as work:
         time.sleep(2)
         modal_exit = quit_and_read()
         assert [tab['path'] for tab in modal_exit['windows'][0]['tabs']] == [str(first), str(second), str(third)]
-        print('PASS: extracted app signature, Finder launch, running-app opens, Unicode paths, tab deduplication, normal/modal quit, session and preference restoration, native Find/clipboard and Cmd+O file dialog')
+        print('PASS: extracted app signature, Finder launch, command-line handoff, Unicode paths, tab deduplication, normal/modal quit, session and preference restoration, native Find/clipboard and Cmd+O file dialog')
     finally:
         if running():
             # Preserve the actual desktop on failure as well as the renderer fixture.

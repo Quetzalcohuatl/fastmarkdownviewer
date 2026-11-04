@@ -6,6 +6,7 @@ fn render(
     context: &egui::Context,
     cache: &mut CommonMarkCache,
     source: &str,
+    prefix: &str,
 ) -> egui::text::LayoutJob {
     cache.navigation.clear();
     let mut output = context.run_ui(egui::RawInput::default(), |ui| {
@@ -16,7 +17,7 @@ fn render(
         .navigation
         .regions
         .iter()
-        .find(|region| region.galley.text().starts_with("let value"))
+        .find(|region| region.galley.text().starts_with(prefix))
         .expect("code stays readable while highlighting loads")
         .galley
         .job
@@ -33,7 +34,7 @@ fn large_code_appears_plain_then_highlights_without_size_or_span_cutoffs() {
     assert!(text.len() > 256 * 1024);
     let source = format!("```rust\n{text}```\n");
     let start = Instant::now();
-    let initial = render(&context, &mut cache, &source);
+    let initial = render(&context, &mut cache, &source, "let value");
     assert_eq!(
         initial.sections.len(),
         1,
@@ -43,7 +44,7 @@ fn large_code_appears_plain_then_highlights_without_size_or_span_cutoffs() {
     let deadline = Instant::now() + Duration::from_secs(90);
     let highlighted = loop {
         std::thread::sleep(Duration::from_millis(100));
-        let job = render(&context, &mut cache, &source);
+        let job = render(&context, &mut cache, &source, "let value");
         if job.sections.len() > 1 {
             break job;
         }
@@ -71,11 +72,72 @@ fn large_code_appears_plain_then_highlights_without_size_or_span_cutoffs() {
     );
     // An oversized completed result must stay cached instead of reverting to plain text.
     assert_eq!(
-        render(&context, &mut cache, &source).sections,
+        render(&context, &mut cache, &source, "let value").sections,
         highlighted.sections
     );
     eprintln!(
         "large code: first plain frame {first_frame:?}, complete {:?}",
         start.elapsed()
+    );
+}
+
+#[test]
+fn python_console_dates_keep_their_numeric_color() {
+    let context = egui::Context::default();
+    fast_markdown_viewer::appearance::ThemeChoice::Monokai.apply(&context);
+    let mut cache = CommonMarkCache::default();
+    let console = concat!(
+        ">>> prices[\"EXAMPLE\"].head(3)\n",
+        "2021-01-04     10.25\n",
+        "2021-01-08      8.50\n",
+        "2021-01-11      8.75\n",
+        "\n",
+        ">>> prices[\"EXAMPLE\"].tail(2)\n",
+        "2025-12-24     15.25\n",
+        "8  2025-12-26   15.50\n",
+        ">>> 2025-12-24"
+    );
+    let source = format!("```python\n{console}\n```\n");
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let job = loop {
+        let job = render(&context, &mut cache, &source, ">>> prices");
+        if job.sections.len() > 1 {
+            break job;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "Python highlighting did not finish"
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    };
+    assert_eq!(job.text, console);
+    let color_at = |byte| {
+        job.sections
+            .iter()
+            .find(|section| section.byte_range.contains(&egui::text::ByteIndex(byte)))
+            .unwrap()
+            .format
+            .color
+    };
+    let numeric = egui::Color32::from_rgb(0xae, 0x81, 0xff);
+    for date in [
+        "2021-01-04",
+        "2021-01-08",
+        "2021-01-11",
+        "2025-12-24",
+        "2025-12-26",
+    ] {
+        let start = job.text.find(date).unwrap();
+        for byte in start..start + date.len() {
+            assert_eq!(color_at(byte), numeric, "inconsistent color in {date}");
+        }
+    }
+    assert_eq!(color_at(job.text.find("8.50").unwrap()), numeric);
+    let subtraction = job.text.rfind("2025-12-24").unwrap();
+    assert_eq!(color_at(subtraction), numeric);
+    assert_ne!(
+        color_at(subtraction + 4),
+        numeric,
+        "Python subtraction stays syntax highlighted"
     );
 }

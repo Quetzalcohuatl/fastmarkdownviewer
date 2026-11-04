@@ -11,6 +11,7 @@ All notable changes are documented here. This project follows Semantic Versionin
 - Update the Markdown parser, TLS libraries, and certificate roots to address
   seven RustSec advisories, and replace the yanked Windows clipboard dependency.
 - Update the Markdown parser to 0.13.6 for [RUSTSEC-2026-0433](https://rustsec.org/advisories/RUSTSEC-2026-0433.html).
+- Replace the yanked Linux `async-executor` dependency with 1.14.1.
 - Track the upstream Linux D-Bus crate migration with review dates for exceptions to
   three unmaintained-only advisories; vulnerability and yanked-crate checks remain enabled.
 

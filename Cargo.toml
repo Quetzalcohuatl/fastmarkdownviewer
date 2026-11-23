@@ -89,7 +89,7 @@ eframe = { version = "0.36.0", default-features = false, features = ["wgpu_no_de
 wgpu = { version = "30.0", default-features = false, features = ["dx12", "wgsl"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-fmv-macos-events = { version = "0.1.0", path = "crates/macos-events" }
+fmv-macos-events = { version = "0.2.0", path = "crates/macos-events" }
 
 [build-dependencies]
 winresource = "0.1.23"
